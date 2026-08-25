@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="PPE VR 교육과정의 이수, 병목, 중도 이탈, 재이수와 개인별 진도를 분석하는 대시보드 목업">
-  <title>PPE 과정·진도 분석 대시보드 V2</title>
+  <meta name="description" content="PPE VR 교육과정의 완료, 중단 단계, 연속 회차 변화와 사용자별 기록을 분석하는 대시보드 목업">
+  <title>PPE 과정·진도 분석 대시보드 V3</title>
   <style>
     :root {
       color-scheme: dark;
@@ -40,6 +40,7 @@
     }
 
     button, select { font: inherit; }
+    a { color: inherit; }
     button, select { color: inherit; }
     button { cursor: pointer; }
     .app { min-height: 100vh; display: grid; grid-template-columns: 252px minmax(0, 1fr); }
@@ -130,6 +131,7 @@
     .two-col { grid-template-columns: minmax(0, 1.55fr) minmax(300px, .85fr); }
     .equal-col { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .three-col { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .data-grid { grid-template-columns: minmax(0, 1.45fr) minmax(310px, .55fr); align-items: start; }
     .spacer { margin-top: 14px; }
 
     .card {
@@ -229,6 +231,33 @@
     .pipe-step b { display: block; margin-bottom: 4px; }
     .pipe-step small { color: var(--muted); }
 
+    .external-card {
+      display: grid; gap: 14px; min-width: 0; padding: 16px;
+      border: 1px solid rgba(98, 229, 223, .28); border-radius: 14px;
+      background: rgba(7, 25, 34, .76);
+    }
+    .external-card h3 { margin: 0; font-size: 16px; }
+    .external-card p { margin: 0; color: var(--muted); font-size: 12px; }
+    .external-card .external-meta { display: flex; flex-wrap: wrap; gap: 8px; }
+    .external-link {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      width: fit-content; max-width: 100%; min-height: 42px; padding: 0 14px; border-radius: 11px;
+      border: 1px solid #3a7488; background: #123247; color: var(--text);
+      font-weight: 800; text-decoration: none;
+    }
+    .external-link:hover { border-color: var(--cyan); background: #173e52; }
+    .external-link:focus-visible { outline: 3px solid var(--cyan-soft); outline-offset: 2px; }
+    .status-cell { white-space: nowrap; }
+
+    .region-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .region-card { padding: 16px; border: 1px solid var(--line-soft); border-radius: 14px; background: rgba(7, 21, 30, .72); }
+    .region-card-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+    .region-card-head strong { font-size: 13px; }
+    .region-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 14px; }
+    .region-facts div { padding-top: 10px; border-top: 1px solid var(--line-soft); }
+    .region-facts small { display: block; color: var(--muted); font-size: 12px; }
+    .region-facts b { display: block; margin-top: 2px; }
+
     .empty { padding: 28px; text-align: center; color: var(--muted); }
     .section-title { margin: 0 0 12px; font-size: 18px; }
     .footer-note { margin-top: 18px; color: #5f7b86; font-size: 12px; text-align: right; }
@@ -245,7 +274,7 @@
     @media (max-width: 760px) {
       .main { padding: 22px 14px 44px; }
       .filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .two-col, .equal-col, .three-col { grid-template-columns: 1fr; }
+      .two-col, .equal-col, .three-col, .data-grid, .region-grid { grid-template-columns: 1fr; }
       .funnel-row { grid-template-columns: 1fr 2fr 48px; }
       .funnel-drop { display: none; }
       .pipeline { grid-template-columns: 1fr; gap: 10px; }
@@ -267,17 +296,17 @@
     <aside class="sidebar">
       <div class="brand">
         <div class="brand-mark">P</div>
-        <div><strong>PPE INSIGHT</strong><small>COURSE ANALYTICS V2</small></div>
+        <div><strong>PPE INSIGHT</strong><small>COURSE ANALYTICS V3</small></div>
       </div>
       <div class="nav-label">Course analytics</div>
       <nav class="nav" aria-label="대시보드 화면">
         <button class="active" data-view="overview"><span>◈</span>전체 개요</button>
-        <button data-view="journey"><span>↳</span>과정 병목·이탈</button>
-        <button data-view="learning"><span>↗</span>재이수·모드 난이도</button>
+        <button data-view="journey"><span>↳</span>과정 단계·중단</button>
+        <button data-view="learning"><span>↗</span>회차·모드 비교</button>
         <button data-view="updates"><span>⇄</span>업데이트 영향</button>
-        <button data-view="people"><span>◎</span>개인 프로그레스</button>
-        <button data-view="ux"><span>⌁</span>UX 설계 신호</button>
-        <button data-view="data"><span>◇</span>데이터 연동</button>
+        <button data-view="people"><span>◎</span>사용자별 기록</button>
+        <button data-view="ux"><span>⌁</span>사용성 검토</button>
+        <button data-view="data"><span>◇</span>데이터 상태</button>
       </nav>
       <div class="side-status"><b>MOCK DATA</b>실제 수집 API 연결 전 구조 검증용 데이터입니다. 추정 종료는 별도 표시합니다.</div>
     </aside>
@@ -285,10 +314,10 @@
     <main class="main">
       <div class="mobile-nav" aria-label="모바일 화면 전환">
         <button class="active" data-view="overview">개요</button>
-        <button data-view="journey">병목·이탈</button>
-        <button data-view="learning">재이수</button>
+        <button data-view="journey">단계·중단</button>
+        <button data-view="learning">회차 비교</button>
         <button data-view="updates">업데이트</button>
-        <button data-view="people">개인</button>
+        <button data-view="people">사용자</button>
         <button data-view="ux">UX</button>
         <button data-view="data">연동</button>
       </div>
@@ -297,27 +326,27 @@
         <div>
           <div class="eyebrow">PPE VR Training / Course Quality Dashboard</div>
           <h1 id="pageTitle">전체 개요</h1>
-          <p class="subtitle" id="pageSubtitle">과정 이수, 중도 이탈, 병목과 재이수 변화를 먼저 확인합니다.</p>
+          <p class="subtitle" id="pageSubtitle">과정 완료, 중단 단계와 연속 회차 변화를 먼저 확인합니다.</p>
           <div class="data-badge">모의 데이터 · 실제 API 미연결</div>
         </div>
         <div class="actions">
-          <button class="ghost-button" id="exportCsv" type="button">현재 범위 CSV</button>
+          <button class="ghost-button" id="exportCsv" type="button">목업 CSV 내려받기</button>
         </div>
       </header>
 
       <section class="filters" aria-label="분석 필터">
         <div class="filter"><label for="periodFilter">기간</label><select id="periodFilter"><option value="all">전체 기간</option><option value="14">최근 14일</option><option value="7">최근 7일</option></select></div>
-        <div class="filter"><label for="participantFilter">참여자</label><select id="participantFilter"><option value="all">전체 참여자</option></select></div>
+        <div class="filter"><label for="participantFilter">사용자</label><select id="participantFilter"><option value="all">전체 사용자</option></select></div>
         <div class="filter"><label for="modeFilter">수행 모드</label><select id="modeFilter"><option value="all">전체 모드</option><option value="Learning">Learning</option><option value="Training">Training</option><option value="Test">Test</option></select></div>
         <div class="filter"><label for="appVersionFilter">앱 업데이트 버전</label><select id="appVersionFilter"><option value="all">전체 앱 버전</option></select></div>
       </section>
 
-      <div class="scope-bar"><div>현재 범위: <b id="scopeText">전체 참여자 · 전체 모드</b></div><small id="scopeMeta">0회 수행</small></div>
+      <div class="scope-bar"><div>현재 범위: <b id="scopeText">전체 사용자 · 전체 모드</b></div><small id="scopeMeta">0회 수행</small></div>
 
       <section id="overview" class="view active">
         <div class="grid kpi-grid" id="overviewKpis"></div>
         <div class="grid two-col spacer">
-          <article class="card"><div class="card-header"><div><h2>전체 과정 퍼널</h2><p>필수 checkpoint 도달·완료·이탈</p></div><span class="pill">과정 기준</span></div><div class="funnel" id="overviewFunnel"></div></article>
+          <article class="card"><div class="card-header"><div><h2>단계별 도달 현황</h2><p>각 과정 단계에 도달한 회차와 중단 수</p></div><span class="pill">수행 회차 기준</span></div><div class="funnel" id="overviewFunnel"></div></article>
           <article class="card"><div class="card-header"><div><h2>우선 검토 후보</h2><p>결함 확정이 아닌 반복 신호</p></div><span class="pill amber">검토</span></div><div class="candidate-list" id="overviewCandidates"></div></article>
         </div>
         <article class="card spacer"><div class="card-header"><div><h2>모드별 과정 결과</h2><p>서로 다른 모드를 하나의 평균으로 합치지 않습니다.</p></div></div><div class="table-wrap"><table><thead><tr><th>모드</th><th class="num">수행</th><th class="num">과정 이수율</th><th class="num">중도 이탈률</th><th class="num">완료시간 중앙값</th><th class="num">힌트 중앙값</th><th>주요 신호</th></tr></thead><tbody id="overviewModeTable"></tbody></table></div></article>
@@ -326,19 +355,19 @@
       <section id="journey" class="view">
         <div class="grid kpi-grid" id="journeyKpis"></div>
         <div class="grid two-col spacer">
-          <article class="card"><div class="card-header"><div><h2>Checkpoint별 병목</h2><p>도달한 수행을 분모로 계산</p></div></div><div class="table-wrap"><table><thead><tr><th>Checkpoint</th><th class="num">도달</th><th class="num">완료</th><th class="num">단계 이탈</th><th class="num">체류 중앙값</th><th>반복 신호</th></tr></thead><tbody id="bottleneckTable"></tbody></table></div></article>
+          <article class="card"><div class="card-header"><div><h2>과정 단계별 중단 현황</h2><p>각 단계에 도달한 회차를 기준으로 계산</p></div></div><div class="table-wrap"><table><thead><tr><th>과정 단계</th><th class="num">도달</th><th class="num">완료</th><th class="num">단계 중단</th><th class="num">머문 시간 중앙값</th><th>반복 신호</th></tr></thead><tbody id="bottleneckTable"></tbody></table></div></article>
           <article class="card"><div class="card-header"><div><h2>종료 경로</h2><p>직접 기록과 추정값 분리</p></div></div><div class="exit-list" id="exitReasons"></div><div class="note warn-note spacer"><strong>전원 종료는 직접 검출값이 아닙니다.</strong> 종료 이벤트 부재, 마지막 heartbeat와 다음 실행 기록으로 추정합니다.</div></article>
         </div>
-        <article class="card spacer"><div class="card-header"><div><h2>미완료 수행 상세</h2><p>어디에서 어떤 경로로 종료됐는지 확인</p></div></div><div class="table-wrap"><table><thead><tr><th>참여자</th><th>모드</th><th>마지막 checkpoint</th><th>종료 원인</th><th>판정</th><th>마지막 기록</th><th>후속 수행</th></tr></thead><tbody id="exitTable"></tbody></table></div></article>
+        <article class="card spacer"><div class="card-header"><div><h2>완료하지 못한 회차</h2><p>어느 단계에서 어떤 이유로 중단됐는지 확인</p></div></div><div class="table-wrap"><table><thead><tr><th>사용자</th><th>모드</th><th>마지막 과정 단계</th><th>종료 원인</th><th>확인 방식</th><th>마지막 기록</th><th>후속 수행</th></tr></thead><tbody id="exitTable"></tbody></table></div></article>
       </section>
 
       <section id="learning" class="view">
         <div class="grid kpi-grid" id="learningKpis"></div>
         <div class="grid equal-col spacer">
-          <article class="card"><div class="card-header"><div><h2>모드 난이도 비교</h2><p>이수·이탈·오류·힌트·재시도 분리</p></div></div><div id="modeDifficulty"></div></article>
-          <article class="card"><div class="card-header"><div><h2>재이수 변화</h2><p>동일 참여자·모드·앱 버전의 연속 회차</p></div></div><div class="candidate-list" id="repeatPairs"></div></article>
+          <article class="card"><div class="card-header"><div><h2>모드별 수행 결과</h2><p>완료·중단·오류·힌트·재시도를 같은 기준으로 비교</p></div></div><div id="modeDifficulty"></div></article>
+          <article class="card"><div class="card-header"><div><h2>연속 회차 변화</h2><p>같은 사용자의 이전 회차와 다음 회차 비교</p></div></div><div class="candidate-list" id="repeatPairs"></div></article>
         </div>
-        <article class="card spacer"><div class="card-header"><div><h2>재이수 비교 원칙</h2></div></div><div class="note"><strong>종합 정확도 점수는 사용하지 않습니다.</strong> 과정 이수, 치명적 오류, 순서 오류, 일반 오류, 힌트, 재시도와 수행시간을 각각 비교합니다. 시간 단축은 오류가 증가하지 않은 경우에만 향상 신호로 표시합니다.</div></article>
+        <article class="card spacer"><div class="card-header"><div><h2>회차 비교 기준</h2></div></div><div class="note"><strong>한 점수로 합치지 않습니다.</strong> 과정 완료 여부, 오류, 힌트, 재시도와 수행시간을 각각 비교합니다. 수행시간이 줄어도 오류가 늘었다면 개선으로 표시하지 않습니다.</div></article>
       </section>
 
       <section id="updates" class="view">
@@ -358,28 +387,28 @@
           <article class="card" id="personSummary"></article>
           <article class="card"><div class="card-header"><div><h2>최근 회차 비교</h2><p>같은 모드·앱 버전일 때만 비교</p></div></div><div id="personComparison"></div></article>
         </div>
-        <article class="card spacer"><div class="card-header"><div><h2>개인 수행 이력</h2><p>완료·중단·재개를 회차 단위로 표시</p></div></div><div class="table-wrap"><table><thead><tr><th>일시</th><th>모드</th><th>앱 버전</th><th>상태</th><th>마지막 checkpoint</th><th class="num">순서 오류</th><th class="num">일반 오류</th><th class="num">힌트</th><th class="num">재시도</th><th class="num">시간</th></tr></thead><tbody id="personAttempts"></tbody></table></div></article>
+        <article class="card spacer"><div class="card-header"><div><h2>사용자 수행 이력</h2><p>완료·중단·재개를 회차 단위로 표시</p></div></div><div class="table-wrap"><table><thead><tr><th>일시</th><th>모드</th><th>앱 버전</th><th>상태</th><th>마지막 과정 단계</th><th class="num">순서 오류</th><th class="num">일반 오류</th><th class="num">힌트</th><th class="num">재시도</th><th class="num">시간</th></tr></thead><tbody id="personAttempts"></tbody></table></div></article>
       </section>
 
       <section id="ux" class="view">
         <div class="grid kpi-grid" id="uxKpis"></div>
         <div class="grid two-col spacer">
-          <article class="card"><div class="card-header"><div><h2>발견성·상호작용 신호</h2><p>HMD 머리 방향과 컨트롤러 Ray를 구분</p></div><span class="pill">trackingSource: head</span></div><div id="uxSignals"></div></article>
+          <article class="card"><div class="card-header"><div><h2>대상 찾기·조작 신호</h2><p>머리 방향과 컨트롤러 Ray 기록을 구분</p></div><span class="pill">측정 기준: 머리 방향</span></div><div id="uxSignals"></div></article>
           <article class="card"><div class="card-header"><div><h2>UX 설계 검토 규칙</h2><p>한 지표만으로 결함을 확정하지 않음</p></div></div><div class="candidate-list" id="uxRules"></div></article>
         </div>
-        <article class="card spacer"><div class="card-header"><div><h2>이름 기반 작업구역</h2><p>3D voxel보다 수정 가능한 구역을 먼저 표시</p></div></div><div id="regionSignals"></div></article>
+        <article class="card spacer"><div class="card-header"><div><h2>작업구역별 문제 신호</h2><p>구역마다 도달 횟수, 체류시간과 문제 신호를 분리해 확인</p></div></div><div class="region-grid" id="regionSignals"></div></article>
       </section>
 
       <section id="data" class="view">
         <div class="grid kpi-grid" id="dataKpis"></div>
-        <article class="card spacer"><div class="card-header"><div><h2>데이터 수집 구조</h2><p>Google처럼 불러오되, 과정 데이터는 프로젝트가 직접 소유</p></div></div><div class="pipeline"><div class="pipe-step"><b>Unity 앱</b><small>checkpoint·오류·heartbeat 이벤트</small></div><div class="pipe-step"><b>수집 API</b><small>일괄 전송·오프라인 재시도·중복 제거</small></div><div class="pipe-step"><b>원시 이벤트</b><small>회차·버전·종료 근거 보존</small></div><div class="pipe-step"><b>집계 API</b><small>퍼널·병목·개인 진도 자동 조회</small></div></div></article>
-        <div class="grid equal-col spacer">
-          <article class="card"><div class="card-header"><div><h2>필수 이벤트 계약</h2></div></div><div class="quality-list" id="eventContract"></div></article>
-          <article class="card"><div class="card-header"><div><h2>Meta Horizon 데이터</h2></div><span class="pill amber">분리 운영</span></div><div class="note warn-note"><strong>현재 외부 Analytics API 연결 없음.</strong> Meta Developer Dashboard의 플랫폼 노출·설치·활성 사용자 데이터는 과정 이수 데이터와 섞지 않습니다. 소규모 평가의 핵심 분석은 자체 이벤트 수집으로 동작합니다.</div><div class="quality-list spacer"><div class="metric-line"><span>과정 이수·진도</span><div class="bar"><i style="width:100%"></i></div><b class="good">자체 수집</b></div><div class="metric-line"><span>Meta 플랫폼 성과</span><div class="bar red"><i style="width:18%"></i></div><b class="warn">미연결</b></div><div class="metric-line"><span>CSV 내보내기</span><div class="bar violet"><i style="width:100%"></i></div><b class="violet">목업 제공</b></div></div></article>
+        <article class="card spacer"><div class="card-header"><div><h2>데이터가 대시보드에 표시되는 과정</h2><p>교육 기록은 프로젝트가 직접 수집하고 관리</p></div></div><div class="pipeline"><div class="pipe-step"><b>Unity 앱</b><small>과정 단계·오류·완료 상태 기록</small></div><div class="pipe-step"><b>수집 API</b><small>묶음 전송·오프라인 재시도·중복 제거</small></div><div class="pipe-step"><b>수행 기록 저장</b><small>회차·앱 버전·종료 근거 보존</small></div><div class="pipe-step"><b>대시보드 집계</b><small>완료율·중단 단계·사용자별 변화 조회</small></div></div></article>
+        <div class="grid data-grid spacer">
+          <article class="card"><div class="card-header"><div><h2>수집 데이터 준비 상태</h2><p>막대가 아닌 실제 구현 상태로 표시</p></div></div><div class="table-wrap"><table><thead><tr><th>분류</th><th>수집할 내용</th><th>현재 상태</th><th>확인 사항</th></tr></thead><tbody id="dataContractTable"></tbody></table></div></article>
+          <article class="card"><div class="card-header"><div><h2>Meta Horizon 운영 정보</h2><p>우리 교육 데이터와 분리해서 확인</p></div><span class="pill amber">외부 페이지</span></div><div class="external-card"><div><h3>Meta Horizon Developer Dashboard</h3><p>스토어 노출, 설치, 활성 사용자와 플랫폼 성능 지표는 Meta 대시보드에서 별도로 확인합니다. 현재 우리 대시보드와 자동으로 연동되지 않습니다.</p></div><div class="external-meta"><span class="pill amber">자동 연동 없음</span><span class="pill">신규 앱 · 레거시 CSV 대상 아님</span></div><a class="external-link" href="https://developers.meta.com/horizon/manage/applications/1279114391950885/analytics/" target="_blank" rel="noopener noreferrer">Meta 대시보드 열기 ↗</a></div></article>
         </div>
       </section>
 
-      <div class="footer-note">PPE Training Dashboard V2 · 구조 검증용 Mock Dataset · 2026-08-25</div>
+      <div class="footer-note">PPE Training Dashboard V3 · 구조 검증용 Mock Dataset · 2026-08-26</div>
     </main>
   </div>
 
@@ -400,8 +429,8 @@
     ];
 
     const participantNames = {
-      "P-001": "참여자 P-001", "P-002": "참여자 P-002", "P-003": "참여자 P-003", "P-004": "참여자 P-004",
-      "P-005": "참여자 P-005", "P-006": "참여자 P-006", "P-007": "참여자 P-007", "P-008": "참여자 P-008"
+      "P-001": "사용자 P-001", "P-002": "사용자 P-002", "P-003": "사용자 P-003", "P-004": "사용자 P-004",
+      "P-005": "사용자 P-005", "P-006": "사용자 P-006", "P-007": "사용자 P-007", "P-008": "사용자 P-008"
     };
 
     const endReasonLabels = {
@@ -484,13 +513,13 @@
     ];
 
     const titles = {
-      overview: ["전체 개요", "과정 이수, 중도 이탈, 병목과 재이수 변화를 먼저 확인합니다."],
-      journey: ["과정 병목·이탈", "마지막 checkpoint와 종료 근거를 연결해 중단 지점을 찾습니다."],
-      learning: ["재이수·모드 난이도", "단일 점수 대신 완료·오류·힌트·재시도와 시간을 각각 비교합니다."],
+      overview: ["전체 개요", "과정 완료, 중단 단계와 연속 회차 변화를 먼저 확인합니다."],
+      journey: ["과정 단계·중단", "마지막 과정 단계와 종료 근거를 연결해 중단 지점을 찾습니다."],
+      learning: ["회차·모드 비교", "이전 회차와 다음 회차, Learning·Training·Test 결과를 각각 비교합니다."],
       updates: ["업데이트 후 더 쉬워졌을까?", "끝까지 완료한 사람, 중간에 멈춘 사람, 실수와 막힌 단계를 이전 버전과 비교합니다."],
-      people: ["개인 프로그레스", "개인의 현재 진도, 중단·재개와 회차별 변화를 확인합니다."],
-      ux: ["UX 설계 신호", "발견·상호작용·피드백·회복 신호가 반복되는 구간을 찾습니다."],
-      data: ["데이터 연동", "Unity 이벤트를 수집 API와 집계 API로 연결하는 기준을 보여 줍니다."]
+      people: ["사용자별 기록", "사용자의 현재 과정 단계, 중단·재개와 회차별 변화를 확인합니다."],
+      ux: ["사용성 검토", "대상 찾기·조작·피드백 문제가 여러 사용자에게 반복되는지 확인합니다."],
+      data: ["데이터 상태", "현재 구현 상태와 외부 Meta 운영 정보의 확인 위치를 보여 줍니다."]
     };
 
     const state = { view: "overview", detailParticipant: "P-001" };
@@ -534,7 +563,7 @@
       const detailSelect = document.createElement("select");
       detailSelect.id = "detailParticipant";
       detailSelect.className = "person-select";
-      detailSelect.setAttribute("aria-label", "개인 상세 참여자");
+      detailSelect.setAttribute("aria-label", "사용자 상세 선택");
       Object.keys(participantNames).forEach(id => detailSelect.add(new Option(participantNames[id], id)));
       detailSelect.value = state.detailParticipant;
       detailSelect.addEventListener("change", () => { state.detailParticipant = detailSelect.value; renderPeople(); });
@@ -603,7 +632,15 @@
             || current.hints < previous.hints
             || current.retries < previous.retries
             || (previous.status !== "completed" && current.status === "completed");
-          pairs.push({ previous, current, accuracyMaintained, improved: accuracyMaintained && anyCoreImprovement, fasterSafely: accuracyMaintained && current.durationSec < previous.durationSec });
+          pairs.push({
+            previous,
+            current,
+            previousRound: i,
+            currentRound: i + 1,
+            accuracyMaintained,
+            improved: accuracyMaintained && anyCoreImprovement,
+            fasterSafely: accuracyMaintained && current.durationSec < previous.durationSec
+          });
         }
       });
       return pairs;
@@ -623,20 +660,21 @@
       const resumed = items.filter(item => item.resumedFrom);
       const pairs = repeatComparisons(items);
       const improved = pairs.filter(pair => pair.improved);
+      const stats = stageStats(items);
+      const candidates = topCandidates(stats);
+
       els("overviewKpis").innerHTML = [
-        kpi("시작된 과정", `${items.length}회`, "선택 범위의 수행 회차", `참여자 ${unique(items.map(i => i.participantId)).length}명 · 표본 n=${items.length}`),
-        kpi("전체 과정 이수율", `${percent(completed.length, items.length)}%`, "필수 checkpoint를 모두 완료", `${completed.length}/${items.length}회 · course_completed=true`, "good"),
+        kpi("시작된 과정", `${items.length}회`, "선택 범위의 수행 회차", `사용자 ${unique(items.map(i => i.participantId)).length}명 · 표본 n=${items.length}`),
+        kpi("전체 과정 이수율", `${percent(completed.length, items.length)}%`, "필수 과정 단계를 모두 완료", `${completed.length}/${items.length}회 완료`, "good"),
         kpi("미완료·중도 이탈", `${percent(unfinished.length, items.length)}%`, "명시적·비정상 종료 포함", `${unfinished.length}/${items.length}회 · 추정 ${unfinished.filter(i => isInferred(i.endReason)).length}회`, unfinished.length ? "warn" : "good"),
-        kpi("재이수 개선 확인", pairs.length ? `${improved.length}/${pairs.length}쌍` : "—", "오류 증가 없이 한 축 이상 개선", "동일 참여자·모드·앱 버전 비교", "violet")
+        kpi("연속 회차 개선", pairs.length ? `${improved.length}/${pairs.length}건` : "—", "오류 증가 없이 한 항목 이상 개선", "같은 사용자·모드·앱 버전 비교", "violet")
       ].join("");
 
-      const stats = stageStats(items);
       els("overviewFunnel").innerHTML = stats.map((row, index) => {
         const reachRate = percent(row.reached, items.length);
         return `<div class="funnel-row"><div class="funnel-name"><strong>${index + 1}. ${row.label}</strong><small>${row.region}</small></div><div class="bar"><i style="width:${reachRate}%"></i></div><div class="funnel-num">${row.reached}/${items.length}</div><div class="funnel-drop">${row.dropped ? `이탈 ${row.dropped}` : "—"}</div></div>`;
       }).join("");
 
-      const candidates = topCandidates(stats);
       els("overviewCandidates").innerHTML = candidates.length ? candidates.map((row, index) => `<div class="candidate"><div class="candidate-top"><strong>${index + 1}. ${row.label}</strong><span class="pill ${index === 0 ? "red" : "amber"}">${row.dropped ? `단계 이탈 ${row.dropped}회` : `신호 ${row.issueTotal}건`}</span></div><p>${row.topIssue ? issueLabels[row.topIssue] : "체류시간 상대 비교 필요"} · 체류 중앙값 ${shortSeconds(row.medianDuration)} · 도달 ${row.reached}회</p></div>`).join("") : `<div class="empty">현재 범위에 검토 신호가 없습니다.</div>`;
 
       els("overviewModeTable").innerHTML = ["Learning", "Training", "Test"].map(mode => {
@@ -680,10 +718,10 @@
       const errorReduced = pairs.filter(pair => pair.current.sequenceErrors < pair.previous.sequenceErrors || pair.current.wrongActions < pair.previous.wrongActions);
       const retryReduced = pairs.filter(pair => pair.current.retries < pair.previous.retries);
       els("learningKpis").innerHTML = [
-        kpi("비교 가능한 재이수", `${pairs.length}쌍`, "동일 참여자·모드·앱 버전", "서로 다른 앱 업데이트 버전은 비교 제외"),
-        kpi("오류 감소", pairs.length ? `${errorReduced.length}/${pairs.length}쌍` : "—", "순서 또는 일반 오류 감소", "오류 증가 여부를 함께 확인", "good"),
-        kpi("재시도 감소", pairs.length ? `${retryReduced.length}/${pairs.length}쌍` : "—", "같은 단계 반복 감소", "힌트·완료 여부와 분리", "violet"),
-        kpi("안전한 시간 단축", pairs.length ? `${faster.length}/${pairs.length}쌍` : "—", "오류가 늘지 않은 상태의 시간 단축", `개선 판정 ${improved.length}쌍`, "warn")
+        kpi("연속 회차 비교", `${pairs.length}건`, "이전 회차와 다음 회차 비교", "같은 사용자·모드·앱 버전만 비교"),
+        kpi("오류 감소", pairs.length ? `${errorReduced.length}/${pairs.length}건` : "—", "순서 또는 일반 오류가 줄어든 비교", "오류 증가 여부를 함께 확인", "good"),
+        kpi("재시도 감소", pairs.length ? `${retryReduced.length}/${pairs.length}건` : "—", "재시도 횟수가 줄어든 비교", "힌트·완료 여부와 분리", "violet"),
+        kpi("오류 없는 시간 단축", pairs.length ? `${faster.length}/${pairs.length}건` : "—", "오류가 늘지 않으면서 시간이 줄어든 비교", `전체 개선 ${improved.length}건`, "warn")
       ].join("");
 
       els("modeDifficulty").innerHTML = ["Learning", "Training", "Test"].map(mode => {
@@ -694,7 +732,7 @@
         return `<div class="ux-signal"><strong><span class="pill ${modeTone(mode)}">${mode}</span> · 이수 ${percent(completed.length, rows.length)}%</strong><span class="${exitRate > 0 ? "warn" : "good"}">이탈 ${exitRate}%</span><p>완료시간 중앙값 ${shortSeconds(median(completed.map(item => item.durationSec)))} · 오류 중앙값 ${errorMedian ?? "—"}회 · 힌트 중앙값 ${median(rows.map(item => item.hints)) ?? "—"}회 · 재시도 중앙값 ${median(rows.map(item => item.retries)) ?? "—"}회</p></div>`;
       }).join("");
 
-      els("repeatPairs").innerHTML = pairs.length ? pairs.slice().reverse().map(pair => `<div class="candidate"><div class="candidate-top"><strong>${pair.current.participantId} · ${pair.current.mode}</strong><span class="pill ${pair.improved ? "green" : "amber"}">${pair.improved ? "개선 확인" : "추가 검토"}</span></div><p>${pair.previous.id} → ${pair.current.id} · 완료 ${pair.previous.status === "completed" ? "완료" : "미완료"}→${pair.current.status === "completed" ? "완료" : "미완료"} · 순서 ${pair.previous.sequenceErrors}→${pair.current.sequenceErrors} · 일반 ${pair.previous.wrongActions}→${pair.current.wrongActions} · 힌트 ${pair.previous.hints}→${pair.current.hints} · 시간 ${shortSeconds(pair.previous.durationSec)}→${shortSeconds(pair.current.durationSec)}</p></div>`).join("") : `<div class="empty">현재 필터에는 비교 가능한 재이수 쌍이 없습니다.</div>`;
+      els("repeatPairs").innerHTML = pairs.length ? pairs.slice().reverse().map(pair => `<div class="candidate"><div class="candidate-top"><strong>${pair.current.participantId} · ${pair.current.mode} · ${pair.previousRound}→${pair.currentRound}회차</strong><span class="pill ${pair.improved ? "green" : "amber"}">${pair.improved ? "개선 확인" : "추가 검토"}</span></div><p>완료 ${pair.previous.status === "completed" ? "완료" : "미완료"}→${pair.current.status === "completed" ? "완료" : "미완료"} · 순서 오류 ${pair.previous.sequenceErrors}→${pair.current.sequenceErrors} · 일반 오류 ${pair.previous.wrongActions}→${pair.current.wrongActions} · 힌트 ${pair.previous.hints}→${pair.current.hints} · 시간 ${shortSeconds(pair.previous.durationSec)}→${shortSeconds(pair.current.durationSec)}</p></div>`).join("") : `<div class="empty">현재 필터에는 비교 가능한 연속 회차가 없습니다.</div>`;
     }
 
     function versionMetrics(rows) {
@@ -747,7 +785,7 @@
         els("updateKpis").innerHTML = [kpi("비교할 수 없음", "기록 부족", "서로 다른 앱 버전의 기록이 모두 필요합니다.", `현재는 ${versions.length}개 버전만 있음`, "warn")].join("");
         els("versionSummaryTable").innerHTML = `<tr><td colspan="9" class="empty">비교 가능한 두 앱 버전이 없습니다.</td></tr>`;
         els("versionModeComparison").innerHTML = `<div class="empty">비교할 기록이 없습니다.</div>`;
-        els("matchedVersionPairs").innerHTML = `<div class="empty">동일 참여자·모드의 버전 전후 기록이 없습니다.</div>`;
+        els("matchedVersionPairs").innerHTML = `<div class="empty">같은 사용자·모드의 버전 전후 기록이 없습니다.</div>`;
         els("versionCheckpointTable").innerHTML = `<tr><td colspan="7" class="empty">비교할 기록이 없습니다.</td></tr>`;
         return;
       }
@@ -765,7 +803,7 @@
         kpi("비교하는 버전", `v${previousVersion} → v${currentVersion}`, "업데이트 전과 현재", `해본 횟수 ${previous.attempts}회 → ${current.attempts}회`, "violet"),
         kpi("끝까지 완료한 비율", signedPoints(completionDelta), `${previous.completionRate}% → ${current.completionRate}%`, completionDelta >= 0 ? "업데이트 후 완료한 사람이 늘었습니다." : "업데이트 후 완료한 사람이 줄었습니다.", completionDelta >= 0 ? "good" : "bad"),
         kpi("중간에 멈춘 비율", signedPoints(exitDelta), `${previous.exitRate}% → ${current.exitRate}%`, exitDelta <= 0 ? "업데이트 후 중간 종료가 줄었습니다." : "업데이트 후 중간 종료가 늘었습니다.", exitDelta <= 0 ? "good" : "bad"),
-        kpi("같은 사람끼리 비교", `${matchedPairs.length}쌍`, "같은 사람이 같은 방식으로 한 기록", `나아짐 ${matchedImproved} · 나빠짐 ${matchedRegressed} · 뚜렷하지 않음 ${matchedPairs.length - matchedImproved - matchedRegressed}`, "warn")
+        kpi("같은 사용자 비교", `${matchedPairs.length}건`, "같은 사용자가 같은 모드로 수행한 기록", `나아짐 ${matchedImproved} · 나빠짐 ${matchedRegressed} · 뚜렷하지 않음 ${matchedPairs.length - matchedImproved - matchedRegressed}`, "warn")
       ].join("");
 
       els("versionSummaryTable").innerHTML = versions.map(version => {
@@ -788,7 +826,7 @@
         const tone = pair.improved ? "green" : pair.regressed ? "red" : "amber";
         const label = pair.improved ? "나아짐" : pair.regressed ? "나빠짐" : "뚜렷하지 않음";
         return `<div class="candidate"><div class="candidate-top"><strong>${pair.current.participantId} · ${pair.current.mode}</strong><span class="pill ${tone}">${label}</span></div><p>v${pair.previous.appVersion} ${pair.previous.id} → v${pair.current.appVersion} ${pair.current.id} · 이수 ${pair.previous.status === "completed" ? "완료" : "미완료"}→${pair.current.status === "completed" ? "완료" : "미완료"} · 오류 ${pair.previous.sequenceErrors + pair.previous.wrongActions}→${pair.current.sequenceErrors + pair.current.wrongActions} · 재시도 ${pair.previous.retries}→${pair.current.retries} · 시간 ${shortSeconds(pair.previous.durationSec)}→${shortSeconds(pair.current.durationSec)}</p></div>`;
-      }).join("") : `<div class="empty">동일 참여자·같은 모드의 버전 전후 기록이 없습니다.</div>`;
+      }).join("") : `<div class="empty">같은 사용자·같은 모드의 버전 전후 기록이 없습니다.</div>`;
 
       const previousStages = stageStats(previousRows);
       const currentStages = stageStats(currentRows);
@@ -897,7 +935,7 @@
       }));
       const regions = [...regionMap.entries()];
       const maxIssues = Math.max(1, ...regions.map(([, row]) => row.issueCount));
-      els("regionSignals").innerHTML = regions.map(([name, row]) => `<div class="metric-line"><span>${name}<br><small class="muted">도달 ${row.count}회 · 체류 ${shortSeconds(median(row.duration))}</small></span><div class="bar ${row.issueCount === maxIssues ? "red" : ""}"><i style="width:${clamp(row.issueCount / maxIssues * 100)}%"></i></div><b>${row.issueCount}건</b></div>`).join("");
+      els("regionSignals").innerHTML = regions.map(([name, row]) => `<div class="region-card"><div class="region-card-head"><strong>${name}</strong><span class="pill ${row.issueCount === maxIssues ? "red" : row.issueCount ? "amber" : "green"}">${row.issueCount ? `문제 신호 ${row.issueCount}건` : "반복 신호 없음"}</span></div><div class="region-facts"><div><small>도달 회차</small><b>${row.count}회</b></div><div><small>대표 체류시간</small><b>${shortSeconds(median(row.duration))}</b></div></div></div>`).join("");
     }
 
     function renderData(items) {
@@ -907,19 +945,19 @@
       els("dataKpis").innerHTML = [
         kpi("현재 데이터 소스", "Mock", "HTML 내 구조 검증용 수행 데이터", "실제 API 연결 전", "warn"),
         kpi("현재 앱 버전", `v${currentAppVersion}`, "Unity bundleVersion", `Android build ${currentAndroidBuildCode}`, "violet"),
-        kpi("수행 회차", `${items.length}회`, "필터에 포함된 attempt", `참여자 ${unique(items.map(i => i.participantId)).length}명 · checkpoint 요약 ${summaryEvents}건`),
+        kpi("수행 회차", `${items.length}회`, "현재 필터에 포함된 수행 기록", `사용자 ${unique(items.map(i => i.participantId)).length}명 · 과정 단계 기록 ${summaryEvents}건`),
         kpi("추정·불명 종료", `${inferred.length + unknown.length}회`, "직접 종료 이벤트가 없는 데이터", `추정 ${inferred.length} · 불명 ${unknown.length}`, inferred.length ? "bad" : "good")
       ].join("");
 
-      const contracts = [
-        ["식별", "participantId · sessionId · attemptId · eventId"],
-        ["과정", "courseId · mode · appVersion · checkpointId"],
-        ["행동", "eventName · outcome · errorCode · targetId"],
-        ["종료", "endReason · lastHeartbeat · recoveredFrom"],
-        ["발견성", "trackingSource · discoveryStartEvent · head_search_summary"],
-        ["시간", "timestamp · elapsedFromAttempt · duration"]
+      const collectionStatus = [
+        ["사용자 식별", "Meta 계정과 내부 사용자 연결", "부분 구현", "SDK 조회와 서버 CRUD는 있으나 Unity-서버 연결은 미완료", "amber"],
+        ["수행 회차", "세션·회차·이벤트 고유 ID", "목업만", "실제 수집 코드 미구현", "red"],
+        ["과정·행동", "시나리오·모드·앱 버전·과정 단계·행동 결과", "목업만", "현재 HTML 예시 데이터만 존재", "red"],
+        ["신규·기존 판정", "Meta ID별 로컬·서버 시나리오 완료 기록", "설계 확정", "Welcome 청취가 아닌 실제 완료 기록으로 교체 필요", "amber"],
+        ["종료·시간", "종료 이유·마지막 신호·발생 시각·소요시간", "목업만", "실제 종료 이벤트와 heartbeat 미구현", "red"],
+        ["오프라인 동기화", "로컬 저장·재전송·event ID 중복 제거", "설계 확정", "서버 가동 전 로컬 완료 기록부터 구현 필요", "amber"]
       ];
-      els("eventContract").innerHTML = contracts.map(([name, fields]) => `<div class="metric-line"><span>${name}</span><div class="bar"><i style="width:100%"></i></div><b>${fields}</b></div>`).join("");
+      els("dataContractTable").innerHTML = collectionStatus.map(([category, fields, status, note, tone]) => `<tr><td><strong>${category}</strong></td><td>${fields}</td><td class="status-cell"><span class="pill ${tone}">${status}</span></td><td>${note}</td></tr>`).join("");
     }
 
     function renderAll() {

@@ -5,7 +5,9 @@ a{color:inherit;text-decoration:none}
 .line-header img{display:block;width:205px;max-height:70px;object-fit:contain;object-position:left center;transform:translateY(-2px)}
 .line-header>a:first-of-type{transform:translateX(-4px)}
 .line-nav{display:flex;gap:24px;font-size:12px;font-weight:800;letter-spacing:.08em;color:#777}
-.line-nav a:hover{color:#111}
+.line-nav a{transition:color .2s}
+.spark-page .line-nav a:hover,.spark-page .line-nav a:focus-visible{color:#ff5f00}
+.loop-page .line-nav a:hover,.loop-page .line-nav a:focus-visible{color:#f4c430}
 .coming-wrap{display:grid;place-items:center;min-height:100vh;margin-top:-82px;padding:0 24px}
 .coming-center{width:min(760px,calc(100% - 48px));text-align:center}
 .coming-kicker{font-size:11px;font-weight:900;letter-spacing:.2em;margin-bottom:18px}

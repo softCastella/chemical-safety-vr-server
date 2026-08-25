@@ -139,7 +139,7 @@
 /* Compact Featured Releases banner */
 .release-head .eyebrow{font-size:16px}
 .release-carousel{min-height:300px;border:0;border-radius:22px;background:transparent}
-.release-track{min-height:300px;border-radius:inherit;overflow:hidden}
+.release-track{min-height:300px;border-radius:inherit}
 .release-slide{border-radius:inherit;overflow:hidden}
 .release-copy{padding:30px 36px 72px}
 .release-status{padding:6px 10px;font-size:16px;letter-spacing:.04em}

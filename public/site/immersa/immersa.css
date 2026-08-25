@@ -24,6 +24,34 @@
 .meta-horizon-banner img{width:180px!important;height:60px!important;max-width:none!important;max-height:none!important;object-fit:contain!important;object-position:center!important}
 .meta-horizon-banner span{position:absolute!important;top:calc(100% + 12px)!important;left:0!important;display:block!important;width:max-content!important;color:var(--muted)!important;font-size:13px!important;font-weight:800!important;line-height:1.35!important;text-align:left!important;white-space:nowrap!important}
 .meta-horizon-banner.has-caption{margin-bottom:0!important}
+
+/* Featured project CTA: quick high bounce with a weighted fall and short rebound delay. */
+.featured-cta{
+  box-shadow:0 10px 24px rgba(32,135,255,.25);
+  transform-origin:center bottom;
+  animation:featured-cta-bounce .78s linear infinite;
+  will-change:transform;
+}
+.featured-cta:hover,.featured-cta:focus-visible{
+  animation-play-state:paused;
+  transform:translateY(-2px) scale(1.03);
+  box-shadow:0 14px 30px rgba(32,135,255,.34);
+}
+.featured-cta:focus-visible{outline:3px solid rgba(32,135,255,.35);outline-offset:4px}
+@keyframes featured-cta-bounce{
+  0%,100%{transform:translateY(0) scale(1);box-shadow:0 10px 24px rgba(32,135,255,.25)}
+  4%{transform:translateY(-1px) scale(1)}
+  14%{transform:translateY(-5px)}
+  24%{transform:translateY(-10px)}
+  32%{transform:translateY(-13px)}
+  36%,50%{transform:translateY(-14px);box-shadow:0 22px 40px rgba(32,135,255,.09)}
+  56%{transform:translateY(-13px)}
+  70%{transform:translateY(-9px)}
+  82%{transform:translateY(-4px)}
+  90%{transform:translateY(-1px)}
+  94%{transform:translateY(0) scaleX(1.038) scaleY(.968);box-shadow:0 7px 18px rgba(32,135,255,.27)}
+}
+@media(prefers-reduced-motion:reduce){.featured-cta{animation:none;will-change:auto}}
 .meta-horizon-caption{margin:12px 0 0;color:var(--muted);font-size:13px;font-weight:800;line-height:1.35}
 .meta-horizon-caption b{color:var(--blue);margin-left:8px}
 

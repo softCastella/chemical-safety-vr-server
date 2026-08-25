@@ -46,5 +46,8 @@ test("GET /dashboard/ serves the PPE dashboard", async () => {
   const body = await response.text();
 
   assert.equal(response.status, 200);
-  assert.match(body, /<title>PPE 과정·진도 분석 대시보드 V2<\/title>/);
+  assert.match(body, /<title>PPE 과정·진도 분석 대시보드 V3<\/title>/);
+  assert.match(body, /연속 회차 비교/);
+  assert.match(body, /작업구역별 문제 신호/);
+  assert.match(body, /Meta 대시보드 열기/);
 });
