@@ -1,0 +1,978 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="PPE VR 교육과정의 이수, 병목, 중도 이탈, 재이수와 개인별 진도를 분석하는 대시보드 목업">
+  <title>PPE 과정·진도 분석 대시보드 V2</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #071018;
+      --panel: #0c1923;
+      --panel-2: #10222e;
+      --line: #1e3947;
+      --line-soft: #162e3b;
+      --text: #ecf7f7;
+      --muted: #8da7b1;
+      --cyan: #62e5df;
+      --cyan-soft: rgba(98, 229, 223, .13);
+      --green: #72dda5;
+      --amber: #f5bd70;
+      --red: #ff7b88;
+      --violet: #b99aff;
+      --shadow: 0 18px 44px rgba(0, 0, 0, .22);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 78% -15%, rgba(42, 132, 151, .18), transparent 38%),
+        linear-gradient(150deg, #061019 0%, #07131c 56%, #08141b 100%);
+      color: var(--text);
+      font-family: Inter, Pretendard, "Noto Sans KR", "Segoe UI", sans-serif;
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    button, select { font: inherit; }
+    button, select { color: inherit; }
+    button { cursor: pointer; }
+    .app { min-height: 100vh; display: grid; grid-template-columns: 252px minmax(0, 1fr); }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 28px 18px 22px;
+      border-right: 1px solid var(--line-soft);
+      background: rgba(5, 14, 21, .94);
+      display: flex;
+      flex-direction: column;
+      z-index: 5;
+    }
+
+    .brand { display: flex; align-items: center; gap: 12px; padding: 0 10px 26px; }
+    .brand-mark {
+      width: 42px; height: 42px; border-radius: 13px;
+      display: grid; place-items: center;
+      background: linear-gradient(145deg, var(--cyan), #699cff);
+      color: #06202a; font-weight: 900; letter-spacing: -.04em;
+      box-shadow: 0 12px 28px rgba(98, 229, 223, .2);
+    }
+    .brand strong { display: block; font-size: 15px; letter-spacing: .08em; }
+    .brand small { color: var(--muted); font-size: 12px; letter-spacing: .12em; }
+    .nav-label { margin: 10px 12px 8px; color: #577482; font-size: 12px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+    .nav { display: grid; gap: 5px; }
+    .nav button {
+      width: 100%; border: 1px solid transparent; border-radius: 12px;
+      background: transparent; color: #9eb5bd; text-align: left;
+      padding: 12px 13px; transition: .16s ease;
+    }
+    .nav button:hover { color: var(--text); background: #0d1e29; }
+    .nav button.active { color: var(--text); border-color: #265064; background: #123047; box-shadow: inset 3px 0 var(--cyan); }
+    .nav button span { display: inline-block; width: 18px; color: var(--cyan); }
+    .side-status {
+      margin-top: auto; padding: 14px; border: 1px solid var(--line-soft); border-radius: 14px;
+      background: rgba(12, 28, 39, .72); color: var(--muted); font-size: 12px;
+    }
+    .side-status b { color: var(--amber); display: block; margin-bottom: 4px; letter-spacing: .06em; }
+
+    .main { min-width: 0; padding: 30px clamp(22px, 3vw, 48px) 60px; }
+    .topbar { display: grid; grid-template-columns: minmax(260px, 1fr) auto; gap: 24px; align-items: end; margin-bottom: 18px; }
+    .eyebrow { color: var(--cyan); text-transform: uppercase; letter-spacing: .16em; font-size: 12px; font-weight: 900; }
+    h1 { margin: 8px 0 4px; font-size: clamp(26px, 3vw, 38px); line-height: 1.15; letter-spacing: -.04em; }
+    .subtitle { margin: 0; color: var(--muted); max-width: 740px; }
+    .data-badge { display: inline-flex; align-items: center; gap: 8px; margin-top: 13px; padding: 7px 10px; border-radius: 999px; background: rgba(245, 189, 112, .1); color: var(--amber); border: 1px solid rgba(245, 189, 112, .28); font-size: 12px; font-weight: 800; }
+    .data-badge::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; box-shadow: 0 0 12px currentColor; }
+
+    .actions { display: flex; gap: 9px; align-items: center; }
+    .ghost-button {
+      border: 1px solid var(--line); background: #0b1a24; padding: 10px 13px; border-radius: 11px; color: #c3d7dc;
+    }
+    .ghost-button:hover { border-color: #3a687b; background: #102632; }
+
+    .filters {
+      display: grid; grid-template-columns: repeat(4, minmax(150px, 1fr)); gap: 10px;
+      padding: 14px; border: 1px solid var(--line); border-radius: var(--radius);
+      background: rgba(10, 25, 35, .82); box-shadow: var(--shadow); margin-bottom: 12px;
+    }
+    .filter label { display: block; color: #6f8d99; font-size: 12px; font-weight: 800; letter-spacing: .08em; margin: 0 0 6px 3px; }
+    .filter select {
+      width: 100%; min-height: 42px; border: 1px solid var(--line-soft); border-radius: 11px;
+      background: #081721; padding: 0 12px; outline: none;
+    }
+    .filter select:focus { border-color: var(--cyan); box-shadow: 0 0 0 3px var(--cyan-soft); }
+    .filter select:disabled { cursor: not-allowed; opacity: .55; }
+
+    .scope-bar {
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+      border: 1px solid var(--line-soft); background: rgba(7, 21, 30, .82); border-radius: 13px;
+      padding: 11px 14px; margin-bottom: 22px; color: #a9c0c7;
+    }
+    .scope-bar b { color: var(--cyan); }
+    .scope-bar small { color: #607d89; white-space: nowrap; }
+
+    .mobile-nav { display: none; gap: 7px; overflow-x: auto; padding: 0 0 12px; }
+    .mobile-nav button { flex: 0 0 auto; border: 1px solid var(--line); background: #0b1a24; color: #9bb2ba; border-radius: 999px; padding: 8px 12px; }
+    .mobile-nav button.active { color: #062026; background: var(--cyan); border-color: var(--cyan); }
+
+    .view { display: none; }
+    .view.active { display: block; animation: appear .2s ease; }
+    @keyframes appear { from { opacity: 0; transform: translateY(4px); } }
+
+    .grid { display: grid; gap: 14px; }
+    .kpi-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .two-col { grid-template-columns: minmax(0, 1.55fr) minmax(300px, .85fr); }
+    .equal-col { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .three-col { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .spacer { margin-top: 14px; }
+
+    .card {
+      min-width: 0; border: 1px solid var(--line-soft); border-radius: var(--radius);
+      background: linear-gradient(155deg, rgba(16, 35, 47, .96), rgba(8, 24, 34, .97));
+      box-shadow: var(--shadow); padding: 18px;
+    }
+    .card-header { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; margin-bottom: 15px; }
+    .card-header h2 { margin: 0; font-size: 16px; letter-spacing: -.015em; }
+    .card-header p, .card-header small { margin: 3px 0 0; color: var(--muted); font-size: 12px; }
+    .kpi .label { color: #819ba5; font-size: 12px; font-weight: 800; letter-spacing: .04em; }
+    .kpi .value { margin: 8px 0 4px; font-size: clamp(26px, 3vw, 36px); font-weight: 850; letter-spacing: -.04em; }
+    .kpi .desc { color: var(--muted); font-size: 12px; min-height: 34px; }
+    .kpi .meta { margin-top: 10px; padding-top: 9px; border-top: 1px solid var(--line-soft); color: #617d88; font-size: 12px; }
+    .good { color: var(--green) !important; }
+    .warn { color: var(--amber) !important; }
+    .bad { color: var(--red) !important; }
+    .violet { color: var(--violet) !important; }
+
+    .funnel { display: grid; gap: 9px; }
+    .funnel-row { display: grid; grid-template-columns: minmax(150px, 1.2fr) 3fr 66px 66px; gap: 10px; align-items: center; }
+    .funnel-name strong { display: block; font-size: 12px; }
+    .funnel-name small { color: #668490; font-size: 12px; }
+    .bar { height: 10px; border-radius: 999px; background: #122e3a; overflow: hidden; }
+    .bar > i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #50c9d0, #6ee4bd); }
+    .bar.red > i { background: linear-gradient(90deg, #d66b76, #ff9a7a); }
+    .bar.violet > i { background: linear-gradient(90deg, #826bdd, #c09aff); }
+    .funnel-num { text-align: right; font-weight: 800; }
+    .funnel-drop { text-align: right; color: var(--red); font-size: 12px; }
+
+    .candidate-list { display: grid; gap: 10px; }
+    .candidate {
+      border: 1px solid var(--line-soft); border-radius: 13px; padding: 12px; background: rgba(7, 21, 30, .72);
+    }
+    .candidate-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .candidate strong { font-size: 12px; }
+    .candidate p { margin: 7px 0 0; color: var(--muted); font-size: 12px; }
+
+    .pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 999px; font-size: 12px; font-weight: 800; background: #173442; color: #9edbe0; }
+    .pill.green { background: rgba(114, 221, 165, .13); color: var(--green); }
+    .pill.amber { background: rgba(245, 189, 112, .13); color: var(--amber); }
+    .pill.red { background: rgba(255, 123, 136, .13); color: var(--red); }
+    .pill.violet { background: rgba(185, 154, 255, .13); color: var(--violet); }
+
+    .table-wrap { overflow-x: auto; border: 1px solid var(--line-soft); border-radius: 13px; }
+    table { width: 100%; border-collapse: collapse; min-width: 700px; }
+    th, td { padding: 12px 13px; border-bottom: 1px solid var(--line-soft); text-align: left; vertical-align: middle; }
+    th { color: #718e99; font-size: 12px; letter-spacing: .04em; background: rgba(6, 19, 27, .62); }
+    td { font-size: 12px; color: #c9dade; }
+    tr:last-child td { border-bottom: 0; }
+    tbody tr:hover { background: rgba(98, 229, 223, .035); }
+    .num { text-align: right; font-variant-numeric: tabular-nums; }
+
+    .exit-list, .quality-list, .metric-list { display: grid; gap: 10px; }
+    .metric-line { display: grid; grid-template-columns: minmax(120px, 1fr) 2.2fr auto; gap: 10px; align-items: center; }
+    .metric-line span { color: #a8bec5; font-size: 12px; }
+    .metric-line b { min-width: 48px; text-align: right; font-size: 12px; }
+    .metric-line .bar { height: 8px; }
+
+    .note { border: 1px solid var(--line-soft); border-left: 3px solid var(--cyan); background: rgba(7, 22, 31, .72); border-radius: 11px; padding: 11px 12px; color: #a9c0c7; font-size: 12px; }
+    .note.warn-note { border-left-color: var(--amber); }
+    .note strong { color: var(--text); }
+
+    .progress-track { height: 12px; background: #122c38; border-radius: 999px; overflow: hidden; }
+    .progress-track i { display: block; height: 100%; background: linear-gradient(90deg, #58d6db, #72dda5); border-radius: inherit; }
+    .person-head { display: flex; align-items: center; gap: 14px; }
+    .avatar { width: 48px; height: 48px; display: grid; place-items: center; border-radius: 15px; background: #153b4c; color: var(--cyan); font-weight: 900; font-size: 16px; }
+    .person-head h2 { margin: 0; }
+    .person-head p { margin: 3px 0 0; color: var(--muted); font-size: 12px; }
+    .person-select { margin-left: auto; border: 1px solid var(--line); border-radius: 10px; background: #081721; padding: 9px 10px; }
+
+    .checkpoint-list { display: grid; gap: 7px; margin-top: 14px; }
+    .checkpoint { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 9px 10px; border-radius: 11px; background: rgba(7, 20, 28, .68); border: 1px solid var(--line-soft); }
+    .checkpoint i { width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; background: #16313e; color: #73909b; font-style: normal; font-size: 12px; }
+    .checkpoint.done i { background: rgba(114, 221, 165, .16); color: var(--green); }
+    .checkpoint.current { border-color: rgba(245, 189, 112, .55); }
+    .checkpoint.current i { background: rgba(245, 189, 112, .16); color: var(--amber); }
+    .checkpoint strong { font-size: 12px; }
+    .checkpoint small { color: var(--muted); font-size: 12px; }
+
+    .compare-grid { display: grid; grid-template-columns: 1.2fr repeat(2, 1fr) .8fr; gap: 0; border: 1px solid var(--line-soft); border-radius: 13px; overflow: hidden; }
+    .compare-grid > div { padding: 10px 12px; border-bottom: 1px solid var(--line-soft); background: rgba(7, 20, 28, .54); }
+    .compare-grid > div:nth-last-child(-n+4) { border-bottom: 0; }
+    .compare-grid .head { color: #6f8c98; font-size: 12px; font-weight: 800; background: rgba(5, 16, 23, .78); }
+    .delta-good { color: var(--green); }
+    .delta-same { color: #8ca4ad; }
+    .delta-bad { color: var(--red); }
+
+    .ux-signal { display: grid; grid-template-columns: 1fr auto; gap: 8px 12px; padding: 12px 0; border-bottom: 1px solid var(--line-soft); }
+    .ux-signal:last-child { border-bottom: 0; }
+    .ux-signal strong { font-size: 12px; }
+    .ux-signal p { grid-column: 1 / -1; margin: 0; color: var(--muted); font-size: 12px; }
+
+    .pipeline { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 28px; margin: 18px 0; }
+    .pipe-step { position: relative; padding: 16px; border: 1px solid var(--line); border-radius: 14px; background: #0a1a24; }
+    .pipe-step:not(:last-child)::after { content: "→"; position: absolute; right: -22px; top: 50%; transform: translateY(-50%); color: var(--cyan); font-size: 18px; }
+    .pipe-step b { display: block; margin-bottom: 4px; }
+    .pipe-step small { color: var(--muted); }
+
+    .empty { padding: 28px; text-align: center; color: var(--muted); }
+    .section-title { margin: 0 0 12px; font-size: 18px; }
+    .footer-note { margin-top: 18px; color: #5f7b86; font-size: 12px; text-align: right; }
+
+    @media (max-width: 1120px) {
+      .app { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .mobile-nav { display: flex; }
+      .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .topbar { grid-template-columns: 1fr; }
+      .actions { justify-content: flex-start; }
+    }
+
+    @media (max-width: 760px) {
+      .main { padding: 22px 14px 44px; }
+      .filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .two-col, .equal-col, .three-col { grid-template-columns: 1fr; }
+      .funnel-row { grid-template-columns: 1fr 2fr 48px; }
+      .funnel-drop { display: none; }
+      .pipeline { grid-template-columns: 1fr; gap: 10px; }
+      .pipe-step:not(:last-child)::after { content: "↓"; right: auto; top: auto; left: 50%; bottom: -20px; transform: translateX(-50%); }
+      .scope-bar { align-items: flex-start; flex-direction: column; }
+      .compare-grid { grid-template-columns: 1.25fr repeat(2, 1fr) .75fr; font-size: 12px; }
+    }
+
+    @media (max-width: 480px) {
+      .filters, .kpi-grid { grid-template-columns: 1fr; }
+      .actions { flex-wrap: wrap; }
+      .person-head { align-items: flex-start; flex-wrap: wrap; }
+      .person-select { margin-left: 0; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">P</div>
+        <div><strong>PPE INSIGHT</strong><small>COURSE ANALYTICS V2</small></div>
+      </div>
+      <div class="nav-label">Course analytics</div>
+      <nav class="nav" aria-label="대시보드 화면">
+        <button class="active" data-view="overview"><span>◈</span>전체 개요</button>
+        <button data-view="journey"><span>↳</span>과정 병목·이탈</button>
+        <button data-view="learning"><span>↗</span>재이수·모드 난이도</button>
+        <button data-view="updates"><span>⇄</span>업데이트 영향</button>
+        <button data-view="people"><span>◎</span>개인 프로그레스</button>
+        <button data-view="ux"><span>⌁</span>UX 설계 신호</button>
+        <button data-view="data"><span>◇</span>데이터 연동</button>
+      </nav>
+      <div class="side-status"><b>MOCK DATA</b>실제 수집 API 연결 전 구조 검증용 데이터입니다. 추정 종료는 별도 표시합니다.</div>
+    </aside>
+
+    <main class="main">
+      <div class="mobile-nav" aria-label="모바일 화면 전환">
+        <button class="active" data-view="overview">개요</button>
+        <button data-view="journey">병목·이탈</button>
+        <button data-view="learning">재이수</button>
+        <button data-view="updates">업데이트</button>
+        <button data-view="people">개인</button>
+        <button data-view="ux">UX</button>
+        <button data-view="data">연동</button>
+      </div>
+
+      <header class="topbar">
+        <div>
+          <div class="eyebrow">PPE VR Training / Course Quality Dashboard</div>
+          <h1 id="pageTitle">전체 개요</h1>
+          <p class="subtitle" id="pageSubtitle">과정 이수, 중도 이탈, 병목과 재이수 변화를 먼저 확인합니다.</p>
+          <div class="data-badge">모의 데이터 · 실제 API 미연결</div>
+        </div>
+        <div class="actions">
+          <button class="ghost-button" id="exportCsv" type="button">현재 범위 CSV</button>
+        </div>
+      </header>
+
+      <section class="filters" aria-label="분석 필터">
+        <div class="filter"><label for="periodFilter">기간</label><select id="periodFilter"><option value="all">전체 기간</option><option value="14">최근 14일</option><option value="7">최근 7일</option></select></div>
+        <div class="filter"><label for="participantFilter">참여자</label><select id="participantFilter"><option value="all">전체 참여자</option></select></div>
+        <div class="filter"><label for="modeFilter">수행 모드</label><select id="modeFilter"><option value="all">전체 모드</option><option value="Learning">Learning</option><option value="Training">Training</option><option value="Test">Test</option></select></div>
+        <div class="filter"><label for="appVersionFilter">앱 업데이트 버전</label><select id="appVersionFilter"><option value="all">전체 앱 버전</option></select></div>
+      </section>
+
+      <div class="scope-bar"><div>현재 범위: <b id="scopeText">전체 참여자 · 전체 모드</b></div><small id="scopeMeta">0회 수행</small></div>
+
+      <section id="overview" class="view active">
+        <div class="grid kpi-grid" id="overviewKpis"></div>
+        <div class="grid two-col spacer">
+          <article class="card"><div class="card-header"><div><h2>전체 과정 퍼널</h2><p>필수 checkpoint 도달·완료·이탈</p></div><span class="pill">과정 기준</span></div><div class="funnel" id="overviewFunnel"></div></article>
+          <article class="card"><div class="card-header"><div><h2>우선 검토 후보</h2><p>결함 확정이 아닌 반복 신호</p></div><span class="pill amber">검토</span></div><div class="candidate-list" id="overviewCandidates"></div></article>
+        </div>
+        <article class="card spacer"><div class="card-header"><div><h2>모드별 과정 결과</h2><p>서로 다른 모드를 하나의 평균으로 합치지 않습니다.</p></div></div><div class="table-wrap"><table><thead><tr><th>모드</th><th class="num">수행</th><th class="num">과정 이수율</th><th class="num">중도 이탈률</th><th class="num">완료시간 중앙값</th><th class="num">힌트 중앙값</th><th>주요 신호</th></tr></thead><tbody id="overviewModeTable"></tbody></table></div></article>
+      </section>
+
+      <section id="journey" class="view">
+        <div class="grid kpi-grid" id="journeyKpis"></div>
+        <div class="grid two-col spacer">
+          <article class="card"><div class="card-header"><div><h2>Checkpoint별 병목</h2><p>도달한 수행을 분모로 계산</p></div></div><div class="table-wrap"><table><thead><tr><th>Checkpoint</th><th class="num">도달</th><th class="num">완료</th><th class="num">단계 이탈</th><th class="num">체류 중앙값</th><th>반복 신호</th></tr></thead><tbody id="bottleneckTable"></tbody></table></div></article>
+          <article class="card"><div class="card-header"><div><h2>종료 경로</h2><p>직접 기록과 추정값 분리</p></div></div><div class="exit-list" id="exitReasons"></div><div class="note warn-note spacer"><strong>전원 종료는 직접 검출값이 아닙니다.</strong> 종료 이벤트 부재, 마지막 heartbeat와 다음 실행 기록으로 추정합니다.</div></article>
+        </div>
+        <article class="card spacer"><div class="card-header"><div><h2>미완료 수행 상세</h2><p>어디에서 어떤 경로로 종료됐는지 확인</p></div></div><div class="table-wrap"><table><thead><tr><th>참여자</th><th>모드</th><th>마지막 checkpoint</th><th>종료 원인</th><th>판정</th><th>마지막 기록</th><th>후속 수행</th></tr></thead><tbody id="exitTable"></tbody></table></div></article>
+      </section>
+
+      <section id="learning" class="view">
+        <div class="grid kpi-grid" id="learningKpis"></div>
+        <div class="grid equal-col spacer">
+          <article class="card"><div class="card-header"><div><h2>모드 난이도 비교</h2><p>이수·이탈·오류·힌트·재시도 분리</p></div></div><div id="modeDifficulty"></div></article>
+          <article class="card"><div class="card-header"><div><h2>재이수 변화</h2><p>동일 참여자·모드·앱 버전의 연속 회차</p></div></div><div class="candidate-list" id="repeatPairs"></div></article>
+        </div>
+        <article class="card spacer"><div class="card-header"><div><h2>재이수 비교 원칙</h2></div></div><div class="note"><strong>종합 정확도 점수는 사용하지 않습니다.</strong> 과정 이수, 치명적 오류, 순서 오류, 일반 오류, 힌트, 재시도와 수행시간을 각각 비교합니다. 시간 단축은 오류가 증가하지 않은 경우에만 향상 신호로 표시합니다.</div></article>
+      </section>
+
+      <section id="updates" class="view">
+        <article class="card"><div class="card-header"><div><h2>이 화면에서 확인할 것</h2><p>업데이트 후 교육이 더 쉬워졌는지, 오히려 어려워졌는지 확인합니다.</p></div></div><div class="note"><strong>네 가지만 보면 됩니다.</strong> 업데이트 후 ① 더 많은 사람이 끝까지 했는지, ② 중간에 그만둔 사람이 줄었는지, ③ 실수와 재시도가 줄었는지, ④ 특정 단계에서 덜 막혔는지를 이전 버전과 비교합니다.</div><div class="note warn-note spacer"><strong>지금 보이는 숫자는 실제 사용자 결과가 아닙니다.</strong> 대시보드 화면을 확인하기 위해 넣은 예시 숫자이며, 실제 수집 기능을 연결한 뒤부터 의미 있는 결과가 표시됩니다.</div></article>
+        <div class="grid kpi-grid spacer" id="updateKpis"></div>
+        <article class="card spacer"><div class="card-header"><div><h2>버전별 전체 결과</h2><p>각 버전에서 사람들이 얼마나 끝까지 했고, 얼마나 실수했는지 비교합니다.</p></div><span class="pill violet">현재 v0.1.0</span></div><div class="table-wrap"><table><thead><tr><th>앱 버전</th><th class="num">해본 횟수</th><th class="num">사람 수</th><th class="num">끝까지 완료</th><th class="num">중간에 멈춤</th><th class="num">완료한 사람의 대표 시간</th><th class="num">실수 횟수 대표값</th><th class="num">힌트 횟수 대표값</th><th class="num">재시도 대표값</th></tr></thead><tbody id="versionSummaryTable"></tbody></table></div></article>
+        <div class="grid equal-col spacer">
+          <article class="card"><div class="card-header"><div><h2>방식별 비교</h2><p>Learning·Training·Test를 따로 보아 조건 차이로 생기는 착각을 줄입니다.</p></div></div><div id="versionModeComparison"></div></article>
+          <article class="card"><div class="card-header"><div><h2>같은 사람의 업데이트 전후</h2><p>같은 사람이 같은 방식으로 했을 때 결과가 어떻게 달라졌는지 봅니다.</p></div></div><div class="candidate-list" id="matchedVersionPairs"></div></article>
+        </div>
+        <article class="card spacer"><div class="card-header"><div><h2>어느 단계에서 더 막혔는가</h2><p>각 단계에서 멈춘 비율과 머문 시간을 이전 버전과 비교합니다.</p></div></div><div class="table-wrap"><table><thead><tr><th>과정 단계</th><th class="num">이전 버전에서 멈춤</th><th class="num">현재 버전에서 멈춤</th><th class="num">차이</th><th class="num">이전 머문 시간</th><th class="num">현재 머문 시간</th><th>쉽게 읽기</th></tr></thead><tbody id="versionCheckpointTable"></tbody></table></div></article>
+        <article class="card spacer"><div class="note warn-note"><strong>숫자 하나만 보고 업데이트가 좋다거나 나쁘다고 정하지 않습니다.</strong> 여러 사람이 끝까지 더 많이 완료하고, 덜 포기하고, 실수도 줄고, 특정 단계에서 덜 막히는 변화가 함께 나타나는지 봅니다. 기록이 너무 적으면 결론을 내리지 않고 더 모읍니다.</div></article>
+      </section>
+
+      <section id="people" class="view">
+        <div class="grid two-col">
+          <article class="card" id="personSummary"></article>
+          <article class="card"><div class="card-header"><div><h2>최근 회차 비교</h2><p>같은 모드·앱 버전일 때만 비교</p></div></div><div id="personComparison"></div></article>
+        </div>
+        <article class="card spacer"><div class="card-header"><div><h2>개인 수행 이력</h2><p>완료·중단·재개를 회차 단위로 표시</p></div></div><div class="table-wrap"><table><thead><tr><th>일시</th><th>모드</th><th>앱 버전</th><th>상태</th><th>마지막 checkpoint</th><th class="num">순서 오류</th><th class="num">일반 오류</th><th class="num">힌트</th><th class="num">재시도</th><th class="num">시간</th></tr></thead><tbody id="personAttempts"></tbody></table></div></article>
+      </section>
+
+      <section id="ux" class="view">
+        <div class="grid kpi-grid" id="uxKpis"></div>
+        <div class="grid two-col spacer">
+          <article class="card"><div class="card-header"><div><h2>발견성·상호작용 신호</h2><p>HMD 머리 방향과 컨트롤러 Ray를 구분</p></div><span class="pill">trackingSource: head</span></div><div id="uxSignals"></div></article>
+          <article class="card"><div class="card-header"><div><h2>UX 설계 검토 규칙</h2><p>한 지표만으로 결함을 확정하지 않음</p></div></div><div class="candidate-list" id="uxRules"></div></article>
+        </div>
+        <article class="card spacer"><div class="card-header"><div><h2>이름 기반 작업구역</h2><p>3D voxel보다 수정 가능한 구역을 먼저 표시</p></div></div><div id="regionSignals"></div></article>
+      </section>
+
+      <section id="data" class="view">
+        <div class="grid kpi-grid" id="dataKpis"></div>
+        <article class="card spacer"><div class="card-header"><div><h2>데이터 수집 구조</h2><p>Google처럼 불러오되, 과정 데이터는 프로젝트가 직접 소유</p></div></div><div class="pipeline"><div class="pipe-step"><b>Unity 앱</b><small>checkpoint·오류·heartbeat 이벤트</small></div><div class="pipe-step"><b>수집 API</b><small>일괄 전송·오프라인 재시도·중복 제거</small></div><div class="pipe-step"><b>원시 이벤트</b><small>회차·버전·종료 근거 보존</small></div><div class="pipe-step"><b>집계 API</b><small>퍼널·병목·개인 진도 자동 조회</small></div></div></article>
+        <div class="grid equal-col spacer">
+          <article class="card"><div class="card-header"><div><h2>필수 이벤트 계약</h2></div></div><div class="quality-list" id="eventContract"></div></article>
+          <article class="card"><div class="card-header"><div><h2>Meta Horizon 데이터</h2></div><span class="pill amber">분리 운영</span></div><div class="note warn-note"><strong>현재 외부 Analytics API 연결 없음.</strong> Meta Developer Dashboard의 플랫폼 노출·설치·활성 사용자 데이터는 과정 이수 데이터와 섞지 않습니다. 소규모 평가의 핵심 분석은 자체 이벤트 수집으로 동작합니다.</div><div class="quality-list spacer"><div class="metric-line"><span>과정 이수·진도</span><div class="bar"><i style="width:100%"></i></div><b class="good">자체 수집</b></div><div class="metric-line"><span>Meta 플랫폼 성과</span><div class="bar red"><i style="width:18%"></i></div><b class="warn">미연결</b></div><div class="metric-line"><span>CSV 내보내기</span><div class="bar violet"><i style="width:100%"></i></div><b class="violet">목업 제공</b></div></div></article>
+        </div>
+      </section>
+
+      <div class="footer-note">PPE Training Dashboard V2 · 구조 검증용 Mock Dataset · 2026-08-25</div>
+    </main>
+  </div>
+
+  <script>
+    "use strict";
+
+    const currentAppVersion = "0.1.0";
+    const currentAndroidBuildCode = 1;
+
+    const checkpoints = [
+      { id: "briefing", label: "과정·작업계획 확인", region: "시작·안내 구역" },
+      { id: "ppe_entry", label: "PPE 구역 진입", region: "PPE 진입 구역" },
+      { id: "selection", label: "장비 선택", region: "PPE 선택 구역" },
+      { id: "inspection", label: "상태 검사", region: "검사·판정 구역" },
+      { id: "equip", label: "착용·절차 수행", region: "착용 판정 구역" },
+      { id: "mirror", label: "거울 확인·다음 단계", region: "거울·전환 구역" },
+      { id: "complete", label: "과정 완료", region: "출구·완료 구역" }
+    ];
+
+    const participantNames = {
+      "P-001": "참여자 P-001", "P-002": "참여자 P-002", "P-003": "참여자 P-003", "P-004": "참여자 P-004",
+      "P-005": "참여자 P-005", "P-006": "참여자 P-006", "P-007": "참여자 P-007", "P-008": "참여자 P-008"
+    };
+
+    const endReasonLabels = {
+      completed: "과정 완료",
+      explicit_exit: "명시적 종료",
+      app_backgrounded: "앱 백그라운드",
+      inactivity_timeout: "장시간 미입력",
+      crash_recovered: "충돌 복구",
+      unexpected_disconnect: "예상치 못한 종료",
+      power_off_suspected: "전원 종료 추정",
+      unknown: "원인 불명"
+    };
+
+    const issueLabels = {
+      discovery: "목표 발견 지연",
+      search_exit: "예상 탐색구역 이탈",
+      visible_unengaged: "목표 노출 후 미상호작용",
+      wrong_target: "잘못된 대상 선택",
+      sequence: "순서 오류",
+      interaction: "상호작용 실패",
+      feedback: "완료 피드백 인지 실패",
+      recovery: "오류 회복 실패",
+      next_step: "다음 단계 연결 지연"
+    };
+
+    function makeStages(completedThrough, currentAt, durations, signals = {}) {
+      const completedIndex = completedThrough ? checkpoints.findIndex(c => c.id === completedThrough) : -1;
+      const currentIndex = currentAt ? checkpoints.findIndex(c => c.id === currentAt) : -1;
+      return checkpoints.map((cp, index) => ({
+        checkpointId: cp.id,
+        reached: index <= completedIndex || index === currentIndex,
+        completed: index <= completedIndex,
+        durationSec: durations[cp.id] || 0,
+        issues: signals[cp.id]?.issues || [],
+        discoverySec: signals[cp.id]?.discoverySec ?? null,
+        outsideExpectedRegionRatio: signals[cp.id]?.outsideExpectedRegionRatio ?? null,
+        targetVisibleUnengagedSec: signals[cp.id]?.targetVisibleUnengagedSec ?? null,
+        wrongTargetInteractions: signals[cp.id]?.wrongTargetInteractions ?? 0,
+        trackingSource: signals[cp.id]?.trackingSource || "head"
+      }));
+    }
+
+    function attempt(config) {
+      const completed = config.status === "completed";
+      const completedThrough = completed ? "complete" : config.completedThrough;
+      return {
+        ...config,
+        endReason: completed ? "completed" : config.endReason,
+        currentAt: completed ? null : config.currentAt,
+        stages: makeStages(completedThrough, completed ? null : config.currentAt, config.durations, config.signals)
+      };
+    }
+
+    const attempts = [
+      attempt({ id:"A-001", participantId:"P-001", date:"2026-08-08", mode:"Training", appVersion:"0.0.9", status:"completed", durationSec:760, criticalErrors:0, sequenceErrors:3, wrongActions:4, hints:3, retries:4, completedThrough:"complete", currentAt:null, durations:{briefing:52,ppe_entry:48,selection:154,inspection:118,equip:214,mirror:132,complete:42}, signals:{selection:{issues:["discovery","search_exit","wrong_target"],discoverySec:51,outsideExpectedRegionRatio:.58,targetVisibleUnengagedSec:18,wrongTargetInteractions:3},equip:{issues:["sequence","interaction"]},mirror:{issues:["next_step"]}} }),
+      attempt({ id:"A-002", participantId:"P-001", date:"2026-08-15", mode:"Training", appVersion:"0.0.9", status:"completed", durationSec:565, criticalErrors:0, sequenceErrors:1, wrongActions:2, hints:1, retries:2, resumedFrom:null, completedThrough:"complete", currentAt:null, durations:{briefing:38,ppe_entry:35,selection:101,inspection:91,equip:172,mirror:91,complete:37}, signals:{selection:{issues:["search_exit"],discoverySec:29,outsideExpectedRegionRatio:.31,targetVisibleUnengagedSec:9,wrongTargetInteractions:1},equip:{issues:["interaction"]}} }),
+      attempt({ id:"A-003", participantId:"P-001", date:"2026-08-21", mode:"Training", appVersion:"0.1.0", status:"completed", durationSec:438, criticalErrors:0, sequenceErrors:0, wrongActions:1, hints:0, retries:1, completedThrough:"complete", currentAt:null, durations:{briefing:30,ppe_entry:29,selection:72,inspection:69,equip:138,mirror:71,complete:29}, signals:{selection:{issues:[],discoverySec:18,outsideExpectedRegionRatio:.18,targetVisibleUnengagedSec:4,wrongTargetInteractions:0}} }),
+
+      attempt({ id:"A-004", participantId:"P-002", date:"2026-08-09", mode:"Learning", appVersion:"0.0.9", status:"exited", endReason:"explicit_exit", durationSec:346, criticalErrors:0, sequenceErrors:2, wrongActions:4, hints:4, retries:3, completedThrough:"selection", currentAt:"inspection", durations:{briefing:61,ppe_entry:58,selection:143,inspection:84}, signals:{selection:{issues:["discovery","wrong_target"],discoverySec:62,outsideExpectedRegionRatio:.66,targetVisibleUnengagedSec:22,wrongTargetInteractions:4},inspection:{issues:["sequence","recovery"]}} }),
+      attempt({ id:"A-005", participantId:"P-002", date:"2026-08-18", mode:"Learning", appVersion:"0.0.9", status:"completed", durationSec:702, criticalErrors:0, sequenceErrors:1, wrongActions:2, hints:2, retries:1, completedThrough:"complete", currentAt:null, durations:{briefing:53,ppe_entry:43,selection:126,inspection:101,equip:201,mirror:130,complete:48}, signals:{selection:{issues:["search_exit"],discoverySec:37,outsideExpectedRegionRatio:.38,targetVisibleUnengagedSec:12,wrongTargetInteractions:1},mirror:{issues:["next_step"]}} }),
+
+      attempt({ id:"A-006", participantId:"P-003", date:"2026-08-10", mode:"Training", appVersion:"0.0.9", status:"interrupted", endReason:"power_off_suspected", durationSec:412, criticalErrors:0, sequenceErrors:2, wrongActions:3, hints:2, retries:2, completedThrough:"inspection", currentAt:"equip", durations:{briefing:45,ppe_entry:42,selection:121,inspection:108,equip:96}, signals:{selection:{issues:["visible_unengaged","wrong_target"],discoverySec:44,outsideExpectedRegionRatio:.35,targetVisibleUnengagedSec:27,wrongTargetInteractions:2},equip:{issues:["interaction","recovery"]}} }),
+      attempt({ id:"A-007", participantId:"P-003", date:"2026-08-12", mode:"Training", appVersion:"0.0.9", status:"completed", durationSec:648, criticalErrors:0, sequenceErrors:1, wrongActions:1, hints:1, retries:1, resumedFrom:"A-006", completedThrough:"complete", currentAt:null, durations:{briefing:36,ppe_entry:38,selection:98,inspection:95,equip:208,mirror:126,complete:47}, signals:{selection:{issues:[],discoverySec:25,outsideExpectedRegionRatio:.24,targetVisibleUnengagedSec:6,wrongTargetInteractions:0},equip:{issues:["interaction"]}} }),
+
+      attempt({ id:"A-008", participantId:"P-004", date:"2026-08-11", mode:"Learning", appVersion:"0.0.9", status:"completed", durationSec:812, criticalErrors:0, sequenceErrors:3, wrongActions:5, hints:5, retries:4, completedThrough:"complete", currentAt:null, durations:{briefing:68,ppe_entry:61,selection:177,inspection:131,equip:218,mirror:111,complete:46}, signals:{selection:{issues:["discovery","search_exit","wrong_target"],discoverySec:71,outsideExpectedRegionRatio:.72,targetVisibleUnengagedSec:29,wrongTargetInteractions:4},inspection:{issues:["sequence"]},mirror:{issues:["feedback"]}} }),
+      attempt({ id:"A-009", participantId:"P-004", date:"2026-08-20", mode:"Learning", appVersion:"0.1.0", status:"exited", endReason:"explicit_exit", durationSec:459, criticalErrors:0, sequenceErrors:1, wrongActions:1, hints:0, retries:2, completedThrough:"equip", currentAt:"mirror", durations:{briefing:31,ppe_entry:34,selection:76,inspection:75,equip:154,mirror:89}, signals:{selection:{issues:[],discoverySec:22,outsideExpectedRegionRatio:.19,targetVisibleUnengagedSec:5,wrongTargetInteractions:0},mirror:{issues:["feedback","next_step","recovery"]}} }),
+
+      attempt({ id:"A-010", participantId:"P-005", date:"2026-08-13", mode:"Training", appVersion:"0.0.9", status:"completed", durationSec:621, criticalErrors:0, sequenceErrors:1, wrongActions:2, hints:2, retries:2, completedThrough:"complete", currentAt:null, durations:{briefing:42,ppe_entry:38,selection:104,inspection:93,equip:196,mirror:103,complete:45}, signals:{selection:{issues:["visible_unengaged"],discoverySec:33,outsideExpectedRegionRatio:.29,targetVisibleUnengagedSec:18,wrongTargetInteractions:1},equip:{issues:["interaction"]}} }),
+
+      attempt({ id:"A-011", participantId:"P-006", date:"2026-08-16", mode:"Learning", appVersion:"0.1.0", status:"interrupted", endReason:"app_backgrounded", durationSec:233, criticalErrors:0, sequenceErrors:1, wrongActions:3, hints:2, retries:1, completedThrough:"ppe_entry", currentAt:"selection", durations:{briefing:55,ppe_entry:49,selection:129}, signals:{selection:{issues:["discovery","search_exit","recovery"],discoverySec:68,outsideExpectedRegionRatio:.76,targetVisibleUnengagedSec:21,wrongTargetInteractions:3}} }),
+
+      attempt({ id:"A-017", participantId:"P-007", date:"2026-08-10", mode:"Test", appVersion:"0.0.9", status:"exited", endReason:"explicit_exit", durationSec:436, criticalErrors:0, sequenceErrors:3, wrongActions:4, hints:0, retries:4, completedThrough:"inspection", currentAt:"equip", durations:{briefing:42,ppe_entry:39,selection:119,inspection:104,equip:132}, signals:{selection:{issues:["discovery","wrong_target"],discoverySec:48,outsideExpectedRegionRatio:.47,targetVisibleUnengagedSec:16,wrongTargetInteractions:3},equip:{issues:["sequence","interaction","recovery"]}} }),
+      attempt({ id:"A-012", participantId:"P-007", date:"2026-08-17", mode:"Test", appVersion:"0.1.0", status:"completed", durationSec:492, criticalErrors:0, sequenceErrors:2, wrongActions:2, hints:0, retries:2, completedThrough:"complete", currentAt:null, durations:{briefing:33,ppe_entry:31,selection:84,inspection:78,equip:154,mirror:79,complete:33}, signals:{selection:{issues:["wrong_target"],discoverySec:27,outsideExpectedRegionRatio:.23,targetVisibleUnengagedSec:7,wrongTargetInteractions:1},equip:{issues:["sequence"]}} }),
+
+      attempt({ id:"A-013", participantId:"P-008", date:"2026-08-07", mode:"Training", appVersion:"0.0.9", status:"exited", endReason:"inactivity_timeout", durationSec:388, criticalErrors:0, sequenceErrors:3, wrongActions:5, hints:3, retries:4, completedThrough:"inspection", currentAt:"equip", durations:{briefing:48,ppe_entry:44,selection:128,inspection:102,equip:66}, signals:{selection:{issues:["discovery","visible_unengaged","wrong_target"],discoverySec:59,outsideExpectedRegionRatio:.52,targetVisibleUnengagedSec:31,wrongTargetInteractions:3},equip:{issues:["sequence","interaction","recovery"]}} }),
+      attempt({ id:"A-014", participantId:"P-008", date:"2026-08-14", mode:"Training", appVersion:"0.0.9", status:"completed", durationSec:676, criticalErrors:0, sequenceErrors:2, wrongActions:3, hints:2, retries:2, completedThrough:"complete", currentAt:null, durations:{briefing:43,ppe_entry:40,selection:112,inspection:98,equip:221,mirror:116,complete:46}, signals:{selection:{issues:["search_exit"],discoverySec:39,outsideExpectedRegionRatio:.37,targetVisibleUnengagedSec:12,wrongTargetInteractions:1},equip:{issues:["sequence","interaction"]}} }),
+      attempt({ id:"A-015", participantId:"P-008", date:"2026-08-22", mode:"Training", appVersion:"0.0.9", status:"completed", durationSec:542, criticalErrors:0, sequenceErrors:0, wrongActions:1, hints:0, retries:1, completedThrough:"complete", currentAt:null, durations:{briefing:35,ppe_entry:32,selection:86,inspection:79,equip:177,mirror:94,complete:39}, signals:{selection:{issues:[],discoverySec:21,outsideExpectedRegionRatio:.20,targetVisibleUnengagedSec:5,wrongTargetInteractions:0}} }),
+
+      attempt({ id:"A-016", participantId:"P-005", date:"2026-08-23", mode:"Training", appVersion:"0.1.0", status:"interrupted", endReason:"unexpected_disconnect", durationSec:521, criticalErrors:0, sequenceErrors:0, wrongActions:1, hints:0, retries:1, completedThrough:"equip", currentAt:"mirror", durations:{briefing:29,ppe_entry:28,selection:71,inspection:70,equip:147,mirror:176}, signals:{selection:{issues:[],discoverySec:19,outsideExpectedRegionRatio:.17,targetVisibleUnengagedSec:4,wrongTargetInteractions:0},mirror:{issues:["next_step","recovery"]}} })
+    ];
+
+    const titles = {
+      overview: ["전체 개요", "과정 이수, 중도 이탈, 병목과 재이수 변화를 먼저 확인합니다."],
+      journey: ["과정 병목·이탈", "마지막 checkpoint와 종료 근거를 연결해 중단 지점을 찾습니다."],
+      learning: ["재이수·모드 난이도", "단일 점수 대신 완료·오류·힌트·재시도와 시간을 각각 비교합니다."],
+      updates: ["업데이트 후 더 쉬워졌을까?", "끝까지 완료한 사람, 중간에 멈춘 사람, 실수와 막힌 단계를 이전 버전과 비교합니다."],
+      people: ["개인 프로그레스", "개인의 현재 진도, 중단·재개와 회차별 변화를 확인합니다."],
+      ux: ["UX 설계 신호", "발견·상호작용·피드백·회복 신호가 반복되는 구간을 찾습니다."],
+      data: ["데이터 연동", "Unity 이벤트를 수집 API와 집계 API로 연결하는 기준을 보여 줍니다."]
+    };
+
+    const state = { view: "overview", detailParticipant: "P-001" };
+    const els = id => document.getElementById(id);
+    const clamp = value => Math.max(0, Math.min(100, value));
+    const percent = (numerator, denominator) => denominator ? Math.round(numerator / denominator * 100) : 0;
+    const seconds = value => value == null ? "—" : `${Math.floor(value / 60)}분 ${String(Math.round(value % 60)).padStart(2, "0")}초`;
+    const shortSeconds = value => value == null ? "—" : value >= 60 ? `${Math.floor(value / 60)}:${String(Math.round(value % 60)).padStart(2, "0")}` : `${Math.round(value)}초`;
+    const median = values => {
+      const sorted = values.filter(v => Number.isFinite(v)).sort((a, b) => a - b);
+      if (!sorted.length) return null;
+      const middle = Math.floor(sorted.length / 2);
+      return sorted.length % 2 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2;
+    };
+    const mean = values => values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : 0;
+    const unique = values => [...new Set(values)];
+    const checkpointById = id => checkpoints.find(cp => cp.id === id);
+    const lastCheckpoint = item => item.status === "completed" ? checkpointById("complete") : checkpointById(item.currentAt || item.completedThrough);
+    const isInferred = reason => ["power_off_suspected", "unexpected_disconnect", "unknown"].includes(reason);
+
+    function filteredAttempts({ ignoreVersion = false } = {}) {
+      const participant = els("participantFilter").value;
+      const mode = els("modeFilter").value;
+      const appVersion = els("appVersionFilter").value;
+      const period = els("periodFilter").value;
+      const latest = new Date("2026-08-24T23:59:59+09:00");
+      return attempts.filter(item => {
+        const dayDiff = (latest - new Date(`${item.date}T00:00:00+09:00`)) / 86400000;
+        return (participant === "all" || item.participantId === participant)
+          && (mode === "all" || item.mode === mode)
+          && (ignoreVersion || appVersion === "all" || item.appVersion === appVersion)
+          && (period === "all" || dayDiff <= Number(period));
+      });
+    }
+
+    function populateFilters() {
+      const participant = els("participantFilter");
+      Object.keys(participantNames).forEach(id => participant.add(new Option(participantNames[id], id)));
+      const appVersion = els("appVersionFilter");
+      unique(attempts.map(item => item.appVersion)).sort().forEach(value => appVersion.add(new Option(`앱 v${value}${value === currentAppVersion ? " (현재)" : ""}`, value)));
+      const detailSelect = document.createElement("select");
+      detailSelect.id = "detailParticipant";
+      detailSelect.className = "person-select";
+      detailSelect.setAttribute("aria-label", "개인 상세 참여자");
+      Object.keys(participantNames).forEach(id => detailSelect.add(new Option(participantNames[id], id)));
+      detailSelect.value = state.detailParticipant;
+      detailSelect.addEventListener("change", () => { state.detailParticipant = detailSelect.value; renderPeople(); });
+      window.detailParticipantSelect = detailSelect;
+    }
+
+    function updateScope(items) {
+      const p = els("participantFilter");
+      const m = els("modeFilter");
+      const v = els("appVersionFilter");
+      const versionLabel = state.view === "updates" ? "앱 버전 간 비교" : v.options[v.selectedIndex].text;
+      const labels = [p.options[p.selectedIndex].text, m.options[m.selectedIndex].text, versionLabel];
+      els("scopeText").textContent = labels.join(" · ");
+      els("scopeMeta").textContent = `${items.length}회 수행 · ${unique(items.map(item => item.participantId)).length}명`;
+    }
+
+    function kpi(label, value, desc, meta, tone = "") {
+      return `<article class="card kpi"><div class="label">${label}</div><div class="value ${tone}">${value}</div><div class="desc">${desc}</div><div class="meta">${meta}</div></article>`;
+    }
+
+    function modeTone(mode) { return mode === "Test" ? "green" : mode === "Training" ? "amber" : ""; }
+    function statusPill(item) {
+      if (item.status === "completed") return `<span class="pill green">완료</span>`;
+      if (item.status === "interrupted") return `<span class="pill red">비정상 중단</span>`;
+      return `<span class="pill amber">중도 종료</span>`;
+    }
+
+    function stageStats(items) {
+      return checkpoints.map(cp => {
+        const stages = items.map(item => ({ item, stage: item.stages.find(stage => stage.checkpointId === cp.id) })).filter(row => row.stage.reached);
+        const completed = stages.filter(row => row.stage.completed);
+        const issueCounts = {};
+        stages.forEach(row => row.stage.issues.forEach(issue => { issueCounts[issue] = (issueCounts[issue] || 0) + 1; }));
+        const topIssue = Object.entries(issueCounts).sort((a, b) => b[1] - a[1])[0];
+        return {
+          ...cp,
+          reached: stages.length,
+          completed: completed.length,
+          dropped: stages.filter(row => !row.stage.completed && row.item.status !== "completed").length,
+          medianDuration: median(stages.map(row => row.stage.durationSec).filter(Boolean)),
+          topIssue: topIssue ? topIssue[0] : null,
+          issueCount: topIssue ? topIssue[1] : 0,
+          issueTotal: Object.values(issueCounts).reduce((sum, count) => sum + count, 0)
+        };
+      });
+    }
+
+    function repeatComparisons(items) {
+      const groups = new Map();
+      items.forEach(item => {
+        const key = `${item.participantId}|${item.mode}|${item.appVersion}`;
+        if (!groups.has(key)) groups.set(key, []);
+        groups.get(key).push(item);
+      });
+      const pairs = [];
+      groups.forEach(group => {
+        group.sort((a, b) => a.date.localeCompare(b.date));
+        for (let i = 1; i < group.length; i++) {
+          const previous = group[i - 1], current = group[i];
+          const accuracyMaintained = current.status === "completed"
+            && current.criticalErrors === 0
+            && current.sequenceErrors <= previous.sequenceErrors
+            && current.wrongActions <= previous.wrongActions;
+          const anyCoreImprovement = current.sequenceErrors < previous.sequenceErrors
+            || current.wrongActions < previous.wrongActions
+            || current.hints < previous.hints
+            || current.retries < previous.retries
+            || (previous.status !== "completed" && current.status === "completed");
+          pairs.push({ previous, current, accuracyMaintained, improved: accuracyMaintained && anyCoreImprovement, fasterSafely: accuracyMaintained && current.durationSec < previous.durationSec });
+        }
+      });
+      return pairs;
+    }
+
+    function topCandidates(stats) {
+      return stats
+        .filter(row => row.reached)
+        .map(row => ({ ...row, signalScore: percent(row.dropped, row.reached) + row.issueTotal * 8 + (row.medianDuration || 0) / 8 }))
+        .sort((a, b) => b.signalScore - a.signalScore)
+        .slice(0, 3);
+    }
+
+    function renderOverview(items) {
+      const completed = items.filter(item => item.status === "completed");
+      const unfinished = items.filter(item => item.status !== "completed");
+      const resumed = items.filter(item => item.resumedFrom);
+      const pairs = repeatComparisons(items);
+      const improved = pairs.filter(pair => pair.improved);
+      els("overviewKpis").innerHTML = [
+        kpi("시작된 과정", `${items.length}회`, "선택 범위의 수행 회차", `참여자 ${unique(items.map(i => i.participantId)).length}명 · 표본 n=${items.length}`),
+        kpi("전체 과정 이수율", `${percent(completed.length, items.length)}%`, "필수 checkpoint를 모두 완료", `${completed.length}/${items.length}회 · course_completed=true`, "good"),
+        kpi("미완료·중도 이탈", `${percent(unfinished.length, items.length)}%`, "명시적·비정상 종료 포함", `${unfinished.length}/${items.length}회 · 추정 ${unfinished.filter(i => isInferred(i.endReason)).length}회`, unfinished.length ? "warn" : "good"),
+        kpi("재이수 개선 확인", pairs.length ? `${improved.length}/${pairs.length}쌍` : "—", "오류 증가 없이 한 축 이상 개선", "동일 참여자·모드·앱 버전 비교", "violet")
+      ].join("");
+
+      const stats = stageStats(items);
+      els("overviewFunnel").innerHTML = stats.map((row, index) => {
+        const reachRate = percent(row.reached, items.length);
+        return `<div class="funnel-row"><div class="funnel-name"><strong>${index + 1}. ${row.label}</strong><small>${row.region}</small></div><div class="bar"><i style="width:${reachRate}%"></i></div><div class="funnel-num">${row.reached}/${items.length}</div><div class="funnel-drop">${row.dropped ? `이탈 ${row.dropped}` : "—"}</div></div>`;
+      }).join("");
+
+      const candidates = topCandidates(stats);
+      els("overviewCandidates").innerHTML = candidates.length ? candidates.map((row, index) => `<div class="candidate"><div class="candidate-top"><strong>${index + 1}. ${row.label}</strong><span class="pill ${index === 0 ? "red" : "amber"}">${row.dropped ? `단계 이탈 ${row.dropped}회` : `신호 ${row.issueTotal}건`}</span></div><p>${row.topIssue ? issueLabels[row.topIssue] : "체류시간 상대 비교 필요"} · 체류 중앙값 ${shortSeconds(row.medianDuration)} · 도달 ${row.reached}회</p></div>`).join("") : `<div class="empty">현재 범위에 검토 신호가 없습니다.</div>`;
+
+      els("overviewModeTable").innerHTML = ["Learning", "Training", "Test"].map(mode => {
+        const rows = items.filter(item => item.mode === mode);
+        const done = rows.filter(item => item.status === "completed");
+        const hintMedian = median(rows.map(item => item.hints));
+        const modeStats = topCandidates(stageStats(rows))[0];
+        return `<tr><td><span class="pill ${modeTone(mode)}">${mode}</span></td><td class="num">${rows.length}회</td><td class="num">${percent(done.length, rows.length)}%</td><td class="num">${percent(rows.length - done.length, rows.length)}%</td><td class="num">${shortSeconds(median(done.map(item => item.durationSec)))}</td><td class="num">${hintMedian == null ? "—" : `${hintMedian}회`}</td><td>${modeStats?.topIssue ? issueLabels[modeStats.topIssue] : "표본 확인 필요"}</td></tr>`;
+      }).join("");
+    }
+
+    function renderJourney(items) {
+      const unfinished = items.filter(item => item.status !== "completed");
+      const inferred = unfinished.filter(item => isInferred(item.endReason));
+      const resumed = items.filter(item => item.resumedFrom);
+      const stats = stageStats(items);
+      const longest = [...stats].filter(row => row.medianDuration != null).sort((a, b) => b.medianDuration - a.medianDuration)[0];
+      els("journeyKpis").innerHTML = [
+        kpi("미완료 수행", `${unfinished.length}회`, "과정 완료 전에 종료", `${percent(unfinished.length, items.length)}% · n=${items.length}`, unfinished.length ? "warn" : "good"),
+        kpi("추정 종료", `${inferred.length}회`, "직접 종료 이벤트가 없는 수행", "전원·연결 종료는 추정 배지 표시", inferred.length ? "bad" : "good"),
+        kpi("중단 후 재개", `${resumed.length}회`, "이전 미종료 회차와 연결", resumed.length ? `복구 연결 ${resumed.map(i => i.resumedFrom).join(", ")}` : "복구 연결 없음", "violet"),
+        kpi("최장 체류 단계", longest ? longest.label : "—", "도달 수행의 단계 체류 중앙값", longest ? shortSeconds(longest.medianDuration) : "표본 없음", "warn")
+      ].join("");
+
+      els("bottleneckTable").innerHTML = stats.map(row => `<tr><td>${row.label}<br><small class="muted">${row.region}</small></td><td class="num">${row.reached}</td><td class="num">${row.completed}</td><td class="num ${row.dropped ? "bad" : ""}">${row.dropped}</td><td class="num">${shortSeconds(row.medianDuration)}</td><td>${row.topIssue ? `<span class="pill amber">${issueLabels[row.topIssue]} ${row.issueCount}건</span>` : "—"}</td></tr>`).join("");
+
+      const reasons = Object.entries(endReasonLabels).filter(([key]) => key !== "completed").map(([key, label]) => ({ key, label, count: unfinished.filter(item => item.endReason === key).length })).filter(row => row.count);
+      const maxReason = Math.max(1, ...reasons.map(row => row.count));
+      els("exitReasons").innerHTML = reasons.length ? reasons.map(row => `<div class="metric-line"><span>${row.label}${isInferred(row.key) ? " · 추정" : ""}</span><div class="bar ${isInferred(row.key) ? "red" : ""}"><i style="width:${row.count / maxReason * 100}%"></i></div><b>${row.count}회</b></div>`).join("") : `<div class="empty">미완료 수행이 없습니다.</div>`;
+
+      els("exitTable").innerHTML = unfinished.length ? unfinished.sort((a, b) => b.date.localeCompare(a.date)).map(item => {
+        const followup = items.find(candidate => candidate.resumedFrom === item.id);
+        return `<tr><td>${item.participantId}</td><td><span class="pill ${modeTone(item.mode)}">${item.mode}</span></td><td>${lastCheckpoint(item)?.label || "—"}</td><td>${endReasonLabels[item.endReason]}</td><td>${isInferred(item.endReason) ? `<span class="pill red">추정</span>` : `<span class="pill">직접 기록</span>`}</td><td>${item.date} · ${shortSeconds(item.durationSec)}</td><td>${followup ? `<span class="pill green">${followup.id} 재개</span>` : "없음"}</td></tr>`;
+      }).join("") : `<tr><td colspan="7" class="empty">현재 범위에 미완료 수행이 없습니다.</td></tr>`;
+    }
+
+    function renderLearning(items) {
+      const pairs = repeatComparisons(items);
+      const improved = pairs.filter(pair => pair.improved);
+      const faster = pairs.filter(pair => pair.fasterSafely);
+      const errorReduced = pairs.filter(pair => pair.current.sequenceErrors < pair.previous.sequenceErrors || pair.current.wrongActions < pair.previous.wrongActions);
+      const retryReduced = pairs.filter(pair => pair.current.retries < pair.previous.retries);
+      els("learningKpis").innerHTML = [
+        kpi("비교 가능한 재이수", `${pairs.length}쌍`, "동일 참여자·모드·앱 버전", "서로 다른 앱 업데이트 버전은 비교 제외"),
+        kpi("오류 감소", pairs.length ? `${errorReduced.length}/${pairs.length}쌍` : "—", "순서 또는 일반 오류 감소", "오류 증가 여부를 함께 확인", "good"),
+        kpi("재시도 감소", pairs.length ? `${retryReduced.length}/${pairs.length}쌍` : "—", "같은 단계 반복 감소", "힌트·완료 여부와 분리", "violet"),
+        kpi("안전한 시간 단축", pairs.length ? `${faster.length}/${pairs.length}쌍` : "—", "오류가 늘지 않은 상태의 시간 단축", `개선 판정 ${improved.length}쌍`, "warn")
+      ].join("");
+
+      els("modeDifficulty").innerHTML = ["Learning", "Training", "Test"].map(mode => {
+        const rows = items.filter(item => item.mode === mode);
+        const completed = rows.filter(item => item.status === "completed");
+        const errorMedian = median(rows.map(item => item.sequenceErrors + item.wrongActions));
+        const exitRate = percent(rows.length - completed.length, rows.length);
+        return `<div class="ux-signal"><strong><span class="pill ${modeTone(mode)}">${mode}</span> · 이수 ${percent(completed.length, rows.length)}%</strong><span class="${exitRate > 0 ? "warn" : "good"}">이탈 ${exitRate}%</span><p>완료시간 중앙값 ${shortSeconds(median(completed.map(item => item.durationSec)))} · 오류 중앙값 ${errorMedian ?? "—"}회 · 힌트 중앙값 ${median(rows.map(item => item.hints)) ?? "—"}회 · 재시도 중앙값 ${median(rows.map(item => item.retries)) ?? "—"}회</p></div>`;
+      }).join("");
+
+      els("repeatPairs").innerHTML = pairs.length ? pairs.slice().reverse().map(pair => `<div class="candidate"><div class="candidate-top"><strong>${pair.current.participantId} · ${pair.current.mode}</strong><span class="pill ${pair.improved ? "green" : "amber"}">${pair.improved ? "개선 확인" : "추가 검토"}</span></div><p>${pair.previous.id} → ${pair.current.id} · 완료 ${pair.previous.status === "completed" ? "완료" : "미완료"}→${pair.current.status === "completed" ? "완료" : "미완료"} · 순서 ${pair.previous.sequenceErrors}→${pair.current.sequenceErrors} · 일반 ${pair.previous.wrongActions}→${pair.current.wrongActions} · 힌트 ${pair.previous.hints}→${pair.current.hints} · 시간 ${shortSeconds(pair.previous.durationSec)}→${shortSeconds(pair.current.durationSec)}</p></div>`).join("") : `<div class="empty">현재 필터에는 비교 가능한 재이수 쌍이 없습니다.</div>`;
+    }
+
+    function versionMetrics(rows) {
+      const completed = rows.filter(item => item.status === "completed");
+      return {
+        attempts: rows.length,
+        participants: unique(rows.map(item => item.participantId)).length,
+        completionRate: percent(completed.length, rows.length),
+        exitRate: percent(rows.length - completed.length, rows.length),
+        completedMedian: median(completed.map(item => item.durationSec)),
+        errorMedian: median(rows.map(item => item.sequenceErrors + item.wrongActions)),
+        hintMedian: median(rows.map(item => item.hints)),
+        retryMedian: median(rows.map(item => item.retries))
+      };
+    }
+
+    function matchedAppVersionPairs(items, previousVersion, currentVersion) {
+      const groups = new Map();
+      items.forEach(item => {
+        const key = `${item.participantId}|${item.mode}`;
+        if (!groups.has(key)) groups.set(key, []);
+        groups.get(key).push(item);
+      });
+      const pairs = [];
+      groups.forEach(group => {
+        const previous = group.filter(item => item.appVersion === previousVersion).sort((a, b) => b.date.localeCompare(a.date))[0];
+        const current = group.filter(item => item.appVersion === currentVersion).sort((a, b) => b.date.localeCompare(a.date))[0];
+        if (!previous || !current) return;
+        const previousErrors = previous.sequenceErrors + previous.wrongActions;
+        const currentErrors = current.sequenceErrors + current.wrongActions;
+        const improved = (previous.status !== "completed" && current.status === "completed")
+          || (previous.status === current.status && currentErrors < previousErrors && current.retries <= previous.retries);
+        const regressed = (previous.status === "completed" && current.status !== "completed")
+          || (previous.status === current.status && currentErrors > previousErrors);
+        pairs.push({ previous, current, improved, regressed });
+      });
+      return pairs;
+    }
+
+    function signedPoints(value) {
+      if (value === 0) return "변화 없음";
+      return `${Math.abs(value)}% ${value > 0 ? "높아짐" : "낮아짐"}`;
+    }
+
+    function renderUpdates(items) {
+      const versions = unique(items.map(item => item.appVersion)).sort();
+      const currentVersion = versions.includes(currentAppVersion) ? currentAppVersion : versions[versions.length - 1];
+      const previousVersion = versions.filter(version => version !== currentVersion).slice(-1)[0];
+      if (!previousVersion || !currentVersion) {
+        els("updateKpis").innerHTML = [kpi("비교할 수 없음", "기록 부족", "서로 다른 앱 버전의 기록이 모두 필요합니다.", `현재는 ${versions.length}개 버전만 있음`, "warn")].join("");
+        els("versionSummaryTable").innerHTML = `<tr><td colspan="9" class="empty">비교 가능한 두 앱 버전이 없습니다.</td></tr>`;
+        els("versionModeComparison").innerHTML = `<div class="empty">비교할 기록이 없습니다.</div>`;
+        els("matchedVersionPairs").innerHTML = `<div class="empty">동일 참여자·모드의 버전 전후 기록이 없습니다.</div>`;
+        els("versionCheckpointTable").innerHTML = `<tr><td colspan="7" class="empty">비교할 기록이 없습니다.</td></tr>`;
+        return;
+      }
+
+      const previousRows = items.filter(item => item.appVersion === previousVersion);
+      const currentRows = items.filter(item => item.appVersion === currentVersion);
+      const previous = versionMetrics(previousRows);
+      const current = versionMetrics(currentRows);
+      const completionDelta = current.completionRate - previous.completionRate;
+      const exitDelta = current.exitRate - previous.exitRate;
+      const matchedPairs = matchedAppVersionPairs(items, previousVersion, currentVersion);
+      const matchedImproved = matchedPairs.filter(pair => pair.improved).length;
+      const matchedRegressed = matchedPairs.filter(pair => pair.regressed).length;
+      els("updateKpis").innerHTML = [
+        kpi("비교하는 버전", `v${previousVersion} → v${currentVersion}`, "업데이트 전과 현재", `해본 횟수 ${previous.attempts}회 → ${current.attempts}회`, "violet"),
+        kpi("끝까지 완료한 비율", signedPoints(completionDelta), `${previous.completionRate}% → ${current.completionRate}%`, completionDelta >= 0 ? "업데이트 후 완료한 사람이 늘었습니다." : "업데이트 후 완료한 사람이 줄었습니다.", completionDelta >= 0 ? "good" : "bad"),
+        kpi("중간에 멈춘 비율", signedPoints(exitDelta), `${previous.exitRate}% → ${current.exitRate}%`, exitDelta <= 0 ? "업데이트 후 중간 종료가 줄었습니다." : "업데이트 후 중간 종료가 늘었습니다.", exitDelta <= 0 ? "good" : "bad"),
+        kpi("같은 사람끼리 비교", `${matchedPairs.length}쌍`, "같은 사람이 같은 방식으로 한 기록", `나아짐 ${matchedImproved} · 나빠짐 ${matchedRegressed} · 뚜렷하지 않음 ${matchedPairs.length - matchedImproved - matchedRegressed}`, "warn")
+      ].join("");
+
+      els("versionSummaryTable").innerHTML = versions.map(version => {
+        const rows = items.filter(item => item.appVersion === version);
+        const metric = versionMetrics(rows);
+        return `<tr><td><span class="pill ${version === currentVersion ? "violet" : ""}">v${version}${version === currentVersion ? " · 현재" : ""}</span></td><td class="num">${metric.attempts}</td><td class="num">${metric.participants}</td><td class="num">${metric.completionRate}%</td><td class="num">${metric.exitRate}%</td><td class="num">${shortSeconds(metric.completedMedian)}</td><td class="num">${metric.errorMedian ?? "—"}</td><td class="num">${metric.hintMedian ?? "—"}</td><td class="num">${metric.retryMedian ?? "—"}</td></tr>`;
+      }).join("");
+
+      els("versionModeComparison").innerHTML = ["Learning", "Training", "Test"].map(mode => {
+        const beforeRows = previousRows.filter(item => item.mode === mode);
+        const afterRows = currentRows.filter(item => item.mode === mode);
+        if (!beforeRows.length || !afterRows.length) return `<div class="ux-signal"><strong><span class="pill ${modeTone(mode)}">${mode}</span></strong><span class="warn">기록 부족</span><p>이전 버전 ${beforeRows.length}회 · 현재 버전 ${afterRows.length}회. 두 버전 모두 기록이 있어야 비교할 수 있습니다.</p></div>`;
+        const before = versionMetrics(beforeRows);
+        const after = versionMetrics(afterRows);
+        const delta = after.completionRate - before.completionRate;
+        return `<div class="ux-signal"><strong><span class="pill ${modeTone(mode)}">${mode}</span> · 완료 비율 ${signedPoints(delta)}</strong><span class="${delta >= 0 ? "good" : "bad"}">${before.completionRate}% → ${after.completionRate}%</span><p>해본 횟수 ${before.attempts}→${after.attempts}회 · 중간에 멈춤 ${before.exitRate}%→${after.exitRate}% · 완료한 사람의 대표 시간 ${shortSeconds(before.completedMedian)}→${shortSeconds(after.completedMedian)} · 실수 대표값 ${before.errorMedian ?? "—"}→${after.errorMedian ?? "—"}</p></div>`;
+      }).join("");
+
+      els("matchedVersionPairs").innerHTML = matchedPairs.length ? matchedPairs.map(pair => {
+        const tone = pair.improved ? "green" : pair.regressed ? "red" : "amber";
+        const label = pair.improved ? "나아짐" : pair.regressed ? "나빠짐" : "뚜렷하지 않음";
+        return `<div class="candidate"><div class="candidate-top"><strong>${pair.current.participantId} · ${pair.current.mode}</strong><span class="pill ${tone}">${label}</span></div><p>v${pair.previous.appVersion} ${pair.previous.id} → v${pair.current.appVersion} ${pair.current.id} · 이수 ${pair.previous.status === "completed" ? "완료" : "미완료"}→${pair.current.status === "completed" ? "완료" : "미완료"} · 오류 ${pair.previous.sequenceErrors + pair.previous.wrongActions}→${pair.current.sequenceErrors + pair.current.wrongActions} · 재시도 ${pair.previous.retries}→${pair.current.retries} · 시간 ${shortSeconds(pair.previous.durationSec)}→${shortSeconds(pair.current.durationSec)}</p></div>`;
+      }).join("") : `<div class="empty">동일 참여자·같은 모드의 버전 전후 기록이 없습니다.</div>`;
+
+      const previousStages = stageStats(previousRows);
+      const currentStages = stageStats(currentRows);
+      els("versionCheckpointTable").innerHTML = checkpoints.map((cp, index) => {
+        const before = previousStages[index], after = currentStages[index];
+        const beforeDrop = percent(before.dropped, before.reached);
+        const afterDrop = percent(after.dropped, after.reached);
+        const dropDelta = afterDrop - beforeDrop;
+        const durationDelta = after.medianDuration == null || before.medianDuration == null ? null : after.medianDuration - before.medianDuration;
+        const improved = dropDelta < 0 && durationDelta != null && durationDelta <= 0;
+        const regressed = dropDelta > 0 && durationDelta != null && durationDelta >= 0;
+        const signal = improved ? `<span class="pill green">덜 막힘</span>` : regressed ? `<span class="pill red">더 막힘</span>` : `<span class="pill amber">결과가 섞임</span>`;
+        return `<tr><td>${cp.label}<br><small class="muted">도달 ${before.reached}→${after.reached}</small></td><td class="num">${beforeDrop}%</td><td class="num">${afterDrop}%</td><td class="num ${dropDelta > 0 ? "bad" : dropDelta < 0 ? "good" : ""}">${signedPoints(dropDelta)}</td><td class="num">${shortSeconds(before.medianDuration)}</td><td class="num">${shortSeconds(after.medianDuration)}</td><td>${signal}</td></tr>`;
+      }).join("");
+    }
+
+    function latestAttemptForParticipant(id) {
+      return attempts.filter(item => item.participantId === id).sort((a, b) => b.date.localeCompare(a.date))[0];
+    }
+
+    function renderPeople() {
+      const filterParticipant = els("participantFilter").value;
+      if (filterParticipant !== "all" && filterParticipant !== state.detailParticipant) {
+        state.detailParticipant = filterParticipant;
+        window.detailParticipantSelect.value = filterParticipant;
+      }
+      const id = state.detailParticipant;
+      const allRows = attempts.filter(item => item.participantId === id).sort((a, b) => a.date.localeCompare(b.date));
+      const rows = filteredAttempts().filter(item => item.participantId === id).sort((a, b) => a.date.localeCompare(b.date));
+      const summary = els("personSummary");
+      if (!rows.length) {
+        summary.innerHTML = `<div class="person-head"><div class="avatar">${id.slice(-2)}</div><div><h2>${participantNames[id]}</h2><p>전체 ${allRows.length}회 · 현재 필터 0회</p></div></div><div class="empty">현재 기간·모드·앱 버전 필터에 해당하는 수행이 없습니다.</div>`;
+        summary.querySelector(".person-head").appendChild(window.detailParticipantSelect);
+        els("personComparison").innerHTML = `<div class="empty">비교할 수행이 없습니다.</div>`;
+        els("personAttempts").innerHTML = `<tr><td colspan="10" class="empty">현재 필터에 해당하는 개인 수행이 없습니다.</td></tr>`;
+        return;
+      }
+      const latest = rows[rows.length - 1];
+      const latestStage = latest.stages.filter(stage => stage.completed).length;
+      const progress = percent(latestStage, checkpoints.length);
+      summary.innerHTML = `<div class="person-head"><div class="avatar">${id.slice(-2)}</div><div><h2>${participantNames[id]}</h2><p>전체 ${allRows.length}회 · 현재 필터 ${rows.length}회 · 최근 ${latest.date}</p></div></div><div style="margin-top:18px"><div style="display:flex;justify-content:space-between;gap:12px;margin-bottom:7px"><strong>최근 과정 진도</strong><b>${progress}%</b></div><div class="progress-track"><i style="width:${progress}%"></i></div></div><div class="checkpoint-list">${latest.stages.map((stage, index) => { const cp = checkpointById(stage.checkpointId); const current = !stage.completed && stage.reached; return `<div class="checkpoint ${stage.completed ? "done" : ""} ${current ? "current" : ""}"><i>${stage.completed ? "✓" : index + 1}</i><div><strong>${cp.label}</strong><br><small>${stage.completed ? "완료" : current ? "마지막 기록" : "미도달"}</small></div><span>${stage.durationSec ? shortSeconds(stage.durationSec) : "—"}</span></div>`; }).join("")}</div>`;
+      summary.querySelector(".person-head").appendChild(window.detailParticipantSelect);
+
+      const sameGroup = rows.filter(item => item.mode === latest.mode && item.appVersion === latest.appVersion);
+      const previous = sameGroup.length > 1 ? sameGroup[sameGroup.length - 2] : null;
+      els("personComparison").innerHTML = previous ? comparisonTable(previous, latest) : `<div class="empty">최근 회차와 같은 모드·앱 버전의 이전 기록이 없습니다.</div>`;
+      els("personAttempts").innerHTML = rows.slice().reverse().map(item => `<tr><td>${item.date}</td><td><span class="pill ${modeTone(item.mode)}">${item.mode}</span></td><td>v${item.appVersion}</td><td>${statusPill(item)}</td><td>${lastCheckpoint(item)?.label || "—"}</td><td class="num">${item.sequenceErrors}</td><td class="num">${item.wrongActions}</td><td class="num">${item.hints}</td><td class="num">${item.retries}</td><td class="num">${shortSeconds(item.durationSec)}</td></tr>`).join("");
+    }
+
+    function comparisonTable(previous, current) {
+      const rows = [
+        ["과정 이수", previous.status === "completed" ? "완료" : "미완료", current.status === "completed" ? "완료" : "미완료", current.status === "completed" && previous.status !== "completed" ? "개선" : "유지"],
+        ["치명적 오류", previous.criticalErrors, current.criticalErrors, current.criticalErrors < previous.criticalErrors ? "감소" : current.criticalErrors === previous.criticalErrors ? "유지" : "증가"],
+        ["순서 오류", previous.sequenceErrors, current.sequenceErrors, current.sequenceErrors < previous.sequenceErrors ? "감소" : current.sequenceErrors === previous.sequenceErrors ? "유지" : "증가"],
+        ["일반 오류", previous.wrongActions, current.wrongActions, current.wrongActions < previous.wrongActions ? "감소" : current.wrongActions === previous.wrongActions ? "유지" : "증가"],
+        ["힌트", previous.hints, current.hints, current.hints < previous.hints ? "감소" : current.hints === previous.hints ? "유지" : "증가"],
+        ["재시도", previous.retries, current.retries, current.retries < previous.retries ? "감소" : current.retries === previous.retries ? "유지" : "증가"],
+        ["수행시간", shortSeconds(previous.durationSec), shortSeconds(current.durationSec), current.durationSec < previous.durationSec ? "단축" : "증가"]
+      ];
+      return `<div class="compare-grid"><div class="head">항목</div><div class="head">${previous.id}</div><div class="head">${current.id}</div><div class="head">변화</div>${rows.map(row => `<div>${row[0]}</div><div>${row[1]}</div><div>${row[2]}</div><div class="${["개선","감소","단축"].includes(row[3]) ? "delta-good" : row[3] === "증가" ? "delta-bad" : "delta-same"}">${row[3]}</div>`).join("")}</div>`;
+    }
+
+    function discoveryStages(items) {
+      return checkpoints.map(cp => {
+        const stages = items.flatMap(item => item.stages.filter(stage => stage.checkpointId === cp.id && stage.reached && stage.discoverySec != null));
+        return {
+          ...cp,
+          sample: stages.length,
+          discoveryMedian: median(stages.map(stage => stage.discoverySec)),
+          outsideMedian: median(stages.map(stage => stage.outsideExpectedRegionRatio)),
+          unengagedMedian: median(stages.map(stage => stage.targetVisibleUnengagedSec)),
+          wrongTargetTotal: stages.reduce((sum, stage) => sum + stage.wrongTargetInteractions, 0)
+        };
+      }).filter(row => row.sample);
+    }
+
+    function renderUx(items) {
+      const discovery = discoveryStages(items);
+      const allDiscoveryStages = items.flatMap(item => item.stages.filter(stage => stage.discoverySec != null));
+      const interactionIssues = items.flatMap(item => item.stages).filter(stage => stage.issues.includes("interaction")).length;
+      const feedbackIssues = items.flatMap(item => item.stages).filter(stage => stage.issues.includes("feedback") || stage.issues.includes("next_step")).length;
+      els("uxKpis").innerHTML = [
+        kpi("목표 발견시간 중앙값", shortSeconds(median(allDiscoveryStages.map(stage => stage.discoverySec))), "첫 유효 목표 상호작용까지", `trackingSource=head · n=${allDiscoveryStages.length}`),
+        kpi("예상 탐색구역 이탈", `${Math.round((median(allDiscoveryStages.map(stage => stage.outsideExpectedRegionRatio)) || 0) * 100)}%`, "발견 구간 중 예상 yaw·pitch 밖 시간", "단독 결함 판정 금지", "warn"),
+        kpi("목표 노출 후 미상호작용", shortSeconds(median(allDiscoveryStages.map(stage => stage.targetVisibleUnengagedSec))), "실제로 보인 구간의 누적시간", "가시성·occlusion 검사 전제", "violet"),
+        kpi("상호작용·피드백 신호", `${interactionIssues + feedbackIssues}건`, "조작 실패와 완료 인지·전환 문제", `상호작용 ${interactionIssues} · 피드백/연결 ${feedbackIssues}`, "bad")
+      ].join("");
+
+      els("uxSignals").innerHTML = discovery.length ? discovery.map(row => `<div class="ux-signal"><strong>${row.label}</strong><span class="pill ${row.outsideMedian > .5 ? "red" : "amber"}">표본 ${row.sample}</span><p>발견 ${shortSeconds(row.discoveryMedian)} · 예상구역 밖 ${Math.round((row.outsideMedian || 0) * 100)}% · 노출 후 미상호작용 ${shortSeconds(row.unengagedMedian)} · 오대상 ${row.wrongTargetTotal}회</p></div>`).join("") : `<div class="empty">발견성 표본이 없습니다.</div>`;
+
+      els("uxRules").innerHTML = [
+        ["발견성 후보", "발견시간 증가 + 예상 탐색구역 이탈 + 오대상/방향반전이 여러 사용자에게 반복"],
+        ["조작 UX 후보", "목표는 찾았지만 올바른 대상의 Grab·Select가 반복 거부"],
+        ["피드백 후보", "상태는 완료됐지만 같은 행동을 반복하거나 다음 단계로 이동하지 않음"],
+        ["오류 회복 후보", "실패 이후 정상 상태로 돌아가지 못하고 이탈 또는 재시작"]
+      ].map(([title, description], index) => `<div class="candidate"><div class="candidate-top"><strong>${title}</strong><span class="pill ${index === 0 ? "amber" : ""}">자동 확정 금지</span></div><p>${description}</p></div>`).join("");
+
+      const regionMap = new Map();
+      items.forEach(item => item.stages.filter(stage => stage.reached).forEach(stage => {
+        const cp = checkpointById(stage.checkpointId);
+        if (!regionMap.has(cp.region)) regionMap.set(cp.region, { count:0, issueCount:0, duration:[] });
+        const row = regionMap.get(cp.region);
+        row.count++;
+        row.issueCount += stage.issues.length;
+        if (stage.durationSec) row.duration.push(stage.durationSec);
+      }));
+      const regions = [...regionMap.entries()];
+      const maxIssues = Math.max(1, ...regions.map(([, row]) => row.issueCount));
+      els("regionSignals").innerHTML = regions.map(([name, row]) => `<div class="metric-line"><span>${name}<br><small class="muted">도달 ${row.count}회 · 체류 ${shortSeconds(median(row.duration))}</small></span><div class="bar ${row.issueCount === maxIssues ? "red" : ""}"><i style="width:${clamp(row.issueCount / maxIssues * 100)}%"></i></div><b>${row.issueCount}건</b></div>`).join("");
+    }
+
+    function renderData(items) {
+      const inferred = items.filter(item => isInferred(item.endReason));
+      const unknown = items.filter(item => item.endReason === "unknown");
+      const summaryEvents = items.reduce((sum, item) => sum + item.stages.filter(stage => stage.reached).length, 0);
+      els("dataKpis").innerHTML = [
+        kpi("현재 데이터 소스", "Mock", "HTML 내 구조 검증용 수행 데이터", "실제 API 연결 전", "warn"),
+        kpi("현재 앱 버전", `v${currentAppVersion}`, "Unity bundleVersion", `Android build ${currentAndroidBuildCode}`, "violet"),
+        kpi("수행 회차", `${items.length}회`, "필터에 포함된 attempt", `참여자 ${unique(items.map(i => i.participantId)).length}명 · checkpoint 요약 ${summaryEvents}건`),
+        kpi("추정·불명 종료", `${inferred.length + unknown.length}회`, "직접 종료 이벤트가 없는 데이터", `추정 ${inferred.length} · 불명 ${unknown.length}`, inferred.length ? "bad" : "good")
+      ].join("");
+
+      const contracts = [
+        ["식별", "participantId · sessionId · attemptId · eventId"],
+        ["과정", "courseId · mode · appVersion · checkpointId"],
+        ["행동", "eventName · outcome · errorCode · targetId"],
+        ["종료", "endReason · lastHeartbeat · recoveredFrom"],
+        ["발견성", "trackingSource · discoveryStartEvent · head_search_summary"],
+        ["시간", "timestamp · elapsedFromAttempt · duration"]
+      ];
+      els("eventContract").innerHTML = contracts.map(([name, fields]) => `<div class="metric-line"><span>${name}</span><div class="bar"><i style="width:100%"></i></div><b>${fields}</b></div>`).join("");
+    }
+
+    function renderAll() {
+      const items = filteredAttempts();
+      updateScope(items);
+      renderOverview(items);
+      renderJourney(items);
+      renderLearning(items);
+      renderUpdates(filteredAttempts({ ignoreVersion: true }));
+      renderPeople();
+      renderUx(items);
+      renderData(items);
+    }
+
+    function setView(view) {
+      state.view = view;
+      const appVersionFilter = els("appVersionFilter");
+      if (view === "updates") appVersionFilter.value = "all";
+      appVersionFilter.disabled = view === "updates";
+      document.querySelectorAll(".view").forEach(section => section.classList.toggle("active", section.id === view));
+      document.querySelectorAll("[data-view]").forEach(button => button.classList.toggle("active", button.dataset.view === view));
+      els("pageTitle").textContent = titles[view][0];
+      els("pageSubtitle").textContent = titles[view][1];
+      renderAll();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function exportCurrentCsv() {
+      const headers = ["attemptId","participantId","date","mode","appVersion","status","endReason","lastCheckpoint","criticalErrors","sequenceErrors","wrongActions","hints","retries","durationSec"];
+      const rows = filteredAttempts().map(item => [item.id,item.participantId,item.date,item.mode,item.appVersion,item.status,item.endReason,lastCheckpoint(item)?.id || "",item.criticalErrors,item.sequenceErrors,item.wrongActions,item.hints,item.retries,item.durationSec]);
+      const csv = [headers, ...rows].map(row => row.map(value => `"${String(value).replaceAll('"', '""')}"`).join(",")).join("\r\n");
+      const blob = new Blob(["\ufeff", csv], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `ppe-training-dashboard-${new Date().toISOString().slice(0,10)}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    populateFilters();
+    document.querySelectorAll("[data-view]").forEach(button => button.addEventListener("click", () => setView(button.dataset.view)));
+    ["periodFilter", "participantFilter", "modeFilter", "appVersionFilter"].forEach(id => els(id).addEventListener("change", () => {
+      if (id === "participantFilter" && els(id).value !== "all") {
+        state.detailParticipant = els(id).value;
+        window.detailParticipantSelect.value = state.detailParticipant;
+      }
+      renderAll();
+    }));
+    els("exportCsv").addEventListener("click", exportCurrentCsv);
+    renderAll();
+  </script>
+</body>
+</html>

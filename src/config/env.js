@@ -1,0 +1,51 @@
+import "dotenv/config";
+
+function readInteger(name, fallback, minimum, maximum) {
+  const rawValue = process.env[name];
+
+  if (rawValue === undefined || rawValue === "") {
+    return fallback;
+  }
+
+  const value = Number.parseInt(rawValue, 10);
+
+  if (!Number.isInteger(value) || value < minimum || value > maximum) {
+    throw new Error(`${name} must be an integer between ${minimum} and ${maximum}.`);
+  }
+
+  return value;
+}
+
+function readBoolean(name, fallback) {
+  const rawValue = process.env[name];
+  if (rawValue === undefined || rawValue === "") {
+    return fallback;
+  }
+  if (rawValue === "true") {
+    return true;
+  }
+  if (rawValue === "false") {
+    return false;
+  }
+
+  throw new Error(`${name} must be either true or false.`);
+}
+
+const nodeEnv = process.env.NODE_ENV ?? "development";
+
+export const env = Object.freeze({
+  nodeEnv,
+  port: readInteger("PORT", 3000, 1, 65535),
+  enableUnauthenticatedUserCrud: readBoolean(
+    "ENABLE_UNAUTHENTICATED_USER_CRUD",
+    nodeEnv !== "production",
+  ),
+  database: Object.freeze({
+    host: process.env.DB_HOST ?? "127.0.0.1",
+    port: readInteger("DB_PORT", 3306, 1, 65535),
+    user: process.env.DB_USER ?? "tyche_app",
+    password: process.env.DB_PASSWORD ?? "",
+    name: process.env.DB_NAME ?? "tyche_training",
+    connectionLimit: readInteger("DB_CONNECTION_LIMIT", 10, 1, 100),
+  }),
+});
