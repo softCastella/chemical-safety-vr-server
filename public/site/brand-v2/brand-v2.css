@@ -12,6 +12,9 @@
   --max: 1180px;
 }
 
+/* 사이트 본문 최소 글자 크기 */
+.site-brand span,.footer-brand span,.mobile-menu summary,.system-parent span,.system-list span,.system-list small,.line-copy li,.principle-grid span,.footer-inner nav,.footer-inner p,.line-category,.line-panel-head{font-size:12px!important}
+
 * {
   box-sizing: border-box;
 }

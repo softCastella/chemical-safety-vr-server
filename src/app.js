@@ -7,6 +7,10 @@ import { env } from "./config/env.js";
 import { errorHandler, notFoundHandler } from "./middleware/error-handler.js";
 import { createUserRepository } from "./modules/users/user-repository.js";
 import { createUserRouter } from "./modules/users/user-routes.js";
+import { createTrainingRegistrationRouter } from "./modules/training-registration/training-registration-routes.js";
+import { createFileTrainingRegistrationRepository } from "./modules/training-registration/training-registration-repository.js";
+import { createLocalTelemetryRouter } from "./modules/local-telemetry/local-telemetry-routes.js";
+import { createLocalTelemetryRepository } from "./modules/local-telemetry/local-telemetry-repository.js";
 
 const publicRoot = fileURLToPath(new URL("../public/", import.meta.url));
 const dashboardRoot = path.join(publicRoot, "dashboard");
@@ -15,6 +19,10 @@ const siteRoot = path.join(publicRoot, "site");
 export function createApp({
   userRepository,
   enableUserCrud = env.enableUnauthenticatedUserCrud,
+  trainingRegistrationRepository,
+  enableTrainingRegistration = env.enableLocalTrainingRegistration,
+  localTelemetryRepository,
+  enableLocalTelemetryRead = env.enableLocalTelemetryRead,
 } = {}) {
   const app = express();
   const resolvedUserRepository =
@@ -34,6 +42,28 @@ export function createApp({
     app.use(
       "/api/users",
       createUserRouter({ repository: resolvedUserRepository }),
+    );
+  }
+
+  if (enableTrainingRegistration) {
+    const resolvedTrainingRegistrationRepository =
+      trainingRegistrationRepository ??
+      createFileTrainingRegistrationRepository(env.localTrainingDataFile);
+    app.use(
+      "/api/training-registrations",
+      createTrainingRegistrationRouter({
+        repository: resolvedTrainingRegistrationRepository,
+      }),
+    );
+  }
+
+  if (enableLocalTelemetryRead) {
+    const resolvedLocalTelemetryRepository =
+      localTelemetryRepository ??
+      createLocalTelemetryRepository(env.unityTelemetryDirectory);
+    app.use(
+      "/api/local-telemetry",
+      createLocalTelemetryRouter({ repository: resolvedLocalTelemetryRepository }),
     );
   }
 

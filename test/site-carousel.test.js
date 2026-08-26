@@ -10,7 +10,7 @@ test('홈 작품 캐러셀은 세 배너를 유지하고 이동 트랙에서 슬
     readFile(new URL('styles.css', siteRoot), 'utf8'),
   ]);
 
-  const slides = html.match(/class="release-slide"/g) ?? [];
+  const slides = html.match(/class="[^"]*\brelease-slide\b[^"]*"/g) ?? [];
   assert.equal(slides.length, 3);
 
   const trackRules = [...css.matchAll(/\.release-track\s*\{([^}]*)\}/g)];

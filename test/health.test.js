@@ -46,8 +46,10 @@ test("GET /dashboard/ serves the PPE dashboard", async () => {
   const body = await response.text();
 
   assert.equal(response.status, 200);
-  assert.match(body, /<title>PPE 과정·진도 분석 대시보드 V3<\/title>/);
-  assert.match(body, /연속 회차 비교/);
-  assert.match(body, /작업구역별 문제 신호/);
-  assert.match(body, /Meta 대시보드 열기/);
+  assert.match(body, /<title>TYCHE PPE 실제 데이터 대시보드<\/title>/);
+  assert.match(body, /실제 세션 수/);
+  assert.match(body, /사용자별 기록/);
+  assert.match(body, /원본 이벤트/);
+  assert.match(body, /location\.protocol==="file:"/);
+  assert.match(body, /http:\/\/127\.0\.0\.1:3000\/dashboard\//);
 });

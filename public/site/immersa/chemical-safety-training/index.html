@@ -23,6 +23,557 @@
                 max-height: 54px
             }
         }
+
+        .experience-overview {
+            padding: 118px 0 156px;
+        }
+
+        .detail-hero {
+            display: block;
+            padding: 68px 0 92px;
+            border-bottom: 1px solid rgba(125, 139, 153, 0.22);
+        }
+
+        .visually-hidden {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+
+        .detail-hero-badges {
+            display: flex;
+            align-items: flex-start;
+            flex-direction: column;
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .detail-hero-badges .eyebrow {
+            flex: 0 0 auto;
+            margin: 0;
+        }
+
+        .detail-hero-badges > .eyebrow:first-child {
+            margin-bottom: 30px;
+        }
+
+        .detail-about-section {
+            display: grid;
+            grid-template-columns: 0.42fr 1fr;
+            gap: 72px;
+            align-items: start;
+            padding: 62px 0;
+            border-bottom: 1px solid rgba(125, 139, 153, 0.22);
+        }
+
+        .detail-about-section .eyebrow {
+            margin: 0;
+        }
+
+        .detail-about-section > p {
+            max-width: 760px;
+            margin: 0;
+            color: var(--muted);
+            font-size: 17px;
+            line-height: 1.8;
+        }
+
+        .experience-heading {
+            display: grid;
+            grid-template-columns: 1fr 0.8fr;
+            gap: 88px;
+            align-items: end;
+            margin-bottom: 52px;
+        }
+
+        .experience-heading h2,
+        .experience-step-copy h2 {
+            margin: 0;
+            color: var(--ink);
+            font-size: clamp(36px, 5vw, 62px);
+            letter-spacing: -0.055em;
+            line-height: 1.08;
+        }
+
+        .experience-heading h2 {
+            font-size: clamp(32px, 3.7vw, 48px);
+        }
+
+        .experience-heading > p,
+        .experience-step-copy > p:last-child {
+            margin: 0;
+            color: var(--muted);
+            font-size: 16px;
+        }
+
+        .experience-room {
+            position: relative;
+            margin: 0;
+            overflow: hidden;
+            border-radius: 28px;
+            background: #edf6ff;
+            box-shadow: 0 22px 60px rgba(32, 135, 255, 0.11);
+        }
+
+        .experience-room img {
+            display: block;
+            width: 100%;
+            aspect-ratio: 16 / 8.4;
+            object-fit: cover;
+        }
+
+        .experience-room figcaption {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 18px 22px;
+            color: var(--blue);
+            background: #fff;
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: 0.12em;
+        }
+
+        .experience-room figcaption span {
+            color: #9db5cc;
+        }
+
+        .experience-room figcaption b {
+            color: var(--muted);
+            font-weight: 500;
+            letter-spacing: 0;
+        }
+
+        .experience-steps {
+            display: grid;
+            gap: 184px;
+            padding: 0 0 78px;
+        }
+
+        .experience-step {
+            display: grid;
+            grid-template-columns: 1.12fr 0.88fr;
+            gap: 96px;
+            align-items: center;
+        }
+
+        .experience-step-reverse {
+            grid-template-columns: 0.88fr 1.12fr;
+        }
+
+        .experience-step-reverse .experience-step-media {
+            order: 2;
+        }
+
+        .experience-step-reverse .experience-step-copy {
+            order: 1;
+        }
+
+        .experience-step-media {
+            overflow: hidden;
+            border: 1px solid var(--line);
+            border-radius: 24px;
+            background: #f5faff;
+            box-shadow: 0 18px 48px rgba(12, 43, 80, 0.08);
+        }
+
+        .experience-step-media img {
+            display: block;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            object-fit: cover;
+        }
+
+        .experience-step-copy .eyebrow {
+            margin-bottom: 14px;
+        }
+
+        .experience-step-copy h2 {
+            font-size: clamp(34px, 4.2vw, 54px);
+        }
+
+        .experience-step-copy > p:last-child {
+            max-width: 430px;
+            margin-top: 24px;
+        }
+
+        .detail-hero-visual {
+            position: relative;
+            min-width: 0;
+        }
+
+        .detail-hero-visual > img {
+            display: block;
+            width: 100%;
+            height: auto;
+            border-radius: 24px;
+            background: #f6faff;
+        }
+
+        .detail-hero-image-tags {
+            position: static;
+            display: flex;
+            width: 100%;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 8px;
+            margin: 0;
+        }
+
+        .detail-hero-image-tags .chip {
+            border: 1px solid rgba(125, 139, 153, 0.32);
+            background: rgba(255, 255, 255, 0.58);
+            box-shadow: none;
+            backdrop-filter: none;
+            font-size: 12px;
+        }
+
+        .detail-hero-meta {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 18px;
+            margin: 0;
+            padding: 30px 0 0;
+        }
+
+        .meta-horizon-group {
+            display: flex;
+            align-items: flex-end;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .detail-hero-meta .meta-horizon-banner {
+            flex: 0 0 auto;
+            margin: 0 !important;
+        }
+
+        .detail-hero-meta .meta-horizon-caption {
+            margin: 0;
+            font-size: 12px;
+            text-align: right;
+        }
+
+        .detail-section-heading {
+            display: grid;
+            grid-template-columns: 1fr 0.8fr;
+            gap: 88px;
+            align-items: end;
+            margin-bottom: 46px;
+        }
+
+        .detail-section-heading h2 {
+            margin: 0;
+            color: var(--ink);
+            font-size: clamp(32px, 3.7vw, 48px);
+            letter-spacing: -0.055em;
+            line-height: 1.08;
+        }
+
+        .detail-section-heading > p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 16px;
+        }
+
+        .project-info-section {
+            padding: 78px 0 128px;
+            border-top: 1px solid rgba(125, 139, 153, 0.22);
+        }
+
+        .project-info-section .detail-section-heading,
+        .detail-faq-section .detail-section-heading {
+            display: block;
+            max-width: 860px;
+            margin: 0 auto 46px;
+            text-align: left;
+        }
+
+        .project-info-section .detail-section-heading > p,
+        .detail-faq-section .detail-section-heading > p {
+            margin-top: 16px;
+            color: #5b6169;
+        }
+
+        .project-info-list {
+            max-width: 860px;
+            margin: 0 auto;
+            border-top: 1px solid var(--line);
+        }
+
+        .project-info-row {
+            display: grid;
+            grid-template-columns: 210px 1fr;
+            gap: 32px;
+            padding: 20px 4px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .project-info-row dt {
+            color: #5b6169;
+            font-size: 13px;
+            font-weight: 800;
+            text-align: left;
+        }
+
+        .project-info-row dd {
+            margin: 0;
+            color: var(--ink);
+            font-size: 15px;
+            font-weight: 800;
+            text-align: left;
+        }
+
+        .detail-faq-section {
+            padding: 112px 0 128px;
+            border-top: 1px solid rgba(125, 139, 153, 0.22);
+            border-bottom: 1px solid rgba(125, 139, 153, 0.22);
+        }
+
+        .detail-faq-list {
+            max-width: 860px;
+            margin: 0 auto;
+            border-top: 1px solid var(--line);
+        }
+
+        .detail-faq-list details {
+            border-bottom: 1px solid var(--line);
+        }
+
+        .detail-faq-list summary {
+            position: relative;
+            display: flex;
+            justify-content: flex-start;
+            gap: 24px;
+            padding: 22px 42px;
+            color: var(--ink);
+            cursor: pointer;
+            list-style: none;
+            font-size: 16px;
+            font-weight: 900;
+            text-align: left;
+        }
+
+        .detail-faq-list summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .detail-faq-list summary::after {
+            content: "+";
+            position: absolute;
+            top: 50%;
+            right: 4px;
+            flex: 0 0 auto;
+            color: var(--blue);
+            font-size: 22px;
+            font-weight: 500;
+            transform: translateY(-50%);
+        }
+
+        .detail-faq-list details[open] summary::after {
+            content: "−";
+        }
+
+        .detail-faq-list details > p {
+            max-width: 820px;
+            margin: -4px auto 22px;
+            padding: 0 42px;
+            color: #5b6169;
+            font-size: 15px;
+            text-align: left;
+        }
+
+        .detail-contact-cta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 34px;
+            margin: 42px 0 72px;
+            padding: 46px 50px;
+            border-radius: 26px;
+            color: #fff;
+            background: linear-gradient(120deg, #0c2b50, #356b9e);
+        }
+
+        .detail-contact-cta .eyebrow {
+            margin-bottom: 12px;
+            color: #8ed0ff;
+        }
+
+        .detail-contact-cta h2 {
+            margin: 0;
+            font-size: clamp(30px, 4vw, 48px);
+            line-height: 1.08;
+            letter-spacing: -0.05em;
+        }
+
+        .detail-contact-cta p:last-child {
+            margin: 16px 0 0;
+            color: rgba(255,255,255,.72);
+        }
+
+        .detail-contact-button {
+            display: inline-flex;
+            flex: 0 0 auto;
+            align-items: center;
+            gap: 18px;
+            padding: 15px 21px;
+            border-radius: 999px;
+            color: var(--ink);
+            background: #fff;
+            font-size: 13px;
+            font-weight: 900;
+            transition: transform .2s, box-shadow .2s;
+        }
+
+        .detail-contact-button span {
+            color: var(--blue);
+            font-size: 18px;
+        }
+
+        .detail-contact-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 24px rgba(0,0,0,.18);
+        }
+
+        @media(max-width:900px) {
+            .experience-heading,
+            .detail-about-section,
+            .detail-section-heading,
+            .experience-step,
+            .experience-step-reverse {
+                grid-template-columns: 1fr;
+            }
+
+            .experience-heading {
+                gap: 22px;
+            }
+
+            .detail-section-heading {
+                gap: 22px;
+            }
+
+            .detail-about-section {
+                gap: 16px;
+            }
+
+            .experience-step-reverse .experience-step-media,
+            .experience-step-reverse .experience-step-copy {
+                order: initial;
+            }
+
+            .experience-step-copy > p:last-child {
+                max-width: 620px;
+            }
+
+            .detail-contact-cta {
+                align-items: flex-start;
+                flex-direction: column;
+                padding: 34px 30px;
+            }
+        }
+
+        @media(max-width:600px) {
+            .experience-overview {
+                padding: 76px 0 100px;
+            }
+
+            .experience-room,
+            .experience-step-media {
+                border-radius: 18px;
+            }
+
+            .experience-room img {
+                aspect-ratio: 4 / 3;
+            }
+
+            .experience-room figcaption {
+                align-items: flex-start;
+                flex-wrap: wrap;
+                gap: 8px 12px;
+                padding: 15px 16px;
+            }
+
+            .experience-room figcaption b {
+                flex-basis: 100%;
+                margin-left: 25px;
+            }
+
+            .experience-steps {
+                gap: 104px;
+                padding-bottom: 50px;
+            }
+
+            .project-info-section {
+                padding: 50px 0 88px;
+            }
+
+            .detail-faq-section {
+                padding: 76px 0 88px;
+            }
+
+            .project-info-row {
+                grid-template-columns: 1fr;
+                gap: 5px;
+                padding: 17px 2px;
+            }
+
+            .experience-step {
+                gap: 38px;
+            }
+
+            .detail-hero {
+                padding: 48px 0 72px;
+            }
+
+            .detail-hero-badges {
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 14px;
+                margin-bottom: 16px;
+            }
+
+            .experience-step-copy h2 {
+                font-size: 36px;
+            }
+
+            .detail-hero-meta {
+                gap: 18px;
+                padding-top: 24px;
+            }
+
+            .detail-about-section {
+                padding: 50px 0;
+            }
+
+            .detail-hero-image-tags {
+                gap: 7px;
+            }
+
+            .meta-horizon-group {
+                align-items: flex-end;
+                flex-direction: column;
+                gap: 18px;
+            }
+
+            .detail-contact-cta {
+                margin-bottom: 40px;
+                padding: 30px 22px;
+                border-radius: 20px;
+            }
+
+            .detail-contact-button {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
     </style>
 </head>
 
@@ -35,68 +586,145 @@
     </header>
     <main class="shell">
         <section class="detail-hero">
-            <div>
+            <h1 class="visually-hidden">화학물질 안전훈련 VR</h1>
+            <div class="detail-hero-badges">
                 <p class="eyebrow">TYCHE IMMERSA / PROJECT 01</p>
-                <h1>화학물질<br>안전훈련 VR</h1>
-                <p>화학물질 작업 전 준비와 PPE 착용, 작업 전 안전 절차를 가상현실 안에서 직접 수행하며 학습하는 실감형 안전교육 콘텐츠.</p><br/>
-                
-                <a class="meta-horizon-banner has-caption" href="#" aria-label="Meta Horizon 링크 준비 중">
-                    <img src="../../assets/Metahorizon_Logo.png" alt="Meta Horizon"></a>
-                <div class="meta-horizon-caption">Meta Horizon에서 만나보세요 <b>Coming soon →</b></div>
-
-                <div class="detail-tags"><span class="chip">Meta Quest</span><span class="chip">Unity XR</span><span
-                        class="chip">XR Interaction Toolkit</span><span class="chip">Safety Training</span></div><a
-                    class="blue-btn" href="#overview">프로젝트 소개 ↓</a>
-            </div><img src="../../assets/metahorizon_title_2560x1440.png" alt="화학물질 안전훈련 VR">
+                <div class="detail-hero-image-tags" aria-label="프로젝트 기술 및 콘텐츠 분류">
+                    <span class="chip">Meta Quest</span><span class="chip">Unity XR</span><span class="chip">XR Interaction Toolkit</span><span class="chip">Safety Training</span>
+                </div>
+            </div>
+            <div class="detail-hero-visual">
+                <img src="../../assets/metahorizon_title_clean_v2.png" width="1672" height="941" alt="화학물질 안전훈련 VR">
+            </div>
+            <div class="detail-hero-meta">
+                <div class="meta-horizon-group">
+                    <div class="meta-horizon-caption">Meta Horizon에서 만나보세요 <b>Coming soon →</b></div>
+                    <a class="meta-horizon-banner has-caption" href="#" aria-label="Meta Horizon 링크 준비 중">
+                        <img src="../../assets/Metahorizon_Logo.png" alt="Meta Horizon"></a>
+                </div>
+            </div>
+        </section>
+        <section class="detail-about-section" aria-labelledby="detail-about-title">
+            <h2 id="detail-about-title" class="eyebrow">ABOUT THE EXPERIENCE</h2>
+            <p>화학물질 작업에 필요한 보호구를 확인하고 착용하는 과정을 가상현실 안에서 직접 수행하며 학습하는 실감형 안전교육 콘텐츠.</p>
         </section>
         <div class="status-panel">
             <div><span>STATUS</span><br><strong>Meta Horizon 입점 예정</strong></div>
             <div>Meta Quest 기반 독립형 VR · 한국어</div>
         </div>
-        <section id="overview" class="detail-grid">
-            <div>
-                <p class="eyebrow">PROJECT OVERVIEW</p>
-                <h2>설명만 듣는 교육에서<br>직접 판단하는 교육으로.</h2>
+        <section id="overview" class="experience-overview">
+            <div class="experience-heading">
+                <div>
+                    <p class="eyebrow">INSIDE THE EXPERIENCE</p>
+                    <h2>PPE Room에서 시작하는<br>안전 훈련</h2>
+                </div>
+                <p>작업계획서를 확인하고, 필요한 보호구를 직접 찾아 착용합니다. 실제 훈련 공간을 닮은 PPE Room에서 사용자의 판단과 행동이 이어집니다.</p>
             </div>
-            <div>
-                <p>사용자는 PPE룸에서 작업계획서에 맞는 보호구를 확인하고 착용한 뒤 혼합기 외부 작업 공간으로 이동합니다.</p>
-                <p>이후 전원 차단, 환기, 가스 측정 등 실제 작업 전 절차를 순서대로 수행하며 단순 암기가 아닌 행동 기반 학습을 경험합니다.</p>
+            <figure class="experience-room">
+                <img src="../../assets/ppe_room.png" alt="PPE Room 가상현실 화면">
+                <figcaption><span>01</span> PPE ROOM <b>장비를 확인하고 훈련을 시작하는 공간</b></figcaption>
+            </figure>
+        </section>
+
+        <section class="experience-steps" aria-label="VR 체험 단계">
+            <article class="experience-step">
+                <div class="experience-step-media"><img src="../../assets/check_work.png" alt="작업계획서를 확인하는 가상현실 화면"></div>
+                <div class="experience-step-copy">
+                    <p class="eyebrow">STEP 01 · CHECK WORK</p>
+                    <h2>작업을<br>확인하세요.</h2>
+                    <p>작업계획서를 먼저 확인하고, 오늘 필요한 작업과 보호구를 파악합니다. 눈앞의 정보를 읽고 다음 행동을 스스로 결정하는 단계입니다.</p>
+                </div>
+            </article>
+            <article class="experience-step experience-step-reverse">
+                <div class="experience-step-media"><img src="../../assets/select_ppe.png" alt="작업에 필요한 개인보호구를 선택하는 가상현실 화면"></div>
+                <div class="experience-step-copy">
+                    <p class="eyebrow">STEP 02 · SELECT PPE</p>
+                    <h2>작업에 필요한<br>개인보호구를 찾아보세요.</h2>
+                    <p>보호복, 장화, 장갑, 호흡보호구 등 작업에 필요한 장비를 PPE Room에서 직접 찾아 선택합니다.</p>
+                </div>
+            </article>
+            <article class="experience-step">
+                <div class="experience-step-media"><img src="../../assets/ppe_check.png" alt="개인보호구의 상태를 확인하는 가상현실 화면"></div>
+                <div class="experience-step-copy">
+                    <p class="eyebrow">STEP 03 · PPE CHECK</p>
+                    <h2>개인보호구의 상태를<br>확인하세요.</h2>
+                    <p>착용하기 전 보호구의 손상이나 오염 여부를 살펴보고, 작업에 적합한 장비인지 확인합니다.</p>
+                </div>
+            </article>
+            <article class="experience-step experience-step-reverse">
+                <div class="experience-step-media"><img src="../../assets/check_ppe.png" alt="착용한 개인보호구를 확인하는 가상현실 화면"></div>
+                <div class="experience-step-copy">
+                    <p class="eyebrow">STEP 04 · CHECK PPE</p>
+                    <h2>착용 상태를<br>확인하세요.</h2>
+                    <p>선택한 보호구를 착용한 뒤 거울 앞에서 전체 착용 상태를 확인합니다. 준비가 끝났는지 직접 점검하며 행동을 마무리합니다.</p>
+                </div>
+            </article>
+        </section>
+        <section class="project-info-section" aria-labelledby="project-info-title">
+            <div class="detail-section-heading">
+                <div>
+                    <p class="eyebrow">PROJECT INFORMATION</p>
+                    <h2 id="project-info-title">프로젝트 정보</h2>
+                </div>
+                <p>현재 공개 범위는 PPE 착용 교육입니다. 최종 지원 기기와 배포 일정은 Meta Horizon 입점 시점에 업데이트됩니다.</p>
+            </div>
+            <dl class="project-info-list">
+                <div class="project-info-row">
+                    <dt>콘텐츠 범위</dt>
+                    <dd>작업계획서 확인 · 개인보호구 선택 · 상태 점검 · 착용 확인</dd>
+                </div>
+                <div class="project-info-row">
+                    <dt>플랫폼</dt>
+                    <dd>Meta Quest 기반 독립형 VR</dd>
+                </div>
+                <div class="project-info-row">
+                    <dt>조작 방식</dt>
+                    <dd>VR 컨트롤러 기반 상호작용</dd>
+                </div>
+                <div class="project-info-row">
+                    <dt>언어</dt>
+                    <dd>한국어</dd>
+                </div>
+                <div class="project-info-row">
+                    <dt>배포 상태</dt>
+                    <dd>Meta Horizon 입점 준비 중</dd>
+                </div>
+            </dl>
+        </section>
+        <section class="detail-faq-section" aria-labelledby="detail-faq-title">
+            <div class="detail-section-heading">
+                <div>
+                    <p class="eyebrow">FAQ</p>
+                    <h2 id="detail-faq-title">자주 묻는 질문</h2>
+                </div>
+                <p>출시 정보와 기업 도입에 필요한 핵심 내용을 안내합니다.</p>
+            </div>
+            <div class="detail-faq-list">
+                <details>
+                    <summary>언제 체험할 수 있나요?</summary>
+                    <p>현재 Meta Horizon 입점을 준비하고 있습니다. 공개 일정은 확정 후 TYCHE WORKS 채널을 통해 안내합니다.</p>
+                </details>
+                <details>
+                    <summary>어떤 기기를 지원하나요?</summary>
+                    <p>Meta Quest 기반 독립형 VR로 개발 중입니다. 세부 지원 모델과 설치 조건은 출시 시점에 안내합니다.</p>
+                </details>
+                <details>
+                    <summary>현재 어떤 교육 내용이 포함되어 있나요?</summary>
+                    <p>현재 공개 범위는 작업계획서 확인, 개인보호구 선택, 오염·손상 점검, 착용 상태 확인으로 이어지는 PPE 착용 교육입니다.</p>
+                </details>
+                <details>
+                    <summary>기업용 데모나 프로젝트 상담이 가능한가요?</summary>
+                    <p>교육 도입, 데모, 콘텐츠 협업 가능 범위는 문의 내용을 확인한 뒤 개별 안내합니다.</p>
+                </details>
             </div>
         </section>
-        <section class="vr-section">
-            <div class="section-title">
-                <p class="eyebrow">EXPERIENCE FLOW</p>
-                <h2>Training Journey</h2>
-            </div>
-            <div class="flow">
-                <div><span>01</span>
-                    <h3>Locker Room</h3>
-                    <p>기본 장비와 조작 방식 준비</p>
-                </div>
-                <div><span>02</span>
-                    <h3>PPE Room</h3>
-                    <p>작업계획서 확인과 PPE 착용</p>
-                </div>
-                <div><span>03</span>
-                    <h3>Work Area</h3>
-                    <p>차단·환기·가스 측정 수행</p>
-                </div>
-                <div><span>04</span>
-                    <h3>Result</h3>
-                    <p>선택과 행동 결과 피드백</p>
-                </div>
-            </div>
-        </section>
-        <section class="detail-grid">
+        <section class="detail-contact-cta" aria-labelledby="detail-contact-title">
             <div>
-                <p class="eyebrow">CORE FEATURES</p>
-                <h2>안전 절차를<br>행동으로 기억하게.</h2>
+                <p class="eyebrow">TALK TO US</p>
+                <h2 id="detail-contact-title">VR 안전교육 도입과<br>프로젝트 협업을 문의하세요.</h2>
+                <p>교육 도입, 콘텐츠 협업, 데모 및 프로젝트 관련 문의를 남겨주세요.</p>
             </div>
-            <div>
-                <p><strong>PPE 착용 교육</strong><br>내화학성 방호복, 장화, 장갑, 호흡보호구 등 시나리오에 필요한 PPE를 확인합니다.</p>
-                <p><strong>절차형 VR 인터랙션</strong><br>문서 확인부터 전원 차단, 환기, 가스 측정까지 실제 작업 순서를 행동으로 수행합니다.</p>
-                <p><strong>교육 중심 피드백</strong><br>정답·오답 표시와 음성 안내를 통해 선택과 행동 결과를 즉시 이해할 수 있도록 설계합니다.</p>
-            </div>
+            <a class="detail-contact-button" href="../../index.html#contact">문의하기 <span>→</span></a>
         </section>
         <div style="padding:0 0 80px"><a class="back" href="../index.html">← VR 라인으로 돌아가기</a></div>
     </main>

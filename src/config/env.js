@@ -1,4 +1,5 @@
 import "dotenv/config";
+import path from "node:path";
 
 function readInteger(name, fallback, minimum, maximum) {
   const rawValue = process.env[name];
@@ -32,6 +33,16 @@ function readBoolean(name, fallback) {
 }
 
 const nodeEnv = process.env.NODE_ENV ?? "development";
+const defaultUnityTelemetryDirectory = process.env.USERPROFILE
+  ? path.join(
+      process.env.USERPROFILE,
+      "AppData",
+      "LocalLow",
+      "softCastella",
+      "Prototype_Tyche_Jinyoung",
+      "tyche-training-telemetry",
+    )
+  : "";
 
 export const env = Object.freeze({
   nodeEnv,
@@ -40,6 +51,19 @@ export const env = Object.freeze({
     "ENABLE_UNAUTHENTICATED_USER_CRUD",
     nodeEnv !== "production",
   ),
+  enableLocalTrainingRegistration: readBoolean(
+    "ENABLE_LOCAL_TRAINING_REGISTRATION",
+    nodeEnv !== "production",
+  ),
+  localTrainingDataFile:
+    process.env.LOCAL_TRAINING_DATA_FILE ??
+    "./data/local-training-registrations.jsonl",
+  enableLocalTelemetryRead: readBoolean(
+    "ENABLE_LOCAL_TELEMETRY_READ",
+    nodeEnv !== "production",
+  ),
+  unityTelemetryDirectory:
+    process.env.UNITY_TELEMETRY_DIRECTORY ?? defaultUnityTelemetryDirectory,
   database: Object.freeze({
     host: process.env.DB_HOST ?? "127.0.0.1",
     port: readInteger("DB_PORT", 3306, 1, 65535),
