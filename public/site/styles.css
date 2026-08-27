@@ -1,5 +1,5 @@
 :root{
-  --bg:#fff;--text:#202020;--muted:#777;--line:rgba(32,32,32,.11);
+  --bg:#fff;--text:#202020;--muted:#777;--line:rgba(32,32,32,.11);--line-soft:rgba(32,32,32,.06);
   --orange:#ff7a00;--orange-soft:#fff4e9;--max:1180px;
 }
 *{box-sizing:border-box} html{scroll-behavior:smooth} body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,Pretendard,"Noto Sans KR",Arial,sans-serif;line-height:1.65} a{color:inherit;text-decoration:none} button{font:inherit}
@@ -147,7 +147,7 @@
 @media(max-width:600px){.release-copy-vr{inset:0;width:100%;background:linear-gradient(120deg,rgba(18,22,26,.92),rgba(18,22,26,.38))}.release-slide-vr .release-media-banner:after{display:none}}
 /* Compact Featured Releases banner */
 .release-head .eyebrow{font-size:16px}
-.release-carousel{min-height:300px;border:0;border-radius:22px;background:transparent}
+.release-carousel{min-height:300px;border:1px solid var(--line-soft);border-radius:22px;background:transparent}
 .release-track{min-height:300px;border-radius:inherit}
 .release-slide{border-radius:inherit;overflow:hidden}
 .release-copy{padding:30px 36px 72px}
