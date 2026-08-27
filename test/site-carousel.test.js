@@ -20,3 +20,14 @@ test('홈 작품 캐러셀은 세 배너를 유지하고 이동 트랙에서 슬
     false,
   );
 });
+
+test('홈 첫 번째 VR 배너의 남는 영역은 흰색 배경을 사용한다', async () => {
+  const css = await readFile(new URL('styles.css', siteRoot), 'utf8');
+  const mediaRule = css.match(/\.release-media-banner\s*\{([^}]*)\}/);
+  const slideRule = css.match(/\.release-slide-vr\s*\{([^}]*)\}/);
+
+  assert.ok(mediaRule);
+  assert.ok(slideRule);
+  assert.match(mediaRule[1], /background\s*:\s*#fff!important/);
+  assert.match(slideRule[1], /background\s*:\s*#fff/);
+});
