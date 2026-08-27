@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <title>TYCHE Server · Login</title>
+  <link rel="stylesheet" href="./status.css">
+</head>
+<body class="login-page">
+  <main class="login-shell">
+    <section class="login-card" aria-labelledby="login-title">
+      <div class="brand-mark" aria-hidden="true">T</div>
+      <p class="eyebrow">TYCHE WORKS</p>
+      <h1 id="login-title">Server console</h1>
+      <p class="muted">관리자 계정으로 로그인하세요.</p>
+      <form class="login-form" action="/api/server-status/login" method="post">
+        <label for="admin-id">관리자 ID</label>
+        <input id="admin-id" name="username" type="text" autocomplete="username" required maxlength="64">
+        <label for="admin-password">비밀번호</label>
+        <input id="admin-password" name="password" type="password" autocomplete="current-password" required maxlength="256">
+        <p class="form-error" role="alert" hidden></p>
+        <button type="submit">로그인</button>
+      </form>
+      <p class="security-note">허가된 관리자만 사용할 수 있으며 접속 기록이 보관됩니다.</p>
+    </section>
+  </main>
+  <script src="./login.js" defer></script>
+</body>
+</html>

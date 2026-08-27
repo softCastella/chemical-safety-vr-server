@@ -62,6 +62,7 @@ export const env = Object.freeze({
     "ENABLE_LOCAL_TELEMETRY_READ",
     nodeEnv !== "production",
   ),
+  enableServerAdmin: readBoolean("ENABLE_SERVER_ADMIN", nodeEnv === "production"),
   unityTelemetryDirectory:
     process.env.UNITY_TELEMETRY_DIRECTORY ?? defaultUnityTelemetryDirectory,
   database: Object.freeze({

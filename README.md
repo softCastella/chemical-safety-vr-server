@@ -24,6 +24,7 @@ Unity XR 클라이언트와 전체 프로젝트 문서는 별도 비공개 저�
 - 정적 사이트와 대시보드: `public`
 - 테스트: `test`, `test-support`
 - 교차 저장소 공용 문서: `Docs`
+- 운영 배포 구성과 검증 범위: `Docs/ProductionDeployment.md`
 - Codex 작업 지침: `AGENTS.md`
 
 ## 개발 환경

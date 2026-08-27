@@ -10,6 +10,8 @@
     "prod": "pm2 start ecosystem.config.cjs",
     "test": "node --test",
     "db:migrate": "node src/db/migrate.js",
+    "admin:create": "bash scripts/create-server-admin.sh",
+    "viewer:create-temporary": "node scripts/create-temporary-viewer.js",
     "restart": "pm2 restart tyche-safety-training-server --update-env",
     "stop": "pm2 stop tyche-safety-training-server",
     "logs": "pm2 logs tyche-safety-training-server",

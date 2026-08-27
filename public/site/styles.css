@@ -115,6 +115,7 @@
 .contact-form select{appearance:auto;cursor:pointer}
 .contact-form input:focus,.contact-form select:focus,.contact-form textarea:focus{border-color:var(--orange);box-shadow:0 0 0 3px rgba(255,122,0,.1)}
 .contact-form input::placeholder,.contact-form textarea::placeholder{color:#aeb5bc}
+.contact-submit:disabled{cursor:not-allowed;opacity:.55}
 .contact-submit{display:inline-flex;align-items:center;justify-content:space-between;margin-top:3px;border:0;border-radius:999px;padding:14px 18px;background:#222;color:#fff;font:900 13px Inter,Pretendard,"Noto Sans KR",Arial,sans-serif;cursor:pointer;transition:.2s}
 .contact-submit:hover{background:var(--orange);transform:translateY(-2px)}
 @media(max-width:900px){.contact{grid-template-columns:1fr;gap:36px}}
@@ -160,4 +161,3 @@
 .release-count{font-size:16px}
 @media(max-width:900px){.release-carousel,.release-track{min-height:320px}.release-copy{min-height:320px;padding:28px 32px 72px}}
 @media(max-width:600px){.release-carousel,.release-track{min-height:330px}.release-copy{min-height:330px;padding:24px 22px 72px}.release-copy h3{font-size:30px}.release-controls{left:22px;bottom:18px}}
-

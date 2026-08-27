@@ -11,10 +11,13 @@ import { createTrainingRegistrationRouter } from "./modules/training-registratio
 import { createFileTrainingRegistrationRepository } from "./modules/training-registration/training-registration-repository.js";
 import { createLocalTelemetryRouter } from "./modules/local-telemetry/local-telemetry-routes.js";
 import { createLocalTelemetryRepository } from "./modules/local-telemetry/local-telemetry-repository.js";
+import { createServerAdminRepository } from "./modules/server-admin/server-admin-repository.js";
+import { createServerAdminRouter } from "./modules/server-admin/server-admin-routes.js";
 
 const publicRoot = fileURLToPath(new URL("../public/", import.meta.url));
 const dashboardRoot = path.join(publicRoot, "dashboard");
 const siteRoot = path.join(publicRoot, "site");
+const serverStatusRoot = path.join(publicRoot, "server-status");
 
 export function createApp({
   userRepository,
@@ -23,12 +26,15 @@ export function createApp({
   enableTrainingRegistration = env.enableLocalTrainingRegistration,
   localTelemetryRepository,
   enableLocalTelemetryRead = env.enableLocalTelemetryRead,
+  serverAdminRepository,
+  enableServerAdmin = env.enableServerAdmin,
 } = {}) {
   const app = express();
   const resolvedUserRepository =
     userRepository ?? createUserRepository(databasePool);
 
   app.disable("x-powered-by");
+  app.set("trust proxy", "loopback");
   app.use(express.json({ limit: "1mb" }));
 
   app.get("/api/health", (_request, response) => {
@@ -65,6 +71,18 @@ export function createApp({
       "/api/local-telemetry",
       createLocalTelemetryRouter({ repository: resolvedLocalTelemetryRepository }),
     );
+  }
+
+  if (enableServerAdmin) {
+    const resolvedAdminRepository = serverAdminRepository ?? createServerAdminRepository(databasePool);
+    const { router, requireAdmin } = createServerAdminRouter({ repository: resolvedAdminRepository });
+    app.use("/api/server-status", router);
+    app.get("/server-status/login", (_request, response) => response.sendFile(path.join(serverStatusRoot, "login.html")));
+    app.get("/server-status/login.html", (_request, response) => response.redirect(308, "/server-status/login"));
+    for (const asset of ["status.css", "controls.css", "login.js", "dashboard.js"]) {
+      app.get(`/server-status/${asset}`, (_request, response) => response.sendFile(path.join(serverStatusRoot, asset)));
+    }
+    app.get(["/server-status", "/server-status/"], requireAdmin, (_request, response) => response.sendFile(path.join(serverStatusRoot, "index.html")));
   }
 
   app.use("/dashboard", express.static(dashboardRoot));

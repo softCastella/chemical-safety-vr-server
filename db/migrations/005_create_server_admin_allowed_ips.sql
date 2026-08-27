@@ -1,0 +1,13 @@
+CREATE TABLE IF NOT EXISTS server_admin_allowed_ips (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  label VARCHAR(64) NOT NULL,
+  cidr VARCHAR(49) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  enabled BOOLEAN NOT NULL DEFAULT TRUE,
+  created_by BIGINT UNSIGNED NULL,
+  created_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  updated_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_server_admin_allowed_ips_cidr (cidr),
+  CONSTRAINT fk_server_admin_allowed_ips_admin FOREIGN KEY (created_by)
+    REFERENCES server_admin_accounts (id) ON UPDATE CASCADE ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;

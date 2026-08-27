@@ -1,0 +1,236 @@
+.certificate-cards {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.dashboard-domain {
+  display: inline-block;
+  margin-top: 8px;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.dashboard-domain:hover {
+  color: var(--accent);
+}
+
+.account-role {
+  color: #c7cbd2;
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: .08em;
+}
+
+.security-warning {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 20px;
+  padding: 16px 18px;
+  border: 1px solid #f0b4ba;
+  border-radius: 14px;
+  background: #fff0f2;
+  color: #8d1f2b;
+}
+
+.security-warning[hidden] {
+  display: none;
+}
+
+.warning-icon {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--red);
+  color: #fff;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.security-warning p {
+  margin: 4px 0 0;
+  font-size: 12px;
+}
+
+.security-warning a {
+  color: inherit;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.system-alerts[hidden] {
+  display: none;
+}
+
+.status-pill.warning {
+  background: #fff0f2;
+  color: #a32633;
+}
+
+.alert-list {
+  display: grid;
+  gap: 9px;
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.alert-list li {
+  padding: 12px 14px;
+  border-left: 3px solid var(--red);
+  border-radius: 8px;
+  background: #fff6f7;
+  font-size: 12px;
+}
+
+.billing-summary {
+  display: grid;
+  grid-template-columns: minmax(150px, .7fr) 2fr auto;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 16px;
+  padding: 18px 22px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+}
+
+.billing-summary strong {
+  font-size: 16px;
+}
+
+.billing-summary dl {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin: 0;
+}
+
+.billing-summary dl div {
+  padding-left: 16px;
+  border-left: 1px solid var(--line);
+}
+
+.billing-summary dt {
+  margin-bottom: 5px;
+}
+
+.billing-summary dd {
+  text-align: left;
+  font-size: 13px;
+}
+
+.billing-actions {
+  display: grid;
+  justify-items: end;
+  gap: 9px;
+}
+
+.vultr-link {
+  padding: 9px 12px;
+  border-radius: 9px;
+  background: #0069ff;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 850;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.vultr-link:hover {
+  background: #0059d9;
+}
+
+.certificate-card {
+  padding: 15px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fafbfc;
+}
+
+.certificate-card > div,
+.access-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.certificate-card p {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.add-ip,
+.remove-ip {
+  border: 0;
+  border-radius: 9px;
+  background: var(--ink);
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.add-ip {
+  padding: 8px 11px;
+  font-size: 11px;
+}
+
+.remove-ip {
+  width: 29px;
+  height: 29px;
+  font-size: 18px;
+}
+
+.remove-ip:disabled {
+  cursor: not-allowed;
+  opacity: .3;
+}
+
+.ip-row {
+  grid-template-columns: 1fr 2fr auto auto;
+  align-items: center;
+}
+
+@media (max-width: 560px) {
+  .security-warning {
+    grid-template-columns: auto 1fr;
+  }
+
+  .security-warning a {
+    grid-column: 2;
+  }
+
+  .billing-summary,
+  .billing-summary dl {
+    grid-template-columns: 1fr;
+  }
+
+  .billing-summary dl div {
+    padding: 10px 0 0;
+    border-top: 1px solid var(--line);
+    border-left: 0;
+  }
+
+  .billing-actions {
+    justify-items: start;
+  }
+
+  .access-actions {
+    align-items: flex-end;
+    flex-direction: column;
+  }
+
+  .ip-row {
+    grid-template-columns: 1fr auto auto;
+  }
+}
