@@ -82,6 +82,7 @@ export function createApp({
     for (const asset of ["status.css", "controls.css", "login.js", "dashboard.js"]) {
       app.get(`/server-status/${asset}`, (_request, response) => response.sendFile(path.join(serverStatusRoot, asset)));
     }
+    app.get("/server-status/favicon.svg", (_request, response) => response.sendFile(path.join(siteRoot, "assets", "favicon.svg")));
     app.get(["/server-status", "/server-status/"], requireAdmin, (_request, response) => response.sendFile(path.join(serverStatusRoot, "index.html")));
   }
 

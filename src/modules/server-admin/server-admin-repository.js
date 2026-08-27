@@ -50,10 +50,26 @@ export function createServerAdminRepository(pool) {
     },
     async recentSecurityEvents() {
       const [rows] = await pool.execute(
-        `SELECT event_type AS eventType, ip_address AS ipAddress, created_at AS createdAt
+        `SELECT id, event_type AS eventType, ip_address AS ipAddress, created_at AS createdAt
          FROM server_admin_audit_log WHERE event_type = 'login_failed'
          ORDER BY created_at DESC LIMIT 20`);
       return rows;
+    },
+    async listSecurityEvents({ page, pageSize = 20 }) {
+      const offset = (page - 1) * pageSize;
+      const [[countRow]] = await pool.execute(
+        "SELECT COUNT(*) AS count FROM server_admin_audit_log WHERE event_type = 'login_failed'");
+      const [rows] = await pool.execute(
+        `SELECT id, event_type AS eventType, ip_address AS ipAddress, created_at AS createdAt
+         FROM server_admin_audit_log WHERE event_type = 'login_failed'
+         ORDER BY created_at DESC LIMIT ? OFFSET ?`, [pageSize, offset]);
+      return { items: rows, total: Number(countRow.count), page, pageSize };
+    },
+    async deleteSecurityEvents(ids) {
+      const placeholders = ids.map(() => "?").join(", ");
+      const [result] = await pool.execute(
+        `DELETE FROM server_admin_audit_log WHERE event_type = 'login_failed' AND id IN (${placeholders})`, ids);
+      return result.affectedRows;
     },
     async listTrustedIps() {
       const [rows] = await pool.execute(

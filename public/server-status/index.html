@@ -4,38 +4,44 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex,nofollow,noarchive">
-  <title>TYCHE Server · Dashboard</title>
+  <title>Tyche Works Server Admin · Dashboard</title>
+  <link rel="icon" type="image/svg+xml" href="/server-status/favicon.svg?v=2">
   <link rel="stylesheet" href="./status.css">
   <link rel="stylesheet" href="./controls.css">
 </head>
 <body>
   <header class="topbar">
-    <a class="wordmark" href="/server-status/" aria-label="서버 대시보드 홈"><span>T</span> TYCHE SERVER</a>
+    <a class="wordmark" href="/server-status/" aria-label="서버 관리자 대시보드 홈"><span>T</span> TYCHE WORKS SERVER ADMIN</a>
     <div class="top-actions"><span class="account-role" data-account-role></span><span class="sync-state"><i></i><b data-sync-state>연결 대기</b></span><button class="ghost" type="button" data-refresh>새로고침</button><button class="ghost" type="button" data-logout>로그아웃</button></div>
   </header>
 
   <main class="dashboard-shell">
+    <section class="page-heading">
+      <div><p class="eyebrow">SYSTEM OVERVIEW</p><h1>서버 상태</h1><p class="muted">Vultr Ubuntu 운영 서버의 주요 상태를 확인합니다.</p></div>
+      <p class="updated">최근 확인 <time data-updated>—</time></p>
+    </section>
+
     <section class="security-warning" data-security-warning hidden role="alert" aria-live="polite">
       <div class="warning-icon" aria-hidden="true">!</div>
       <div><strong data-warning-title>서버 확인이 필요합니다.</strong><p data-warning-message>상세 상태를 확인해주세요.</p></div>
-      <a href="#system-alerts">상세 확인</a>
+      <div class="warning-actions"><a href="#system-alerts" data-alert-details>상세 확인</a><button type="button" data-alert-close aria-label="알림 닫기">×</button></div>
     </section>
 
-    <section class="page-heading">
-      <div><p class="eyebrow">SYSTEM OVERVIEW</p><h1>서버 상태</h1><p class="muted">Vultr Ubuntu 운영 서버의 주요 상태를 확인합니다.</p><a class="dashboard-domain" href="https://admin.tycheworks.com/">admin.tycheworks.com</a></div>
-      <p class="updated">최근 확인 <time data-updated>—</time></p>
+    <section class="server-specs" aria-label="현재 서버 사양">
+      <div><p class="eyebrow">SERVER SPECS</p><strong>서버 사양</strong></div>
+      <dl><div><dt>CPU</dt><dd data-spec-cpu>확인 대기</dd></div><div><dt>메모리</dt><dd data-spec-memory>확인 대기</dd></div><div><dt>SSD</dt><dd data-spec-disk>확인 대기</dd></div><div><dt>운영체제</dt><dd data-spec-os>확인 대기</dd></div></dl>
     </section>
 
     <section class="billing-summary" aria-label="Vultr 결제 일정">
       <div><p class="eyebrow">VULTR BILLING</p><strong>결제 일정</strong></div>
-      <dl><div><dt>최근 결제일</dt><dd data-billing-last>연결 대기</dd></div><div><dt>다음 결제 예정일</dt><dd data-billing-next>연결 대기</dd></div></dl>
-      <div class="billing-actions"><span class="status-pill waiting" data-billing-state>API 미연결</span><a class="vultr-link" href="https://my.vultr.com/" target="_blank" rel="noopener noreferrer">Vultr 서버 관리 ↗</a></div>
+      <dl><div><dt>최근 결제일</dt><dd data-billing-last>확인 대기</dd></div><div><dt>다음 청구서 발행 예정일</dt><dd data-billing-next>확인 대기</dd></div></dl>
+      <div class="billing-actions"><span class="status-pill waiting" data-billing-state>확인 대기</span><a class="vultr-link" href="https://my.vultr.com/billing/" target="_blank" rel="noopener noreferrer">Vultr 결제 관리 ↗</a></div>
     </section>
 
     <section class="metric-grid" aria-label="서버 자원">
       <article class="metric-card"><div class="metric-title"><span>메모리</span><b data-memory-percent>—</b></div><strong data-memory-used>연결 대기</strong><small data-memory-detail>사용량 / 전체 / 잔여</small><div class="meter"><i data-memory-bar></i></div></article>
       <article class="metric-card"><div class="metric-title"><span>SSD 저장공간</span><b data-disk-percent>—</b></div><strong data-disk-used>연결 대기</strong><small data-disk-detail>사용량 / 전체 / 잔여</small><div class="meter"><i data-disk-bar></i></div></article>
-      <article class="metric-card"><div class="metric-title"><span>서버 가동시간</span><b class="status-pill waiting" data-server-state>대기</b></div><strong data-uptime>연결 대기</strong><small data-load>시스템 부하 —</small></article>
+      <article class="metric-card"><div class="metric-title"><span>서버 가동시간</span><b class="status-pill waiting" data-server-state>대기</b></div><strong data-uptime>연결 대기</strong><dl class="load-summary"><div><dt>최근 1분 부하</dt><dd data-load-minute>—</dd></div><div><dt>CPU 기준</dt><dd data-load-cpu>—</dd></div><div><dt>판정 기준</dt><dd class="load-thresholds"><span>주의 0.7 이상</span><strong>위험 1.0 이상</strong></dd></div></dl></article>
     </section>
 
     <section class="panel system-alerts" id="system-alerts" data-system-alerts-panel hidden>
@@ -45,22 +51,20 @@
 
     <section class="panel">
       <div class="panel-heading"><div><p class="eyebrow">SERVICES</p><h2>서비스별 사용 현황</h2></div></div>
-      <div class="service-grid" data-services>
-        <article class="service-card skeleton-card"><div><span class="service-dot waiting"></span><strong>서비스 정보 연결 대기</strong></div><p>상태 API 연결 후 도메인별 응답과 사용량을 표시합니다.</p></article>
-      </div>
+      <ol class="service-list" data-services><li class="service-list-empty">서비스 정보 연결 대기</li></ol>
     </section>
 
     <div class="two-column">
       <section class="panel">
         <div class="panel-heading"><div><p class="eyebrow">NETWORK</p><h2>포트 및 프로세스</h2></div></div>
-        <div class="table-wrap"><table><thead><tr><th>서비스</th><th>포트</th><th>노출</th><th>상태</th></tr></thead><tbody data-ports><tr><td colspan="4" class="empty">연결 대기</td></tr></tbody></table></div>
+        <div class="table-wrap"><table class="ports-table"><thead><tr><th>서비스</th><th>포트</th><th>노출</th><th>상태</th></tr></thead><tbody data-ports><tr><td colspan="4" class="empty">연결 대기</td></tr></tbody></table></div>
       </section>
       <section class="panel">
-        <div class="panel-heading"><div><p class="eyebrow">TLS</p><h2>HTTPS 인증서</h2></div></div>
+        <div class="panel-heading"><div><p class="eyebrow">TLS</p><h2>HTTPS 인증서 <span class="heading-count" data-certificate-count>—</span></h2></div></div>
         <div class="certificate-cards" data-certificates>
           <article class="certificate-card">
             <div><strong>인증서 정보 연결 대기</strong><span class="status-pill waiting">대기</span></div>
-            <p>연결 후 인증서별 도메인, 등록일, 만료일과 자동 갱신 상태를 표시합니다.</p>
+            <p>연결 후 인증서별 도메인, 최근 갱신일, 만료일과 자동 갱신 상태를 표시합니다.</p>
           </article>
         </div>
       </section>
@@ -69,13 +73,14 @@
     <section class="panel">
       <div class="panel-heading"><div><p class="eyebrow">TRUSTED LOCATIONS</p><h2>신뢰 IP 관리</h2></div><div class="access-actions"><span class="status-pill waiting">차단하지 않음</span><button class="add-ip" type="button" data-add-ip>+ IP 추가</button></div></div>
       <p class="muted">집과 학원처럼 익숙한 위치를 판별하는 용도입니다. 국내 미등록 IP는 차단하지 않고 새 위치 접속으로 기록합니다.</p>
-      <div class="ip-list" data-ip-list><div class="ip-row"><span>학원</span><code>보호된 정보</code><b>등록됨</b><button class="remove-ip" type="button" disabled title="마지막 필수 IP는 삭제할 수 없습니다" aria-label="학원 IP 삭제">−</button></div></div>
+      <div class="ip-list" data-ip-list><div class="ip-row"><span class="ip-number">1</span><span class="ip-label">학원</span><code>보호된 정보</code><b class="ip-state">등록됨</b><button class="remove-ip" type="button" disabled title="마지막 필수 IP는 삭제할 수 없습니다" aria-label="학원 IP 삭제">−</button></div></div>
     </section>
 
     <section class="panel" id="security-events">
-      <div class="panel-heading"><div><p class="eyebrow">SECURITY EVENTS</p><h2>비정상 접속 이력</h2></div><span class="status-pill waiting" data-security-event-count>기록 없음</span></div>
+      <div class="panel-heading"><div><p class="eyebrow">SECURITY EVENTS</p><h2>비정상 접속 이력</h2></div><div class="security-event-actions"><span class="status-pill waiting" data-security-event-count>기록 없음</span><button type="button" data-delete-events hidden disabled>선택 삭제</button></div></div>
       <p class="muted">관리자 로그인 실패, 미등록 IP 및 해외 IP의 대시보드 접근 시도를 표시합니다.</p>
-      <div class="table-wrap"><table><thead><tr><th>발생 시각</th><th>IP</th><th>국가</th><th>사유</th><th>처리 상태</th></tr></thead><tbody data-security-events><tr><td colspan="5" class="empty">확인된 비정상 접속 이력이 없습니다.</td></tr></tbody></table></div>
+      <div class="table-wrap"><table class="security-events-table"><colgroup><col class="event-select-column"><col class="event-time-column"><col class="event-ip-column"><col class="event-country-column"><col class="event-reason-column"><col class="event-status-column"></colgroup><thead><tr><th class="select-column"><input type="checkbox" data-select-page aria-label="현재 페이지 전체 선택"></th><th>발생 시각</th><th>IP</th><th>국가</th><th>사유</th><th>처리 상태</th></tr></thead><tbody data-security-events><tr><td colspan="6" class="empty">확인된 비정상 접속 이력이 없습니다.</td></tr></tbody></table></div>
+      <nav class="event-pagination" aria-label="비정상 접속 이력 페이지"><button type="button" data-events-prev>이전</button><div class="event-page-numbers" data-events-pages><button type="button" class="active" aria-current="page">1</button></div><button type="button" data-events-next>다음</button></nav>
     </section>
   </main>
   <script src="./dashboard.js" defer></script>

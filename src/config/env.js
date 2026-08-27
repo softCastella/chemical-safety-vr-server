@@ -63,6 +63,7 @@ export const env = Object.freeze({
     nodeEnv !== "production",
   ),
   enableServerAdmin: readBoolean("ENABLE_SERVER_ADMIN", nodeEnv === "production"),
+  vultrApiKey: process.env.VULTR_API_KEY ?? "",
   unityTelemetryDirectory:
     process.env.UNITY_TELEMETRY_DIRECTORY ?? defaultUnityTelemetryDirectory,
   database: Object.freeze({

@@ -47,8 +47,23 @@ export function createServerAdminRouter({ repository }) {
   });
   router.get("/session", requireAdmin, (request, response) => response.json({ username: request.serverAdmin.username }));
   router.get("/overview", requireAdmin, async (request, response, next) => {
-    try { response.json({ ...(await collectServerOverview({ securityEvents: await repository.recentSecurityEvents(), trustedIps: await repository.listTrustedIps() })), currentUser: { username: request.serverAdmin.username, role: request.serverAdmin.role } }); }
+    try { response.json({ ...(await collectServerOverview({ securityEvents: await repository.recentSecurityEvents(), trustedIps: await repository.listTrustedIps(), currentIp: clientIp(request) })), currentUser: { username: request.serverAdmin.username, role: request.serverAdmin.role } }); }
     catch (error) { next(error); }
+  });
+  router.get("/security-events", requireAdmin, async (request, response, next) => {
+    try {
+      const page = Number.parseInt(request.query.page, 10) || 1;
+      if (page < 1 || page > 100000) return response.status(400).json({ error: "Invalid page." });
+      response.json(await repository.listSecurityEvents({ page, pageSize: 20 }));
+    } catch (error) { next(error); }
+  });
+  router.delete("/security-events", requireAdmin, requireWriteAdmin, async (request, response, next) => {
+    try {
+      if (!Array.isArray(request.body?.ids)) return response.status(400).json({ error: "Invalid security event IDs." });
+      const ids = [...new Set(request.body.ids)];
+      if (ids.length < 1 || ids.length > 20 || ids.some((id) => !Number.isInteger(id) || id < 1)) return response.status(400).json({ error: "Invalid security event IDs." });
+      response.json({ deleted: await repository.deleteSecurityEvents(ids) });
+    } catch (error) { next(error); }
   });
   router.post("/trusted-ips", requireAdmin, requireWriteAdmin, async (request, response, next) => {
     try {

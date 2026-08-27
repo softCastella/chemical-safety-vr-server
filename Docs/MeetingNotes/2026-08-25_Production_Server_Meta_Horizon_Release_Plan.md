@@ -924,3 +924,163 @@ SPARK와 LOOP 준비중 페이지의 공통 `.line-nav a:hover`가 `#111`로 고
 7. 홈페이지 문의 폼의 `/api/contact`는 현재 서버 라우트가 없어 POST 시 `404`가 발생한다. 문의 저장 또는 메일 전달 정책을 확정한 뒤 별도 구현·검증해야 한다.
 
 정적 파일과 자동 테스트 결과를 실제 브라우저의 시각적 승인으로 확대 해석하지 않는다. 현재 완료 범위는 별도 시안과 자산·CSS 적용, 정적 검사와 서버 테스트까지이며 최종 라우팅 교체와 실브라우저 반응형 승인은 남아 있다.
+
+## 16. 2026-08-27 Meta Horizon APK·Vultr 텔레메트리 연동 회의
+
+### 16.1 회의 목적
+
+Unity 클라이언트가 아직 개발·테스트 단계이고 출시 APK와 Meta Horizon 입점이 완료되지 않은 상황에서, 훈련 데이터를 어떤 경로로 Vultr 서버와 MySQL에 저장하고 VR 운영 대시보드에서 검증할지 작업 책임과 순서를 확정한다.
+
+기준 커밋은 다음과 같다.
+
+- 서버 저장소 `main`: `2931c305ece1afef413e15974dd4618f5188fb1c`
+- 클라이언트 저장소 `main`: `2f7250e6c3ecdeaf9f712676d7d01074a6120b94`
+
+두 Codex 대화는 자동으로 상태를 공유하지 않는다. 각 저장소의 코드, 문서, 테스트 결과와 커밋 SHA를 작업 사실의 기준으로 사용한다.
+
+### 16.2 현재 확인된 사실
+
+- Unity의 `PPETrainingTelemetryCapture.cs`는 훈련 이벤트를 `Application.persistentDataPath/tyche-training-telemetry` 아래 세션 JSONL 파일로 기록한다.
+- 전체 텔레메트리 JSONL을 운영 서버로 업로드하는 클라이언트 코드는 현재 없다.
+- `TycheLocalTrainingRegistrationClient.cs`는 개발용 로컬 왕복 시험이며 기본 주소가 `http://127.0.0.1:3000`이다. 전체 이벤트가 아니라 Meta 앱 범위 사용자 ID와 현재 세션 요약만 `/api/training-registrations`로 전송한다.
+- Quest 독립 실행에서 `127.0.0.1`은 개발 PC나 Vultr가 아니라 Quest 기기 자신을 뜻한다.
+- 운영 서버의 `/dashboard/` 정적 화면은 Express 내부에서 HTTP `200`이지만 Nginx 외부 공개 대상은 아니다.
+- 운영 서버의 `/api/local-telemetry/sessions`는 HTTP `404`다. 운영 `.env`에서 `ENABLE_LOCAL_TELEMETRY_READ=false`이고 `UNITY_TELEMETRY_DIRECTORY`도 설정하지 않았다.
+- 현재 대시보드는 개발 PC의 Unity JSONL 디렉터리를 읽는 로컬 검증용이다. Meta Horizon 사용자 데이터가 Vultr로 자동 수집되는 상태가 아니다.
+
+따라서 `클라이언트 계측 코드 존재`, `로컬 JSONL 생성`, `운영 서버 수신`, `MySQL 저장`, `관리자 대시보드 조회`는 서로 다른 완료 단계다. 하나의 성공을 나머지 단계의 성공으로 확대 해석하지 않는다.
+
+### 16.3 최종 배포 구조
+
+출시 APK는 Vultr에 설치하거나 실행하지 않는다. Unity에서 서명한 APK를 Meta Horizon Developer Dashboard의 Alpha, Beta, RC와 Production 채널로 올리고, Meta가 Quest 사용자에게 배포한다.
+
+```text
+Unity 프로젝트
+→ 출시 서명 APK
+→ Meta Horizon Release Channel
+→ 사용자 Quest에 설치
+→ Vultr HTTPS 텔레메트리 API
+→ Express 입력 검증·중복 제거
+→ MySQL 세션·원본 이벤트 저장
+→ 관리자 인증 조회 API
+→ VR 운영 대시보드
+```
+
+- Meta Horizon은 APK 심사·배포·업데이트를 담당한다.
+- Quest APK는 훈련 실행, 원본 이벤트 생성, 로컬 임시 보관과 재전송을 담당한다.
+- Vultr Express는 기기 인증, 입력 검증, 중복 제거, MySQL 저장과 관리자 조회를 담당한다.
+- MySQL 접속정보와 관리자 비밀키는 APK에 넣지 않는다. Unity는 DB에 직접 접속하지 않고 HTTPS API만 호출한다.
+- 텔레메트리 업로드 API는 다양한 Quest 네트워크에서 접근할 수 있어야 하며 기기별 폐기 가능한 인증, 요청 제한과 입력 검증을 적용한다.
+- VR 대시보드와 조회 API는 관리자 인증과 VR 조회 권한을 통과한 경우에만 제공한다.
+
+### 16.4 서버 저장소 구현 위치
+
+서버 쪽 제안 파일과 책임은 다음과 같다. 파일명과 API 경로는 구현 전 계약 검토에서 최종 확정한다.
+
+| 경로 | 책임 |
+|---|---|
+| `db/migrations/009_create_training_telemetry.sql` | 기기, 훈련 세션과 원본 이벤트 테이블 추가 |
+| `src/modules/training-telemetry/training-telemetry-routes.js` | Quest 업로드 요청과 관리자 조회 요청의 HTTP 경로 |
+| `src/modules/training-telemetry/training-telemetry-service.js` | 필수 필드, 이벤트 형식, 세션 상태와 중복 기준 검증 |
+| `src/modules/training-telemetry/training-telemetry-repository.js` | MySQL 트랜잭션, 세션·이벤트 저장과 조회 |
+| `src/app.js` | 텔레메트리 라우터와 관리자 인증 연결 |
+| `public/dashboard/index.html` | 로컬 파일 API 대신 관리자 조회 API 소비 |
+| `test/training-telemetry.test.js` | 정상 업로드, 잘못된 입력, 중복 재전송과 권한 회귀 테스트 |
+
+운영 DB 마이그레이션은 코드와 테스트가 완료된 뒤 별도 승인을 받아 실행한다. 기존 적용 마이그레이션을 수정하지 않는다.
+
+### 16.5 클라이언트 저장소 구현 위치
+
+| 경로 | 책임 |
+|---|---|
+| `Assets/Scripts/PPETrainingTelemetryCapture.cs` | 기존 훈련 원본 이벤트와 세션 JSONL 생성 유지 |
+| `Assets/Scripts/TycheTrainingTelemetryUploader.cs` | JSONL 이벤트 일괄 전송, 서버 확인과 실패 재시도 |
+| `Assets/Scripts/TycheTelemetryApiConfig.cs` | 개발·테스트·운영 HTTPS 기본 주소 구분 |
+| Unity 테스트 코드 | JSON 직렬화 계약, 배치 분할과 재시도 상태 검증 |
+
+서버 비밀정보를 C# 소스, `PlayerPrefs`나 APK에 하드코딩하지 않는다. 학원 관리 기기에는 기기별로 폐기 가능한 등록 정보를 부여하고, 구체적인 발급·교체 방식은 서버 인증 계약과 함께 확정한다.
+
+### 16.6 제안 API 흐름
+
+```text
+POST /api/training-telemetry/sessions
+POST /api/training-telemetry/sessions/{sessionId}/events
+POST /api/training-telemetry/sessions/{sessionId}/complete
+
+GET /api/vr-dashboard/sessions
+GET /api/vr-dashboard/sessions/{sessionId}
+```
+
+- Unity 이벤트는 한 건마다 요청하지 않고 20~50건 단위 배치를 우선 검토한다.
+- 각 이벤트에 `eventId`, 각 배치에 `batchId`를 두고 고유 제약으로 재전송 중복을 제거한다.
+- 서버가 저장 성공을 확인하기 전에는 Quest의 원본 JSONL을 삭제하지 않는다.
+- 네트워크가 끊겨도 교육 진행을 막지 않고 로컬에 보관한 뒤 연결 복구 시 다시 전송한다.
+- `application_quitting`은 앱 종료 신호일 뿐 충돌·전원 종료·실수 종료를 확정하는 값으로 사용하지 않는다.
+
+### 16.7 검증 순서와 완료 조건
+
+```text
+Unity가 이벤트 20건 생성
+→ API가 20건 수락
+→ MySQL 원본 이벤트 20건 저장
+→ VR 대시보드가 같은 sessionId와 20건 표시
+```
+
+다음 단계를 각각 증거로 확인한다.
+
+1. 서버 API·신규 마이그레이션·저장소의 자동 테스트
+2. Unity Editor의 JSON 생성과 테스트 API 전송
+3. 서버 응답의 수락·중복·거부 건수
+4. 테스트 DB의 세션·원본 이벤트 수량
+5. 관리자 조회 API와 대시보드의 같은 `sessionId`·이벤트 수량
+6. Quest 개발 빌드의 HTTPS 전송과 오프라인 재전송
+7. Meta Horizon Alpha 채널 APK의 실제 Quest 수집
+
+`Unity 전송 수 = API 수락 수 = DB 저장 수 = 대시보드 원본 수`가 일치해야 한 회차의 통합 성공으로 판단한다. 정적 계약 테스트나 화면 HTTP `200`만으로 실제 수집 성공을 확정하지 않는다.
+
+### 16.8 작업 순서 결정
+
+1. 서버 저장소에서 API 계약, 신규 DB 마이그레이션, 인증 경계와 자동 테스트를 먼저 작성한다.
+2. 운영 DB를 변경하기 전에 테스트 저장소로 중복·재시도 계약을 검증한다.
+3. 서버 계약 문서와 서버 커밋 SHA를 Windows의 클라이언트 Codex 세션에 전달한다.
+4. 클라이언트 저장소에서 C# 업로더와 빌드 환경별 주소 설정을 구현한다.
+5. Unity Editor → 테스트 API → 테스트 DB → 비공개 대시보드 순서로 통합 검증한다.
+6. 검증 완료 뒤에만 운영 DB 마이그레이션, PM2 재시작과 Nginx 대시보드 공개를 각각 승인받아 진행한다.
+7. Quest 개발 빌드와 Meta Alpha 채널에서 실제 기기 검증 후 Production 심사를 준비한다.
+
+### 16.9 현재 완료·미완료 구분
+
+#### 완료
+
+- Unity 클라이언트와 Express 서버 저장소 분리
+- Unity 원본 텔레메트리 JSONL 기록 코드 존재
+- 로컬 Express 등록 요약 POST·GET 왕복 코드와 자동 테스트 존재
+- 로컬 JSONL 조회용 VR 대시보드 화면 존재
+- Vultr Express, MySQL과 서버 관리자 인증 기반 존재
+
+#### 미완료
+
+- Quest 전체 텔레메트리 운영 HTTPS 업로드
+- 기기별 인증과 토큰 폐기
+- 운영 MySQL 세션·이벤트 스키마
+- 중복 제거·배치·오프라인 재전송 통합 검증
+- VR 관리자 권한과 인증된 조회 API
+- Nginx VR 대시보드 공개
+- APK 릴리스 빌드와 Meta Horizon 입점
+- Quest → Vultr → MySQL → 대시보드 실제 전체 흐름 검증
+
+### 16.10 교차 저장소 인수인계
+
+클라이언트 작업은 Windows PC의 `chemical-safety-vr-client` 저장소를 연 별도 Codex 세션에서 수행한다. 현재 Vultr Linux 세션은 사용자 PC의 `C:\` 드라이브에 접근하지 못한다.
+
+서버 API 계약이 구현되면 다음 정보를 클라이언트 작업에 전달한다.
+
+- 서버 대상 브랜치와 커밋 SHA
+- API 계약 문서 경로
+- 개발·테스트·운영 기본 주소
+- 요청·응답 예시와 오류 코드
+- 기기 인증 발급·교체 방식
+- 서버 자동 테스트 결과
+- 남은 Quest 수동 검증 항목
+
+이 회의록은 `Docs/SharedDocumentManifest.md`의 공용 문서다. 현재 서버 미러에 이번 회의 내용을 먼저 반영했으며 클라이언트 기준본에도 같은 상대 경로와 내용으로 동기화해야 한다. 동기화 전에는 이 서버 미러만으로 클라이언트 구현 완료 상태를 확정하지 않는다.
