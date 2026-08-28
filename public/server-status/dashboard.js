@@ -3,13 +3,15 @@ const formatEventTime=(value)=>{const parts=Object.fromEntries(new Intl.DateTime
 const setText=(selector,value)=>{const node=document.querySelector(selector);if(node)node.textContent=value};
 const setBar=(selector,value)=>{const node=document.querySelector(selector);if(node)node.style.width=`${Math.max(0,Math.min(100,value||0))}%`};
 let currentIp=null;
-const dismissedAlertStorageKey="tyche-server-admin-dismissed-alert";
-let dismissedAlertKey="";
-try{dismissedAlertKey=window.localStorage.getItem(dismissedAlertStorageKey)||""}catch{}
+const dismissedAlertStorageKey="tyche-server-admin-dismissed-alerts-v2";
+let dismissedAlertKeys=new Set();
+let activeWarningKeys=[];
+try{const stored=JSON.parse(window.localStorage.getItem(dismissedAlertStorageKey)||"[]");if(Array.isArray(stored))dismissedAlertKeys=new Set(stored.filter((key)=>typeof key==="string"))}catch{}
 let securityEventPage=1;
 let securityEventPages=1;
 let isReadOnly=false;
-const dismissWarning=()=>{const warning=document.querySelector("[data-security-warning]");if(warning){dismissedAlertKey=warning.dataset.alertKey||"";try{window.localStorage.setItem(dismissedAlertStorageKey,dismissedAlertKey)}catch{}warning.hidden=true}};
+const saveDismissedAlerts=()=>{try{window.localStorage.setItem(dismissedAlertStorageKey,JSON.stringify([...dismissedAlertKeys].slice(-500)))}catch{}};
+const dismissWarning=()=>{const warning=document.querySelector("[data-security-warning]");if(warning){for(const key of activeWarningKeys)dismissedAlertKeys.add(key);saveDismissedAlerts();warning.hidden=true}};
 
 async function refresh(){
   try{
@@ -42,9 +44,15 @@ async function refresh(){
     const alertPanel=document.querySelector("[data-system-alerts-panel]");
     const alertList=document.querySelector("[data-system-alerts]");
     if(serverAlerts.length>0){alertPanel.hidden=false;alertList.replaceChildren(...serverAlerts.map((message)=>{const item=document.createElement("li");item.textContent=message;return item}));setText("[data-system-alert-count]",`${serverAlerts.length}건 확인 필요`)}else{alertPanel.hidden=true;alertList.replaceChildren()}
-    const warningCount=events.length+serverAlerts.length;
-    const alertKey=JSON.stringify([serverAlerts,events.map((event)=>[event.createdAt,event.ipAddress])]);warning.dataset.alertKey=alertKey;const alertDetails=document.querySelector("[data-alert-details]");if(alertDetails)alertDetails.href=serverAlerts.length>0?"#system-alerts":"#security-events";
-    if(warningCount>0&&dismissedAlertKey!==alertKey){warning.hidden=false;setText("[data-warning-title]",serverAlerts.length>0?"서버 이상 상태가 감지되었습니다.":"비정상 접속이 감지되었습니다.");setText("[data-warning-message]",`서버 경고 ${serverAlerts.length}건, 비정상 접속 ${events.length}건을 확인해주세요.`);setText("[data-security-event-count]",events.length?`${events.length}건 확인 필요`:"기록 없음")}else{warning.hidden=true;if(!warningCount)setText("[data-security-event-count]","기록 없음")}
+    const systemAlertKeys=serverAlerts.map((message,index)=>`system:${data.alertItems?.[index]?.id||message}`);
+    const securityAlertKeys=events.map((event)=>`security:${event.id??`${event.createdAt}:${event.ipAddress}`}`);
+    const activeSystemAlertKeys=new Set(systemAlertKeys);for(const key of dismissedAlertKeys)if(key.startsWith("system:")&&!activeSystemAlertKeys.has(key))dismissedAlertKeys.delete(key);
+    const unseenSystemAlerts=serverAlerts.filter((_,index)=>!dismissedAlertKeys.has(systemAlertKeys[index]));
+    const unseenSecurityEvents=events.filter((_,index)=>!dismissedAlertKeys.has(securityAlertKeys[index]));
+    activeWarningKeys=[...systemAlertKeys,...securityAlertKeys];saveDismissedAlerts();
+    const warningCount=unseenSystemAlerts.length+unseenSecurityEvents.length;
+    const alertDetails=document.querySelector("[data-alert-details]");if(alertDetails)alertDetails.href=unseenSystemAlerts.length>0?"#system-alerts":"#security-events";
+    if(warningCount>0){warning.hidden=false;setText("[data-warning-title]",unseenSystemAlerts.length>0?"새 서버 이상 상태가 감지되었습니다.":"새 비정상 접속이 감지되었습니다.");setText("[data-warning-message]",`새 서버 경고 ${unseenSystemAlerts.length}건, 새 비정상 접속 ${unseenSecurityEvents.length}건을 확인해주세요.`);setText("[data-security-event-count]",events.length?`${events.length}건 확인 필요`:"기록 없음")}else{warning.hidden=true;if(!events.length)setText("[data-security-event-count]","기록 없음")}
     await loadSecurityEvents();
   }catch(error){setText("[data-sync-state]","연결 실패");setText("[data-updated]",error.message)}
 }
@@ -59,6 +67,7 @@ async function loadSecurityEvents(){const response=await fetch(`/api/server-stat
 async function deleteSelectedEvents(){const ids=[...document.querySelectorAll("[data-event-select]:checked")].map((node)=>Number(node.dataset.eventSelect));if(!ids.length||!window.confirm(`선택한 비정상 접속 이력 ${ids.length}건을 삭제할까요?`))return;const response=await fetch("/api/server-status/security-events",{method:"DELETE",credentials:"same-origin",headers:{"content-type":"application/json"},body:JSON.stringify({ids})});if(!response.ok){window.alert("선택한 이력을 삭제하지 못했습니다.");return}await refresh()}
 document.querySelector("[data-add-ip]")?.addEventListener("click",addTrustedIp);
 document.querySelector("[data-alert-close]")?.addEventListener("click",dismissWarning);
+document.querySelector("[data-alert-details]")?.addEventListener("click",dismissWarning);
 document.querySelector("[data-select-page]")?.addEventListener("change",(event)=>{document.querySelectorAll("[data-event-select]").forEach((checkbox)=>{checkbox.checked=event.target.checked});updateDeleteButton()});
 document.querySelector("[data-delete-events]")?.addEventListener("click",deleteSelectedEvents);
 document.querySelector("[data-events-prev]")?.addEventListener("click",()=>{if(securityEventPage>1){securityEventPage-=1;loadSecurityEvents()}});

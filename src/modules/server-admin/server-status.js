@@ -113,22 +113,23 @@ export async function collectServerOverview({ securityEvents = [], trustedIps = 
   const freeMemory = os.freemem();
   const totalDisk = disk.blocks * disk.bsize;
   const freeDisk = disk.bavail * disk.bsize;
-  const alerts = [];
-  if ((totalMemory - freeMemory) / totalMemory >= 0.9) alerts.push("메모리 사용률이 90% 이상입니다.");
-  if ((totalDisk - freeDisk) / totalDisk >= 0.85) alerts.push("SSD 사용률이 85% 이상입니다.");
+  const alertItems = [];
+  if ((totalMemory - freeMemory) / totalMemory >= 0.9) alertItems.push({ id: "memory-high", message: "메모리 사용률이 90% 이상입니다." });
+  if ((totalDisk - freeDisk) / totalDisk >= 0.85) alertItems.push({ id: "disk-high", message: "SSD 사용률이 85% 이상입니다." });
   const cpuCount = Math.max(1, os.cpus().length);
   const load = os.loadavg().map(round);
   const loadPerCpu = round(load[0] / cpuCount);
   const loadState = loadPerCpu >= 1 ? "비정상" : loadPerCpu >= 0.7 ? "주의" : "정상";
   const [services, certificates, certificateRenewal, billing, operatingSystem] = await Promise.all([Promise.all(serviceTargets.map(checkService)), readCertificate(), readCertificateRenewal(), readVultrBilling(), readOperatingSystem()]);
-  for (const service of services) if (service.status !== "online") alerts.push(`${service.name} 서비스 응답을 확인해주세요.`);
-  if (loadState === "비정상") alerts.push(`1분 시스템 부하가 CPU 코어 수 이상입니다. (${load[0]} / ${cpuCount}코어)`);
+  for (const service of services) if (service.status !== "online") alertItems.push({ id: `service:${service.host}${service.path}`, message: `${service.name} 서비스 응답을 확인해주세요.` });
+  if (loadState === "비정상") alertItems.push({ id: "load-high", message: `1분 시스템 부하가 CPU 코어 수 이상입니다. (${load[0]} / ${cpuCount}코어)` });
+  const alerts = alertItems.map((alert) => alert.message);
   return {
     checkedAt: new Date().toISOString(),
     memory: { total: totalMemory, used: totalMemory - freeMemory, free: freeMemory },
     disk: { total: totalDisk, used: totalDisk - freeDisk, free: freeDisk },
     uptimeLabel: uptimeLabel(os.uptime()),
-    load, cpuCount, loadPerCpu, loadState, alerts, securityEvents, services, certificates, certificateRenewal, billing, trustedIps, currentIp,
+    load, cpuCount, loadPerCpu, loadState, alerts, alertItems, securityEvents, services, certificates, certificateRenewal, billing, trustedIps, currentIp,
     serverSpecs: { cpuModel: os.cpus()[0]?.model ?? "확인 불가", cpuCount, architecture: os.arch(), operatingSystem, kernel: os.release() },
     ports: [
       { service: "Nginx HTTP", port: 80, exposure: "외부", status: "online" },
