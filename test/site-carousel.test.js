@@ -40,3 +40,16 @@ test('홈 작품 배너 외곽은 매우 연한 회색 선을 사용한다', asy
   assert.match(css, /--line-soft\s*:\s*rgba\(32,32,32,\.06\)/);
   assert.match(finalCarouselRule, /border\s*:\s*1px solid var\(--line-soft\)/);
 });
+
+test('홈과 세부 라인의 포인트 컬러 역할을 구분한다', async () => {
+  const css = await readFile(new URL('styles.css', siteRoot), 'utf8');
+
+  assert.match(css, /--brand-accent\s*:\s*#6c4bd8/);
+  assert.match(css, /\.btn-primary\{[^}]*background\s*:\s*var\(--brand-accent\)/);
+  assert.match(css, /\.active-line\{[^}]*rgba\(40,120,255,\.065\)/);
+  assert.match(css, /\.status\.live\{[^}]*color\s*:\s*var\(--immersa\)/);
+  assert.match(css, /--immersa\s*:\s*#2878ff/);
+  assert.match(css, /--spark\s*:\s*#ff7a00/);
+  assert.match(css, /--loop\s*:\s*#f4c430/);
+  assert.doesNotMatch(css, /var\(--orange\)/);
+});
