@@ -183,6 +183,19 @@ VR 사용자 데이터는 서버 상태 대시보드에 섞어 표시하지 않�
 
 관리자·DB 비밀번호, 임시 viewer PIN과 원문 세션 토큰은 문서나 저장소에 기록하지 않는다. 임시 viewer를 다시 발급하면 기존 PIN과 만료시간을 교체한다.
 
+## 홈페이지 포인트 컬러 운영 반영
+
+2026-08-28 홈의 오렌지 포인트가 SPARK 라인 컬러와 겹치는 문제를 해결하기 위해 모기업 홈과 공통 브랜드 영역을 바이올렛 `#6C4BD8`로 분리했다. IMMERSA `#2878FF`, SPARK `#FF7A00`, LOOP `#F4C430`은 각 라인의 고유 색으로 유지했다.
+
+- 운영 반영 커밋: `8961843821050e606619fd9116db1b0153f84108`
+- 운영 서버 반영 방식: `main` fast-forward
+- 공개 확인: 루트, 브랜드, IMMERSA, SPARK, LOOP HTTPS 페이지 모두 HTTP `200`
+- CSS 확인: `--brand-accent:#6c4bd8`, `--immersa:#2878ff` 존재 및 `var(--orange)` 미사용
+- 운영 검증: 자동 테스트 20개 통과, 의존성 취약점 0개, `git diff --check`와 `nginx -t` 통과
+- 변경 제외: Express API, 운영 DB, 마이그레이션, 텔레메트리, PM2와 Unity 클라이언트 코드
+
+정적 파일은 Nginx가 직접 읽으므로 PM2 재시작과 Nginx reload 없이 반영했다. 실제 데스크톱·모바일 브라우저의 색감과 명도 대비는 별도 육안 확인 대상으로 남긴다.
+
 ## SSH 보안 남은 작업
 
 현재 `linuxuser`의 ED25519 키 접속은 확인했지만 SSH hardening은 아직 적용하지 않았다. 점검 당시 `PermitRootLogin yes`, `PasswordAuthentication yes`, 22번 포트 전체 공개, Fail2ban 비활성 상태였으며 해외 IP의 `root`·`ubuntu` 로그인 시도가 실제 로그에 있었다. 다음 작업에서 현재 SSH 창을 유지한 채 새 창의 `ssh tycheworks` 키 접속을 재확인하고 root 로그인 차단, 비밀번호 로그인 차단, `linuxuser` 허용과 Fail2ban 활성화를 순서대로 적용해야 한다.
