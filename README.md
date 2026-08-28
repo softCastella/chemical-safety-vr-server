@@ -66,3 +66,24 @@ npm test
 ```
 
 정적 테스트 통과를 운영 DB, 실제 Unity 전송 또는 배포 성공으로 확대 해석하지 않습니다. 최종 문서와 보고자료에는 서버와 클라이언트 저장소의 기준 커밋, 실제 원본 이벤트와 완료한 검증 범위를 함께 기록합니다.
+
+## 훈련 텔레메트리 DB 적재 확인
+
+훈련 텔레메트리 수집 API는 기본적으로 비활성화되어 있다. 별도 테스트 DB에 `009`~`012` 훈련 텔레메트리 migration을 적용하고 다음 설정을 명시한 경우에만 API와 개발 확인 화면이 열린다.
+
+```dotenv
+ENABLE_TRAINING_TELEMETRY_INGEST=true
+TRAINING_TELEMETRY_UPLOAD_TOKEN=replace-with-16-plus-ascii-token
+```
+
+- 개발 확인 화면: `/telemetry-ingest-test/`
+- 세션 시작: `POST /api/training-telemetry/sessions`
+- 이벤트 배치: `POST /api/training-telemetry/sessions/{sessionId}/events`
+- 세션 완료: `POST /api/training-telemetry/sessions/{sessionId}/complete`
+- 원본 조회: `GET /api/training-telemetry/sessions`, `GET /api/training-telemetry/sessions/{sessionId}`
+- 자체 ID 인원 조회: `GET /api/training-telemetry/participants`, `GET /api/training-telemetry/participants/{participantId}`
+- 자체 ID별 세션 조회: `GET /api/training-telemetry/sessions?participantId={participantId}`
+
+현재 임시 Bearer 토큰은 로컬·통합 테스트용이며 출시 APK 인증 계약이 아니다. 출시 전 Meta User Proof를 서버에서 검증해 발급하는 단기 토큰으로 교체해야 한다. 실제 수집 출처는 새 클라이언트 저장소를 나타내는 `sourceProject=chemical-safety-vr-client`만 허용하며 이전 모노리포 JSONL은 DB 적재 대상으로 사용하지 않는다.
+
+세션 시작 요청에는 새 클라이언트가 로컬에 보존하는 32자리 `clientInstanceId`가 항상 필요하다. Meta 테스트 ID가 있으면 숫자 문자열 `metaUserId`를 함께 보내고, 없으면 생략한다. 서버는 두 경우 모두 별도의 숫자형 `participantId`를 발급한다. 같은 Meta ID는 기기가 달라도 같은 `participantId`로, Meta ID가 없는 경우에는 같은 `clientInstanceId`가 같은 `participantId`로 묶인다. 공유 기기에서 서로 다른 사용자를 잘못 합치지 않기 위해 익명 ID와 나중에 확인된 Meta ID는 자동 병합하지 않는다.

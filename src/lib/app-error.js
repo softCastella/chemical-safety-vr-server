@@ -12,6 +12,10 @@ export function badRequest(message, details) {
   return new AppError(400, "BAD_REQUEST", message, details);
 }
 
+export function unauthorized(message = "Authentication is required.") {
+  return new AppError(401, "UNAUTHORIZED", message);
+}
+
 export function notFound(message) {
   return new AppError(404, "NOT_FOUND", message);
 }

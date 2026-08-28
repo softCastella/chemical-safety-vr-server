@@ -13,11 +13,15 @@ import { createLocalTelemetryRouter } from "./modules/local-telemetry/local-tele
 import { createLocalTelemetryRepository } from "./modules/local-telemetry/local-telemetry-repository.js";
 import { createServerAdminRepository } from "./modules/server-admin/server-admin-repository.js";
 import { createServerAdminRouter } from "./modules/server-admin/server-admin-routes.js";
+import { createTrainingTelemetryTokenAuthorizer } from "./modules/training-telemetry/training-telemetry-auth.js";
+import { createTrainingTelemetryRepository } from "./modules/training-telemetry/training-telemetry-repository.js";
+import { createTrainingTelemetryRouter } from "./modules/training-telemetry/training-telemetry-routes.js";
 
 const publicRoot = fileURLToPath(new URL("../public/", import.meta.url));
 const dashboardRoot = path.join(publicRoot, "dashboard");
 const siteRoot = path.join(publicRoot, "site");
 const serverStatusRoot = path.join(publicRoot, "server-status");
+const telemetryIngestTestRoot = path.join(publicRoot, "telemetry-ingest-test");
 
 export function createApp({
   userRepository,
@@ -26,6 +30,9 @@ export function createApp({
   enableTrainingRegistration = env.enableLocalTrainingRegistration,
   localTelemetryRepository,
   enableLocalTelemetryRead = env.enableLocalTelemetryRead,
+  trainingTelemetryRepository,
+  enableTrainingTelemetryIngest = env.enableTrainingTelemetryIngest,
+  trainingTelemetryUploadToken = env.trainingTelemetryUploadToken,
   serverAdminRepository,
   enableServerAdmin = env.enableServerAdmin,
 } = {}) {
@@ -70,6 +77,26 @@ export function createApp({
     app.use(
       "/api/local-telemetry",
       createLocalTelemetryRouter({ repository: resolvedLocalTelemetryRepository }),
+    );
+  }
+
+  if (enableTrainingTelemetryIngest) {
+    const resolvedTrainingTelemetryRepository =
+      trainingTelemetryRepository ?? createTrainingTelemetryRepository(databasePool);
+    const authorize = createTrainingTelemetryTokenAuthorizer(
+      trainingTelemetryUploadToken,
+    );
+    app.use(
+      "/api/training-telemetry",
+      createTrainingTelemetryRouter({
+        repository: resolvedTrainingTelemetryRepository,
+        authorize,
+      }),
+    );
+    app.get(
+      ["/telemetry-ingest-test", "/telemetry-ingest-test/"],
+      (_request, response) =>
+        response.sendFile(path.join(telemetryIngestTestRoot, "index.html")),
     );
   }
 

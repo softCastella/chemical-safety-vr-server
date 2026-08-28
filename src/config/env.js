@@ -62,6 +62,12 @@ export const env = Object.freeze({
     "ENABLE_LOCAL_TELEMETRY_READ",
     nodeEnv !== "production",
   ),
+  enableTrainingTelemetryIngest: readBoolean(
+    "ENABLE_TRAINING_TELEMETRY_INGEST",
+    false,
+  ),
+  trainingTelemetryUploadToken:
+    process.env.TRAINING_TELEMETRY_UPLOAD_TOKEN ?? "",
   enableServerAdmin: readBoolean("ENABLE_SERVER_ADMIN", nodeEnv === "production"),
   vultrApiKey: process.env.VULTR_API_KEY ?? "",
   unityTelemetryDirectory:

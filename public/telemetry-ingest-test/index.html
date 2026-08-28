@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>훈련 텔레메트리 DB 확인</title>
+  <style>
+    :root { color-scheme: light; font-family: system-ui, sans-serif; color: #202020; background: #f5f6f8; }
+    body { margin: 0; }
+    main { width: min(1080px, calc(100% - 32px)); margin: 32px auto; }
+    h1 { margin: 0 0 8px; font-size: 24px; }
+    .notice { margin: 0 0 24px; color: #555; }
+    .panel { margin: 16px 0; padding: 18px; border: 1px solid #dfe3e8; border-radius: 12px; background: #fff; }
+    .controls { display: grid; grid-template-columns: 1fr 1fr 1fr auto auto; gap: 10px; align-items: end; }
+    label { display: grid; gap: 6px; color: #555; font-size: 12px; }
+    input, button { min-height: 40px; box-sizing: border-box; border-radius: 8px; font: inherit; }
+    input { padding: 8px 10px; border: 1px solid #cbd1d8; }
+    button { padding: 8px 14px; border: 0; background: #202020; color: #fff; cursor: pointer; }
+    button.secondary { background: #e9edf2; color: #202020; }
+    button:disabled { opacity: .55; cursor: wait; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { padding: 10px; border-bottom: 1px solid #eceff2; text-align: left; vertical-align: top; }
+    tbody tr { cursor: pointer; }
+    tbody tr:hover { background: #f7f9fb; }
+    pre { max-height: 520px; overflow: auto; margin: 0; padding: 14px; border-radius: 8px; background: #101214; color: #dce4ec; font-size: 12px; white-space: pre-wrap; }
+    #status { min-height: 20px; margin: 12px 0 0; font-size: 13px; }
+    .error { color: #b42318; }
+    .success { color: #067647; }
+    @media (max-width: 760px) { .controls { grid-template-columns: 1fr; } .table-wrap { overflow-x: auto; } }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>훈련 텔레메트리 DB 확인</h1>
+    <p class="notice">개발 확인 전용 화면입니다. 최종 대시보드 지표를 계산하지 않고 MySQL에 저장된 원본 세션과 이벤트만 표시합니다. Meta 입점 확인은 <strong>Unity 0.1.0 원본 세션</strong>과 <strong>Meta 연결 성공</strong>이 같은 행에 표시돼야 통과입니다.</p>
+
+    <section class="panel">
+      <div class="controls">
+        <label>API 주소<input id="baseUrl" value=""></label>
+        <label>업로드 토큰<input id="token" type="password" autocomplete="off"></label>
+        <label>Meta 테스트 ID(선택)<input id="metaUserId" inputmode="numeric" placeholder="비우면 익명 ID"></label>
+        <button id="sample">샘플 3건 전송</button>
+        <button id="refresh" class="secondary">DB 새로고침</button>
+      </div>
+      <p id="status"></p>
+    </section>
+
+    <section class="panel table-wrap">
+      <table>
+        <thead><tr><th>자체 ID</th><th>Meta 연결</th><th>세션</th><th>상태</th><th>시작 시각</th><th>모드</th><th>앱 버전/출처</th><th>이벤트</th></tr></thead>
+        <tbody id="sessions"><tr><td colspan="8">토큰을 입력하고 새로고침하세요.</td></tr></tbody>
+      </table>
+    </section>
+
+    <section class="panel table-wrap">
+      <label style="max-width:220px;margin-bottom:12px">자체 ID로 세션 필터<input id="participantFilter" type="number" min="1" placeholder="전체"></label>
+      <table>
+        <thead><tr><th>자체 ID</th><th>구분</th><th>세션 수</th><th>최초 수집</th><th>최근 수집</th></tr></thead>
+        <tbody id="participants"><tr><td colspan="5">수집 인원 정보가 없습니다.</td></tr></tbody>
+      </table>
+    </section>
+
+    <section class="panel">
+      <pre id="detail">세션을 선택하면 DB 원본 이벤트가 표시됩니다.</pre>
+    </section>
+  </main>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    $("baseUrl").value = location.origin;
+    $("token").value = sessionStorage.getItem("tycheTelemetryTestToken") || "";
+    const clientInstanceId = localStorage.getItem("tycheTelemetryWebClientId") ||
+      crypto.randomUUID().replaceAll("-", "");
+    localStorage.setItem("tycheTelemetryWebClientId", clientInstanceId);
+
+    function configuration() {
+      const baseUrl = $("baseUrl").value.trim().replace(/\/$/, "");
+      const token = $("token").value;
+      if (!baseUrl || !token) throw new Error("API 주소와 업로드 토큰을 입력하세요.");
+      if (!/^[\x21-\x7e]{16,512}$/.test(token)) {
+        throw new Error("업로드 토큰은 16~512자의 공백 없는 영문·숫자·기호만 사용할 수 있습니다.");
+      }
+      sessionStorage.setItem("tycheTelemetryTestToken", token);
+      return { baseUrl, token };
+    }
+
+    async function api(path, options = {}) {
+      const { baseUrl, token } = configuration();
+      const response = await fetch(`${baseUrl}${path}`, {
+        ...options,
+        headers: {
+          Authorization: `Bearer ${token}`,
+          ...(options.body ? { "Content-Type": "application/json" } : {}),
+          ...options.headers,
+        },
+      });
+      const body = response.status === 204 ? null : await response.json().catch(() => null);
+      if (!response.ok) throw new Error(body?.error?.message || `HTTP ${response.status}`);
+      return body;
+    }
+
+    function setStatus(message, error = false) {
+      $("status").textContent = message;
+      $("status").className = error ? "error" : "success";
+    }
+
+    async function loadSession(sessionId) {
+      try {
+        const result = await api(`/api/training-telemetry/sessions/${encodeURIComponent(sessionId)}`);
+        $("detail").textContent = JSON.stringify(result.data, null, 2);
+      } catch (error) {
+        setStatus(error.message, true);
+      }
+    }
+
+    async function refresh() {
+      const button = $("refresh");
+      button.disabled = true;
+      try {
+        const participantId = $("participantFilter").value.trim();
+        const sessionPath = participantId
+          ? `/api/training-telemetry/sessions?limit=50&participantId=${encodeURIComponent(participantId)}`
+          : "/api/training-telemetry/sessions?limit=50";
+        const [result, participantResult] = await Promise.all([
+          api(sessionPath),
+          api("/api/training-telemetry/participants?limit=100"),
+        ]);
+        const rows = result.data;
+        const identityByParticipantId = new Map(
+          participantResult.data.map((participant) => [participant.participantId, participant.identityType]),
+        );
+        $("sessions").innerHTML = "";
+        if (rows.length === 0) {
+          $("sessions").innerHTML = '<tr><td colspan="8">저장된 세션이 없습니다.</td></tr>';
+        }
+        for (const session of rows) {
+          const row = document.createElement("tr");
+          for (const value of [
+            session.participantId,
+            identityByParticipantId.get(session.participantId) === "meta"
+              ? "Meta 연결 성공"
+              : "익명/미연결",
+            session.sessionId,
+            session.status,
+            session.startedAtUtc,
+            session.mode || "-",
+            session.appVersion === "local-db-test" || session.appVersion === "identity-repeat-test"
+              ? `${session.appVersion} (합성 검증)`
+              : session.appVersion || "Unity 원본",
+            session.eventCount,
+          ]) {
+            const cell = document.createElement("td");
+            cell.textContent = value;
+            row.appendChild(cell);
+          }
+          row.addEventListener("click", () => loadSession(session.sessionId));
+          $("sessions").appendChild(row);
+        }
+        $("participants").innerHTML = "";
+        for (const participant of participantResult.data) {
+          const row = document.createElement("tr");
+          for (const value of [
+            participant.participantId,
+            participant.identityType === "meta" ? "Meta 테스트 사용자" : "ID 없는 사용자",
+            participant.sessionCount,
+            participant.firstSeenAt,
+            participant.lastSeenAt,
+          ]) {
+            const cell = document.createElement("td");
+            cell.textContent = value;
+            row.appendChild(cell);
+          }
+          row.addEventListener("click", () => {
+            $("participantFilter").value = participant.participantId;
+            refresh();
+          });
+          $("participants").appendChild(row);
+        }
+        if (participantResult.data.length === 0) {
+          $("participants").innerHTML = '<tr><td colspan="5">수집 인원 정보가 없습니다.</td></tr>';
+        }
+        const realUnityRows = rows.filter((session) =>
+          session.appVersion !== "local-db-test" && session.appVersion !== "identity-repeat-test");
+        const metaUnityRows = realUnityRows.filter((session) =>
+          identityByParticipantId.get(session.participantId) === "meta");
+        setStatus(
+          `MySQL ${participantResult.data.length}명 · ${rows.length}개 세션 / ` +
+          `실제 Unity ${realUnityRows.length}건 / Meta 연결 Unity ${metaUnityRows.length}건`,
+        );
+      } catch (error) {
+        setStatus(error.message, true);
+      } finally {
+        button.disabled = false;
+      }
+    }
+
+    async function sendSample() {
+      const button = $("sample");
+      button.disabled = true;
+      try {
+        const now = new Date();
+        const compact = now.toISOString().replace(/[-:.TZ]/g, "");
+        const sessionId = `web-test-${compact}`;
+        const base = {
+          schemaVersion: 1,
+          sessionId,
+          scene: "Assets/Scenes/3_PPE_Room_3mode_loco.unity",
+          mode: "Education",
+          workPlan: "None",
+        };
+        await api("/api/training-telemetry/sessions", {
+          method: "POST",
+          body: JSON.stringify({
+            ...base,
+            sourceProject: "chemical-safety-vr-client",
+            clientInstanceId,
+            ...($("metaUserId").value.trim()
+              ? { metaUserId: $("metaUserId").value.trim() }
+              : {}),
+            startedAtUtc: now.toISOString(),
+            appVersion: "web-test",
+          }),
+        });
+        const types = ["session_started", "flow_state_changed", "ppe_choice_resolved"];
+        const events = types.map((eventType, index) => ({
+          ...base,
+          eventId: `${sessionId}:${String(index + 1).padStart(8, "0")}`,
+          sequence: index + 1,
+          timestampUtc: new Date(now.getTime() + index * 1000).toISOString(),
+          eventType,
+          flowState: index === 0 ? "Welcome" : index === 1 ? "PpeEducationSelected" : "CardIntro",
+          itemType: index === 2 ? "SafetyHelmet" : null,
+          choice: index === 2 ? "Use" : null,
+          result: index === 2 ? "Accepted" : null,
+          note: "generated by telemetry ingest test page",
+        }));
+        const saved = await api(`/api/training-telemetry/sessions/${sessionId}/events`, {
+          method: "POST",
+          body: JSON.stringify({ events }),
+        });
+        await api(`/api/training-telemetry/sessions/${sessionId}/complete`, {
+          method: "POST",
+          body: JSON.stringify({
+            schemaVersion: 1,
+            endedAtUtc: new Date(now.getTime() + 3000).toISOString(),
+            reason: "web_test_completed",
+          }),
+        });
+        setStatus(`샘플 저장 완료: accepted=${saved.accepted}, duplicates=${saved.duplicates}`);
+        await refresh();
+        await loadSession(sessionId);
+      } catch (error) {
+        setStatus(error.message, true);
+      } finally {
+        button.disabled = false;
+      }
+    }
+
+    $("refresh").addEventListener("click", refresh);
+    $("sample").addEventListener("click", sendSample);
+  </script>
+</body>
+</html>
