@@ -9,7 +9,7 @@
 - 서버 검증 기준 커밋: `6512f0c8e65401e5e32b88c971961cf6aea90f22`
 - 서버 미러·검증 결과 커밋: `5adc9ef647fd786f918db33ba1f698e61a5ce5b3`
 - 서버 작업 트리: 기존 수정 파일이 남아 있어 clean 상태가 아님
-- 동기화 상태: 서버 미러·정적 계약 검증 완료 / 서버 결과의 클라이언트 반영 완료 / 통합 검증 대기
+- 동기화 상태: 서버 런처 문서 보강 완료 / 클라이언트 기준본 재동기화 필요 / 통합 검증 대기
 
 ## 목적
 
@@ -26,8 +26,45 @@
 | 로컬 Express 실행 | 확인 | 2026-08-30 현재 TCP 3000 listen 및 `GET /` HTTP 200 확인 |
 | 로컬 등록 API | 서버 구현 확인 / 왕복 미검증 | 서버 라우트·테스트는 존재하지만 이번 Unity POST/GET 성공 근거가 없음 |
 | 텔레메트리 업로드 API | 서버 구현·설정 확인 / 통합 미검증 | ingest 활성화와 서버용 token 설정은 확인했지만 Unity 수신·DB 적재 근거가 없음 |
-| 대화 채널·큐 전달 | 미검증 | 클라이언트 코드·Unity 로그만으로 대화가 서버 큐에 전달됐다고 판단할 수 없음 |
+| 대화 채널·큐 전달 | 로컬 런처 구현 확인 / 이번 전달 미검증 | `CodexPairLauncher`는 존재하지만 클라이언트 코드·Unity 로그나 대화 표시만으로 특정 메시지의 큐 전달 성공을 판단할 수 없음 |
 | 출시 Player 업로드 | 미구현 | 현재 업로더는 Editor만 허용하고 Player에서는 업로드를 시작하지 않음 |
+
+## 로컬 Codex Pair Launcher
+
+### 위치와 역할
+
+- 이 PC의 런처 경로는 `C:\Users\lanoc\Tools\CodexPairLauncher`다.
+- 런처는 클라이언트·서버 저장소 밖에 있는 Windows용 로컬 도구이며, 확인 시점에는 별도 Git 저장소가 아니다.
+- 같은 PC에서 Codex CLI 세션 두 개를 로컬 app-server에 연결하고 사용자가 명시적으로 요청할 때만 상대 세션에 메시지를 전달한다.
+- 통신 대상은 `ws://127.0.0.1`뿐이다. `--remote`는 이 구성에서 외부 서버가 아니라 같은 PC의 Codex CLI 연결을 뜻한다.
+- 자동 답장이나 무한 대화 루프를 만들지 않으며 프로젝트 파일 또는 Git 저장소를 자동 수정하지 않는다.
+
+### 주요 명령
+
+- `Setup.cmd`: 클라이언트·서버 저장소 경로와 로컬 릴레이 설정을 작성한다.
+- `Self-Test.cmd`: 모델 턴을 시작하지 않고 런처 호환성과 임시 검사 세션을 확인한다.
+- `Start-CodexPair.cmd`: 숨겨진 로컬 app-server와 클라이언트·서버 Codex 창을 시작하고, 호환되는 기존 중계기와 저장 세션이 있으면 재사용한다.
+- `Start-Fresh-CodexPair.cmd`: 기존 세션을 재사용할 수 없을 때 새 세션 두 개를 만든다.
+- `Send-ToClient.cmd`, `Send-ToServer.cmd`: 사용자가 입력한 메시지를 상대 세션의 새 턴으로 전달한다.
+- `Open-SessionManager.cmd`: 세션 관리 화면을 연다.
+- `Stop-CodexPair.cmd`: 런처가 시작한 로컬 app-server만 종료한다.
+- `Logout-Codex.cmd`: 공용 PC 사용 후 Codex 인증정보를 제거한다. GitHub 인증정보는 별도로 관리한다.
+- `Build-Zip.cmd`: 로컬 설정과 실행 로그를 제외한 배포 ZIP을 만든다.
+
+### 설정과 보안 제한
+
+- PC별 경로 설정은 `relay.local.json`에 저장되며 `.gitignore`와 배포 ZIP에서 제외된다.
+- `relay.local.json`에는 저장소 경로, `listenHost`, port와 세션 재사용 여부만 두고 로그인 token이나 API key를 저장하지 않는다.
+- `listenHost`는 반드시 `127.0.0.1`이어야 한다. `0.0.0.0`으로 열거나 집·학원 PC를 직접 연결하지 않는다.
+- 로그인 token, API key, DB 비밀번호와 실제 사용자 데이터를 전달 메시지에 넣지 않는다.
+- app-server 포트를 다른 프로세스가 사용하면 해당 프로세스에 임의 연결하거나 종료하지 않고 중단한다.
+- 런처는 Codex CLI의 실험적 `app-server`, `--remote`, `queue`와 세션 프로토콜을 사용하므로 CLI 업데이트 뒤에는 `Self-Test.cmd` 통과 전 사용하지 않는다.
+
+### 기록과 검증 경계
+
+- 런처의 `queue`는 일시적인 대화 전달 수단이며 영구 작업 기록이 아니다. 완료 사실은 코드, 테스트 결과, Git 커밋과 `Docs/SharedDocumentManifest.md`의 공용 문서로 남긴다.
+- 대화가 상대 Codex 화면에 보였다는 사실은 Unity 등록·텔레메트리 API 수신, Express 로그, MariaDB 적재 또는 대시보드 조회 성공을 의미하지 않는다.
+- 이번 서버 문서 보강에서는 README, 명령 파일, PowerShell 스크립트 목록, `.gitignore`와 `relay.example.json`을 정적으로 확인했다. `Self-Test.cmd` 실행과 실제 양방향 메시지 전달은 이번 검증 범위에 포함하지 않았다.
 
 ## 클라이언트에서 확인된 계약
 
@@ -113,6 +150,7 @@
   통합 검증 상태는 계속 `대기`다.
 - 위 결과는 서버 `main@5adc9ef647fd786f918db33ba1f698e61a5ce5b3`에서 확인됐고 이
   클라이언트 기준본에 반영했다.
+- `로컬 Codex Pair Launcher` 절은 서버에서 후속 보강했으므로 클라이언트 기준본에 다시 동기화해야 한다. 서버 결과 커밋 SHA는 작업 결과에 별도로 기록한다.
 
 ## 다음 통합 검증 순서
 
