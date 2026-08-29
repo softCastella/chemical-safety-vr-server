@@ -1,0 +1,35 @@
+.light-page {
+  --cyan: #087bd1;
+  --white: #0b1a2b;
+  --muted: #425970;
+  color: var(--white);
+  background: #eef4f9;
+}
+
+.light-page .splash { background: #f4f8fb; }
+.light-page .splash-art { background: #eef4f9; }
+.light-page .splash-shade {
+  background:
+    linear-gradient(90deg, rgba(250, 253, 255, .99) 0%, rgba(247, 251, 255, .95) 35%, rgba(238, 247, 254, .34) 68%, rgba(236, 246, 253, .08) 100%),
+    linear-gradient(0deg, rgba(233, 242, 249, .8) 0%, transparent 40%);
+}
+.light-page .splash-grid {
+  opacity: .22;
+  background-image: linear-gradient(rgba(27, 104, 164, .12) 1px, transparent 1px), linear-gradient(90deg, rgba(27, 104, 164, .12) 1px, transparent 1px);
+}
+.light-page .splash-header { border-color: rgba(24, 86, 137, .2); }
+.light-page .project-label { color: #547089; }
+.light-page .release-state { color: #42647f; }
+.light-page .release-state span { background: #0788da; box-shadow: 0 0 16px rgba(7, 136, 218, .45); }
+.light-page .eyebrow { color: #42647f; }
+.light-page .eyebrow span { color: #fff; background: #087bd1; }
+.light-page .splash h1 { text-shadow: 0 8px 34px rgba(255, 255, 255, .7); }
+.light-page .splash h1 strong { background: linear-gradient(100deg, #173b64 0%, #087bd1 52%, #1456a8 100%); background-clip: text; -webkit-background-clip: text; }
+.light-page .meta-row span { color: #285b82; background: rgba(255, 255, 255, .62); border-color: rgba(32, 102, 158, .25); }
+.light-page .enter-button { color: #fff; background: linear-gradient(105deg, #087bd1, #1358ab); border-color: rgba(8, 79, 143, .35); box-shadow: 0 18px 48px rgba(20, 89, 151, .25); }
+.light-page .enter-button small { color: #c6e8ff; }
+@media (max-width: 760px) {
+  .light-page .splash-shade {
+    background: linear-gradient(0deg, rgba(244, 248, 251, .99) 0%, rgba(244, 249, 253, .95) 58%, rgba(239, 247, 252, .24) 100%);
+  }
+}
