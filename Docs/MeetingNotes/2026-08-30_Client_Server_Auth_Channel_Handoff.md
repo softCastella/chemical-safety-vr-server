@@ -3,12 +3,13 @@
 - 일자: 2026-08-30
 - 클라이언트 저장소: `softCastella/chemical-safety-vr-client`
 - 클라이언트 브랜치: `main`
-- 클라이언트 확인 기준 커밋: `e65a97de349bd8fd81e1c8278f66fd6846a1efb3`
+- 클라이언트 UI 반영 커밋: `b25814a018fb2c5a3c98b77e56385ca889abd35b`
 - 서버 저장소: `softCastella/chemical-safety-vr-server`
 - 서버 확인 브랜치: `main`
-- 서버 확인 기준 커밋: `6512f0c8e65401e5e32b88c971961cf6aea90f22`
-- 서버 작업 트리: 기존 수정 및 미추적 파일이 있어 clean 상태가 아님
-- 동기화 상태: 서버 미러·정적 계약 검증 완료 / 클라이언트 기준본 동기화 필요 / 통합 검증 대기
+- 서버 검증 기준 커밋: `6512f0c8e65401e5e32b88c971961cf6aea90f22`
+- 서버 미러·검증 결과 커밋: `5adc9ef647fd786f918db33ba1f698e61a5ce5b3`
+- 서버 작업 트리: 기존 수정 파일이 남아 있어 clean 상태가 아님
+- 동기화 상태: 서버 미러·정적 계약 검증 완료 / 서버 결과의 클라이언트 반영 완료 / 통합 검증 대기
 
 ## 목적
 
@@ -68,11 +69,11 @@
 
 ## 서버 저장소에서 확인된 상태
 
-- 확인 시점의 서버 기준은 `main@6512f0c8e65401e5e32b88c971961cf6aea90f22`다.
-- 서버 작업 트리에는 이 문서 작성 전부터
-  `Docs/MeetingNotes/2026-08-25_Production_Server_Meta_Horizon_Release_Plan.md` 수정과
-  `public/site/chemical-safety-vr-landing/` 미추적 파일이 있었다. 이 문서 작성 과정에서는 서버
-  파일을 수정하지 않았다.
+- 서버 검증 시작 기준은 `main@6512f0c8e65401e5e32b88c971961cf6aea90f22`이며, 미러와 검증
+  결과는 `main@5adc9ef647fd786f918db33ba1f698e61a5ce5b3`에 푸시됐다.
+- 서버 결과 커밋 뒤에도
+  `Docs/MeetingNotes/2026-08-25_Production_Server_Meta_Horizon_Release_Plan.md`의 기존 수정은
+  별도 미커밋 상태로 남아 있다.
 - `src/app.js`에 `/api/training-registrations`와 `/api/training-telemetry` 라우터가 연결되어 있다.
 - 등록·텔레메트리 라우트 구현과 관련 자동 테스트 파일이 존재한다.
 - 서버 `.env` 파일이 있으며 다음 상태만 값 노출 없이 확인했다.
@@ -93,22 +94,25 @@
 - API, 데이터 계약, Meta 인증, 텔레메트리 및 서버 구현에는 영향이 없다.
 - `Assembly-CSharp.csproj --no-restore` 정적 빌드는 오류 0개였고, 실제 Quest/OpenXR hover 표시는
   수동 확인이 남아 있다.
-- 이 변경은 위 기준 커밋 이후의 커밋되지 않은 작업 트리 변경이므로 서버에서 완료 커밋으로
-  인용하지 않는다.
+- 클라이언트 반영 커밋은 `b25814a018fb2c5a3c98b77e56385ca889abd35b`다.
 
-## 서버 담당 확인 요청
+## 서버 담당 확인 결과
 
-1. 이 문서를 서버 저장소의
-   `Docs/MeetingNotes/2026-08-30_Client_Server_Auth_Channel_Handoff.md`에 미러링한다.
-2. 서버 미러 작업의 기준 커밋과 결과 커밋을 구분해 기록한다. 기존 dirty 작업을 이 문서 변경과
-   합쳐 완료로 보고하지 않는다.
-3. 위 등록·텔레메트리 엔드포인트의 요청/응답 스키마와 인증 조건이 클라이언트 계약과 일치하는지
-   서버 테스트 결과로 확인한다.
-4. 다음 통합 실행에서 각 요청의 HTTP 상태, 서버 수신 로그, DB 적재·재조회 결과를 기록한다.
-5. 대화 채널 또는 작업 큐가 별도 런처 기능이라면 해당 프로세스·채널 ID·큐 적재 로그를 서버
-   API와 구분해 확인한다. 대화가 보였다는 사실만으로 훈련 데이터 수신을 확정하지 않는다.
-6. 서버 확인 결과 공용 사실이 바뀌면 서버 커밋 SHA와 `클라이언트 문서 동기화 필요` 여부를
-   함께 기록한다.
+- 등록 계약은 서버 구현과 자동 테스트 기준으로 클라이언트 계약과 일치한다.
+  - `POST /api/training-registrations`는 `metaUserId`, `sessionId`를 포함한 요청을 저장한다.
+  - `GET /api/training-registrations/{sessionId}`는 같은 `sessionId`의 등록을 재조회한다.
+  - 자동 테스트에서 생성 응답 HTTP 201, `metaUserId`·`sessionId` 일치와 GET 재조회를 확인했다.
+- 텔레메트리 계약도 서버 구현과 자동 테스트 기준으로 일치한다.
+  - 세션 생성, 이벤트 적재, 완료 엔드포인트는 모두 Bearer 업로드 token을 요구한다.
+  - `acceptedThroughSequence`, 중복 재전송, 완료 세션의 후속 이벤트 거부를 테스트한다.
+- 2026-08-30 서버 `npm test` 결과는 34개 통과, 실패 0개다. 이는 서버 정적 계약과 격리 저장소
+  동작의 회귀 확인이며 Unity 실제 요청이나 로컬 MariaDB 적재 성공을 대신하지 않는다.
+- 서버 `src`와 `test`에는 대화 채널 또는 작업 큐 구현이 확인되지 않았다. 등록 저장소의 내부
+  `writeQueue`와 MySQL 풀의 `queueLimit`은 대화 전달 큐가 아니다.
+- Unity 요청의 HTTP 상태, 서버 수신 로그, MariaDB 적재와 같은 `sessionId` 재조회 근거가 없어
+  통합 검증 상태는 계속 `대기`다.
+- 위 결과는 서버 `main@5adc9ef647fd786f918db33ba1f698e61a5ce5b3`에서 확인됐고 이
+  클라이언트 기준본에 반영했다.
 
 ## 다음 통합 검증 순서
 
@@ -124,20 +128,3 @@
 
 - Meta 사용자 ID, 계정 ID, 비밀번호, access token, 업로드 token 원문을 이 문서에 기록하지 않는다.
 - 사용자 식별이 필요한 검증 결과에는 마스킹 값 또는 일치 여부만 기록한다.
-
-## 서버 담당 확인 결과
-
-- 서버 확인 브랜치와 기준 커밋은 `main@6512f0c8e65401e5e32b88c971961cf6aea90f22`다.
-- 서버 미러 작업은 기존 dirty 변경과 분리해 이번 후속 커밋에 포함하며, 결과 SHA는 작업 결과에 별도로 보고한다.
-- 등록 계약은 서버 구현과 자동 테스트 기준으로 클라이언트 계약과 일치한다.
-  - `POST /api/training-registrations`는 `metaUserId`, `sessionId`를 포함한 등록 요청을 저장한다.
-  - `GET /api/training-registrations/{sessionId}`는 같은 `sessionId`의 등록을 재조회한다.
-  - 자동 테스트에서 생성 응답 HTTP 201, `metaUserId`·`sessionId` 일치와 GET 재조회를 확인했다.
-- 텔레메트리 계약은 서버 구현과 자동 테스트 기준으로 클라이언트 계약과 일치한다.
-  - 세션 생성, 이벤트 적재, 완료 엔드포인트는 모두 Bearer 업로드 token을 요구한다.
-  - 이벤트 응답의 `acceptedThroughSequence`, 중복 처리, 완료 세션의 후속 이벤트 거부를 테스트한다.
-- 2026-08-30 서버 `npm test` 결과는 34개 통과, 실패 0개다. 이는 서버 정적 계약과 격리 저장소 동작의 회귀 확인이며 Unity 실제 요청 성공이나 로컬 MariaDB 적재 성공을 대신하지 않는다.
-- 서버 `src`와 `test`에는 대화 채널 또는 작업 큐 구현이 확인되지 않았다. 등록 저장소의 내부 직렬화용 `writeQueue`와 MySQL 풀의 `queueLimit`은 대화 전달 큐가 아니다.
-- 현재 통합 검증 상태는 계속 `대기`다. Unity 요청의 HTTP 상태·서버 수신 로그·MariaDB 적재 및 같은 `sessionId` 재조회 근거가 아직 이 문서에 없다.
-- 클라이언트 문서 동기화 필요: `예`. 위 서버 확인 결과와 향후 서버 결과 커밋 SHA를 클라이언트 기준본에 반영해야 한다.
-- 최종 확인 시 클라이언트 로컬과 원격 `main`은 모두 `e65a97de349bd8fd81e1c8278f66fd6846a1efb3`였고, 클라이언트 기준본과 매니페스트 변경은 아직 커밋되지 않은 상태였다.
