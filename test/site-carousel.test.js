@@ -63,7 +63,12 @@ test('화학물질 안전훈련 VR 상세페이지 푸터는 공개 개인정보
     'https://softcastella.github.io/tycheworks-safetytrainingvr-privacy/';
 
   assert.equal(html.match(new RegExp(`href="${privacyUrl}"`, 'g'))?.length, 1);
-  assert.match(html, />VR PRIVACY POLICY<\/a>/);
+  assert.match(
+    html,
+    new RegExp(
+      `<a href="${privacyUrl}" target="_blank" rel="noopener noreferrer">VR PRIVACY POLICY<\\/a>`,
+    ),
+  );
   assert.doesNotMatch(
     html,
     /href="https:\/\/github\.com\/softCastella\/tycheworks-safetytrainingvr-privacy"/,
