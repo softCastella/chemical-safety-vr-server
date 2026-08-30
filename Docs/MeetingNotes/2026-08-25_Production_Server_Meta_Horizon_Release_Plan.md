@@ -31,7 +31,7 @@
 
 ### 2.1 Unity 앱
 
-- Unity 프로젝트 기준 경로는 저장소 루트에서 `client`로 이동했다. 현재 기준 파일은 `client/Assets`, `client/Packages`, `client/ProjectSettings`에 있다.
+- Unity 프로젝트 기준 경로는 저장소 루트에서 `client`로 이동했다. 현재 기준 파일은 `Assets`, `Packages`, `ProjectSettings`에 있다.
 - Android 앱 ID는 `com.softcastella.prototype.tyche.jinyoung`이다.
 - `productName`은 `Prototype_Tyche_Jinyoung`이다.
 - 앱 버전은 `0.1.0`, Android 빌드 번호는 `1`이다.
@@ -39,8 +39,8 @@
 - Android 최소 SDK는 현재 `25`, Target SDK는 Unity 자동 선택값이다.
 - 출시용 Android Keystore와 Key Alias는 아직 설정되지 않았다.
 - Meta Quest용 OpenXR 기능과 Oculus Touch Controller Profile은 활성화되어 있다.
-- Meta XR Platform SDK(`com.meta.xr.sdk.platform`) `205.0.0`이 `client/Packages/manifest.json`과 `client/Packages/packages-lock.json`에 등록되어 있다.
-- Meta 개발자 앱은 생성됐고 DUC는 제출·검토 대기 상태다. Quest App ID는 `client/Assets/Resources/OculusPlatformSettings.asset`에 설정되어 있다. App Secret은 Unity나 Git에 넣지 않는다.
+- Meta XR Platform SDK(`com.meta.xr.sdk.platform`) `205.0.0`이 `Packages/manifest.json`과 `Packages/packages-lock.json`에 등록되어 있다.
+- Meta 개발자 앱은 생성됐고 DUC는 제출·검토 대기 상태다. Quest App ID는 `Assets/Resources/OculusPlatformSettings.asset`에 설정되어 있다. App Secret은 Unity나 Git에 넣지 않는다.
 - 빌드 씬은 `0_App`에서 시작해 타이틀·인트로·로딩·PPE 룸으로 이어진다.
 - 현재 PPE 씬의 `AudioManager/PPE Voice Flow.m_KeyboardPresentationRoot`는 `Modal  Keyboard Canvas`를 계속 참조하지만 `m_SkipKeyboardNameInput=true`로 `NameInput` 진입을 임시 우회한다. 재사용 패키지를 만들었더라도 참조와 이름 제출 경로를 정식 전환하기 전에는 키보드 Canvas를 삭제하지 않는다.
 
@@ -115,7 +115,7 @@ Final_VR_Tyche_Pivot/
 - `server/archive`: 공개하지 않지만 삭제하지 않고 보존해야 하는 이전 사이트와 작업 자료다.
 - `shared/contracts`: Unity와 서버가 서로 다른 필드 이름을 사용하는 문제를 막는 공통 데이터 명세다.
 - `infra`: 테스트 서버와 실서버의 배포 구성을 분리한다.
-- 루트 `Tools`: Unity·서버·문서 제작을 함께 지원하는 저장소 공통 도구다. Unity 파일을 직접 참조하는 도구는 `client/Assets`를 명시한다.
+- 루트 `Tools`: Unity·서버·문서 제작을 함께 지원하는 저장소 공통 도구다. Unity 파일을 직접 참조하는 도구는 `Assets`를 명시한다.
 
 공개 개인정보처리방침은 Meta에서 접근 가능한 URL을 안정적으로 유지해야 하므로 이 비공개 모노레포 안으로 합치지 않는다. 현재의 별도 공개 저장소 `tycheworks-safetytrainingvr-privacy`와 GitHub Pages 주소를 계속 사용한다.
 
@@ -135,10 +135,10 @@ Unity 앱은 데이터베이스에 직접 접속하지 않는다. Unity는 HTTPS
 
 ### 4.2 이동 대상
 
-- `Assets` → `client/Assets`
-- `Packages` → `client/Packages`
-- `ProjectSettings` → `client/ProjectSettings`
-- 루트 `Tools`는 유지하고 Unity 직접 참조 경로만 `client/Assets`로 변경
+- `Assets` → `Assets`
+- `Packages` → `Packages`
+- `ProjectSettings` → `ProjectSettings`
+- 루트 `Tools`는 유지하고 Unity 직접 참조 경로만 `Assets`로 변경
 - `tycheworks-site-final-v2-260824` → `server/public/site`
 - 대시보드 HTML과 이후 프런트엔드 코드 → `server/public/dashboard`
 - 새 Express 애플리케이션과 DB migration → `server`
@@ -155,7 +155,7 @@ Unity 앱은 데이터베이스에 직접 접속하지 않는다. Unity는 HTTPS
 1. Unity Hub에 `client`를 프로젝트 경로로 다시 등록한다.
 2. Unity `6000.4.8f1`로 프로젝트를 연다.
 3. 패키지 복원과 스크립트 컴파일이 끝날 때까지 기다린다.
-4. `client/ProjectSettings/EditorBuildSettings.asset`의 빌드 씬 순서를 확인한다.
+4. `ProjectSettings/EditorBuildSettings.asset`의 빌드 씬 순서를 확인한다.
 5. 주요 씬과 프리팹의 Missing Script·Missing Reference를 확인한다.
 6. 이동 전후 주요 `.meta` GUID가 변하지 않았는지 확인한다.
 7. 정적 C# 빌드, Unity Play Mode와 Quest/OpenXR 실행을 각각 구분해 검증한다.
@@ -167,11 +167,11 @@ Express 실행 기반·정적 파일 제공과 사용자 CRUD까지 구성했고
 
 완료된 파일 작업은 다음과 같다.
 
-- `Assets` → `client/Assets` 이동
-- `Packages` → `client/Packages` 이동
-- `ProjectSettings` → `client/ProjectSettings` 이동
+- `Assets` → `Assets` 이동
+- `Packages` → `Packages` 이동
+- `ProjectSettings` → `ProjectSettings` 이동
 - 루트 `server` 폴더 생성
-- `client/Packages`에 Meta XR Platform SDK `205.0.0` 등록
+- `Packages`에 Meta XR Platform SDK `205.0.0` 등록
 - `server` npm 초기화 및 Express `5.2.1` 설치
 - `npm start`, `npm run dev`, `npm test` 스크립트 구성
 - `GET /api/health` 구현과 실제 localhost 응답 검증
@@ -182,7 +182,7 @@ Express 실행 기반·정적 파일 제공과 사용자 CRUD까지 구성했고
 - `client` 생성 폴더용 `.gitignore`, Unity MCP, VS Code, README, AGENTS와 공통 도구 경로 갱신
 - users/external identities migration과 사용자 CRUD 모듈 구현
 - Meta 인증 전 운영 CRUD 비활성화 플래그 적용
-- Unity Hub에서 `client`를 Unity `6000.4.8f1` 프로젝트로 열고 `client/Library` 및 Platform SDK package cache 재생성
+- Unity Hub에서 `client`를 Unity `6000.4.8f1` 프로젝트로 열고 `Library` 및 Platform SDK package cache 재생성
 - Meta Quest App ID 설정과 `OculusPlatformSettings.asset` 생성
 - `MetaPlatformIdentityProbe` 구현 및 시작 씬 `0_App/AppMain` 연결
 - SDK 초기화, entitlement, 앱 범위 사용자 ID와 연령대 조회 코드의 Unity C# 컴파일 확인
@@ -190,9 +190,9 @@ Express 실행 기반·정적 파일 제공과 사용자 CRUD까지 구성했고
 아직 완료로 판단하지 않는 항목은 다음과 같다.
 
 - 프로젝트용 DB와 계정, Meta 사용자 증명 검증, 교육 기록 API는 아직 구현되지 않았다.
-- 루트 `Tools`는 공통 도구 위치로 유지하고 Unity 직접 참조 스크립트는 `client/Assets` 경로로 갱신했다.
+- 루트 `Tools`는 공통 도구 위치로 유지하고 Unity 직접 참조 스크립트는 `Assets` 경로로 갱신했다.
 - 기존 루트 Unity 생성 폴더의 최종 정리가 남아 있다.
-- 기존 루트 `Library/PackageCache`는 새 Unity 프로젝트의 영구 기준 경로가 아니며, 현재 기준은 `client/Library/PackageCache`다. 기존 루트 생성 폴더의 안전한 정리는 별도 작업으로 남긴다.
+- 기존 루트 `Library/PackageCache`는 새 Unity 프로젝트의 영구 기준 경로가 아니며, 현재 기준은 `Library/PackageCache`다. 기존 루트 생성 폴더의 안전한 정리는 별도 작업으로 남긴다.
 - Git 상태에서 `client`는 아직 새 경로로 추적되지 않은 상태다. 기존 변경 보존과 이동 diff 확인이 필요하다.
 - 새 `client` 경로에서 패키지 복원과 C# 컴파일은 완료했다. 전체 Play Mode, Quest/OpenXR 첫 기동, 양안, 입력과 Meta 계정 실연동 검증은 아직 완료하지 않았다.
 
@@ -687,7 +687,7 @@ SDK 설치만으로 키보드 Canvas를 삭제하거나 컨트롤러 가이드�
   3. 입력·Interactor·Raycaster·Collider 경로는 사용하지 않으며 Editor 메뉴 실행만 영향을 받는다.
   4. 저장소 루트를 찾지 못하면 임의 경로를 만들거나 복사하지 않고 기존처럼 명확한 검증 오류로 멈춘다.
   5. UI·텔레포트·PPE Grab·거울·XR 양안 소비자는 영향받지 않는다. 문서 검사 경로만 영향받는다.
-  6. 변경 전 기준은 `client/AGENTS.md` 누락 오류이며, 변경 후 기준은 루트 `AGENTS.md`, 루트 `Docs`, `client/Assets/Docs`를 검사하고 통과하는 것이다.
+  6. 변경 전 기준은 `client/AGENTS.md` 누락 오류이며, 변경 후 기준은 루트 `AGENTS.md`, 루트 `Docs`, `Assets/Docs`를 검사하고 통과하는 것이다.
   7. 정적 코드 확인, Unity C# 컴파일과 `DocumentationPolicyHarness.Validate()` 실제 실행 결과를 구분해 기록한다. Quest/OpenXR 검증 대상은 아니다.
 
 근본 원인은 하네스가 `Application.dataPath/..`를 저장소 루트로 고정해 모노레포의 `client`만 보던 것과, 필수 정책 문구를 이동 전 경로인 ``Assets/Docs``에 정확히 일치시키던 것이다.
@@ -696,14 +696,14 @@ SDK 설치만으로 키보드 Canvas를 삭제하거나 컨트롤러 가이드�
 
 - Unity 프로젝트 루트에서 상위 디렉터리를 탐색해 `AGENTS.md`와 `.git` 또는 `Docs`가 함께 있는 저장소 루트를 선택한다.
 - 문서 분류 검사는 저장소 루트 `Docs`, 현재 Unity 프로젝트의 `Assets/Docs`, 호환용 저장소 루트 `Assets/Docs` 후보를 중복 없이 검사한다.
-- 필수 정책 문구를 현재 기준인 ``Docs``와 ``client/Assets/Docs``에 맞췄다.
+- 필수 정책 문구를 현재 기준인 ``Docs``와 ``Assets/Docs``에 맞췄다.
 - 저장소 루트를 찾지 못할 때 파일을 복사하거나 생성하는 fallback은 추가하지 않았다.
 
 완료한 검증은 다음과 같다.
 
 - Unity에서 `DocumentationPolicyHarness.cs` 재임포트와 Editor C# 컴파일이 성공했다.
 - 같은 Unity 세션에서 `DocumentationPolicyHarness.Validate()`를 다시 실행해 오류 없이 통과했다.
-- 루트 `AGENTS.md`, 루트 `Docs`와 `client/Assets/Docs`가 현재 모노레포 기준 검사 대상에 포함된다.
+- 루트 `AGENTS.md`, 루트 `Docs`와 `Assets/Docs`가 현재 모노레포 기준 검사 대상에 포함된다.
 
 이번 변경은 Editor 문서 검증 경로에만 영향을 주며 런타임, 씬, UI, 입력, Meta SDK와 Quest/OpenXR에는 영향을 주지 않는다. 저장소 구조가 다시 변경될 때에는 하네스를 재실행해 상위 루트 탐색 결과를 다시 확인해야 한다.
 
@@ -766,7 +766,7 @@ SDK 설치만으로 키보드 Canvas를 삭제하거나 컨트롤러 가이드�
 
 Git이 추적하는 파일만 대상으로 경로 길이를 조사했다. 생성 폴더인 `Library`, `Temp`, `Logs`, `UserSettings`는 조사 대상에서 제외했다. 저장소에는 절대경로 260자 이상인 추적 파일은 없었지만, 다음 송풍기 텍스처와 `.meta`가 각각 251자와 256자로 확인돼 Unity 임포트, 압축 해제, 빌드 도구 또는 더 긴 위치의 클론에서 문제가 될 여유가 거의 없었다.
 
-`client/Assets/TripoModels/yellow_industrial_blower_3d_model_Clone1_Clone1`
+`Assets/TripoModels/yellow_industrial_blower_3d_model_Clone1_Clone1`
 
 근본 원인은 동일한 긴 이름이 외부 폴더, FBX, `.fbm` 폴더와 텍스처에 반복된 구조다. FBX 바이너리에는 `.fbm`과 텍스처의 상대경로가 들어 있으므로 내부 FBX·Material·Texture 이름은 바꾸지 않았다. Unity `AssetDatabase.MoveAsset`으로 외부 폴더만 다음과 같이 이동했다.
 
@@ -780,7 +780,7 @@ Git이 추적하는 파일만 대상으로 경로 길이를 조사했다. 생성
 
 루트의 `RPG_FPS_Unused_Recovery_20260804`는 696개 파일, 약 445.82MB의 복구 묶음이다. 2026-08-05 커밋에서 `Assets/RPG_FPS_game_assets_industrial`의 에셋 695개를 Unity `Assets` 밖으로 이동하면서 만들어졌고, 당시 문서에는 대량 삭제·재임포트와 누락된 `Hangar_v2_6 Variant` 부모 참조가 기록돼 있다. 사용자가 당시 폴더를 제거한 뒤 혼합기동 건물 또는 바닥이 선홍색으로 보였다고 확인했으므로, `Unused`라는 폴더명만으로 전체를 삭제 가능한 상태로 판단하지 않는다.
 
-현재 `5_MixerRoom_Unlit_scale.unity`가 실제로 참조하는 RPG FPS 사용본은 다음 `client/Assets` 경로에 존재한다.
+현재 `5_MixerRoom_Unlit_scale.unity`가 실제로 참조하는 RPG FPS 사용본은 다음 `Assets` 경로에 존재한다.
 
 - `Assets/RPG_FPS_game_assets_industrial/Buildings/Industrial/Hangars/Hangar_v2/Source/Hangar_v2_6.FBX`
 - `Assets/RPG_FPS_game_assets_industrial/Buildings/Industrial/Hangars/Hangar_v2/Source/Hangar_v2.mat`
@@ -788,7 +788,7 @@ Git이 추적하는 파일만 대상으로 경로 길이를 조사했다. 생성
 - `Assets/RPG_FPS_game_assets_industrial/Other_props/Support_set/Support_set_v1/Source/Support_set_v1.mat`
 - `Assets/UIs/Facilities/mixer_Romm_A/mixer_room_A.fbx`
 
-복구 폴더의 `Extracted_Prefabs/Hangar_v2_6.FBX`는 현재 사용본과 GUID `d38c6eb5eac83874ca4e1361ff5ff63c`가 중복된다. 따라서 복구 폴더 전체를 `client/Assets/UIs/Facilities/mixer_Romm_A` 또는 다른 `Assets` 하위로 옮기면 Unity가 446MB에 가까운 복구 묶음을 다시 임포트하고 중복 GUID 충돌을 일으킬 수 있다. 복구 폴더는 현재 위치에서 보존하며 전체 이동·삭제하지 않는다.
+복구 폴더의 `Extracted_Prefabs/Hangar_v2_6.FBX`는 현재 사용본과 GUID `d38c6eb5eac83874ca4e1361ff5ff63c`가 중복된다. 따라서 복구 폴더 전체를 `Assets/UIs/Facilities/mixer_Romm_A` 또는 다른 `Assets` 하위로 옮기면 Unity가 446MB에 가까운 복구 묶음을 다시 임포트하고 중복 GUID 충돌을 일으킬 수 있다. 복구 폴더는 현재 위치에서 보존하며 전체 이동·삭제하지 않는다.
 
 현재 Mixer Room Preview Scene의 Renderer 357개를 조사한 결과 누락 Material, 누락 Shader와 미지원 Shader는 각각 0개였다. 위 Hangar·Interior·Support Material은 `Universal Render Pipeline/Simple Lit`을 사용하고 `shader.isSupported=true`이며 각 TGA Base Texture가 로드되는 것을 Unity에서 확인했다. 이는 정적·Editor 검증이며, 과거 선홍색 회귀가 실제 Quest 빌드에서 재발하지 않는지는 Mixer Room 양안 확인이 필요하다.
 
@@ -925,165 +925,6 @@ SPARK와 LOOP 준비중 페이지의 공통 `.line-nav a:hover`가 `#111`로 고
 
 정적 파일과 자동 테스트 결과를 실제 브라우저의 시각적 승인으로 확대 해석하지 않는다. 현재 완료 범위는 별도 시안과 자산·CSS 적용, 정적 검사와 서버 테스트까지이며 최종 라우팅 교체와 실브라우저 반응형 승인은 남아 있다.
 
-## 16. 2026-08-27 Meta Horizon APK·Vultr 텔레메트리 연동 회의
-
-### 16.1 회의 목적
-
-Unity 클라이언트가 아직 개발·테스트 단계이고 출시 APK와 Meta Horizon 입점이 완료되지 않은 상황에서, 훈련 데이터를 어떤 경로로 Vultr 서버와 MySQL에 저장하고 VR 운영 대시보드에서 검증할지 작업 책임과 순서를 확정한다.
-
-기준 커밋은 다음과 같다.
-
-- 서버 저장소 `main`: `2931c305ece1afef413e15974dd4618f5188fb1c`
-- 클라이언트 저장소 `main`: `2f7250e6c3ecdeaf9f712676d7d01074a6120b94`
-
-두 Codex 대화는 자동으로 상태를 공유하지 않는다. 각 저장소의 코드, 문서, 테스트 결과와 커밋 SHA를 작업 사실의 기준으로 사용한다.
-
-### 16.2 현재 확인된 사실
-
-- Unity의 `PPETrainingTelemetryCapture.cs`는 훈련 이벤트를 `Application.persistentDataPath/tyche-training-telemetry` 아래 세션 JSONL 파일로 기록한다.
-- 전체 텔레메트리 JSONL을 운영 서버로 업로드하는 클라이언트 코드는 현재 없다.
-- `TycheLocalTrainingRegistrationClient.cs`는 개발용 로컬 왕복 시험이며 기본 주소가 `http://127.0.0.1:3000`이다. 전체 이벤트가 아니라 Meta 앱 범위 사용자 ID와 현재 세션 요약만 `/api/training-registrations`로 전송한다.
-- Quest 독립 실행에서 `127.0.0.1`은 개발 PC나 Vultr가 아니라 Quest 기기 자신을 뜻한다.
-- 운영 서버의 `/dashboard/` 정적 화면은 Express 내부에서 HTTP `200`이지만 Nginx 외부 공개 대상은 아니다.
-- 운영 서버의 `/api/local-telemetry/sessions`는 HTTP `404`다. 운영 `.env`에서 `ENABLE_LOCAL_TELEMETRY_READ=false`이고 `UNITY_TELEMETRY_DIRECTORY`도 설정하지 않았다.
-- 현재 대시보드는 개발 PC의 Unity JSONL 디렉터리를 읽는 로컬 검증용이다. Meta Horizon 사용자 데이터가 Vultr로 자동 수집되는 상태가 아니다.
-
-따라서 `클라이언트 계측 코드 존재`, `로컬 JSONL 생성`, `운영 서버 수신`, `MySQL 저장`, `관리자 대시보드 조회`는 서로 다른 완료 단계다. 하나의 성공을 나머지 단계의 성공으로 확대 해석하지 않는다.
-
-### 16.3 최종 배포 구조
-
-출시 APK는 Vultr에 설치하거나 실행하지 않는다. Unity에서 서명한 APK를 Meta Horizon Developer Dashboard의 Alpha, Beta, RC와 Production 채널로 올리고, Meta가 Quest 사용자에게 배포한다.
-
-```text
-Unity 프로젝트
-→ 출시 서명 APK
-→ Meta Horizon Release Channel
-→ 사용자 Quest에 설치
-→ Vultr HTTPS 텔레메트리 API
-→ Express 입력 검증·중복 제거
-→ MySQL 세션·원본 이벤트 저장
-→ 관리자 인증 조회 API
-→ VR 운영 대시보드
-```
-
-- Meta Horizon은 APK 심사·배포·업데이트를 담당한다.
-- Quest APK는 훈련 실행, 원본 이벤트 생성, 로컬 임시 보관과 재전송을 담당한다.
-- Vultr Express는 기기 인증, 입력 검증, 중복 제거, MySQL 저장과 관리자 조회를 담당한다.
-- MySQL 접속정보와 관리자 비밀키는 APK에 넣지 않는다. Unity는 DB에 직접 접속하지 않고 HTTPS API만 호출한다.
-- 텔레메트리 업로드 API는 다양한 Quest 네트워크에서 접근할 수 있어야 하며 기기별 폐기 가능한 인증, 요청 제한과 입력 검증을 적용한다.
-- VR 대시보드와 조회 API는 관리자 인증과 VR 조회 권한을 통과한 경우에만 제공한다.
-
-### 16.4 서버 저장소 구현 위치
-
-서버 쪽 제안 파일과 책임은 다음과 같다. 파일명과 API 경로는 구현 전 계약 검토에서 최종 확정한다.
-
-| 경로 | 책임 |
-|---|---|
-| `db/migrations/009_create_training_telemetry.sql` | 기기, 훈련 세션과 원본 이벤트 테이블 추가 |
-| `src/modules/training-telemetry/training-telemetry-routes.js` | Quest 업로드 요청과 관리자 조회 요청의 HTTP 경로 |
-| `src/modules/training-telemetry/training-telemetry-service.js` | 필수 필드, 이벤트 형식, 세션 상태와 중복 기준 검증 |
-| `src/modules/training-telemetry/training-telemetry-repository.js` | MySQL 트랜잭션, 세션·이벤트 저장과 조회 |
-| `src/app.js` | 텔레메트리 라우터와 관리자 인증 연결 |
-| `public/dashboard/index.html` | 로컬 파일 API 대신 관리자 조회 API 소비 |
-| `test/training-telemetry.test.js` | 정상 업로드, 잘못된 입력, 중복 재전송과 권한 회귀 테스트 |
-
-운영 DB 마이그레이션은 코드와 테스트가 완료된 뒤 별도 승인을 받아 실행한다. 기존 적용 마이그레이션을 수정하지 않는다.
-
-### 16.5 클라이언트 저장소 구현 위치
-
-| 경로 | 책임 |
-|---|---|
-| `Assets/Scripts/PPETrainingTelemetryCapture.cs` | 기존 훈련 원본 이벤트와 세션 JSONL 생성 유지 |
-| `Assets/Scripts/TycheTrainingTelemetryUploader.cs` | JSONL 이벤트 일괄 전송, 서버 확인과 실패 재시도 |
-| `Assets/Scripts/TycheTelemetryApiConfig.cs` | 개발·테스트·운영 HTTPS 기본 주소 구분 |
-| Unity 테스트 코드 | JSON 직렬화 계약, 배치 분할과 재시도 상태 검증 |
-
-서버 비밀정보를 C# 소스, `PlayerPrefs`나 APK에 하드코딩하지 않는다. 학원 관리 기기에는 기기별로 폐기 가능한 등록 정보를 부여하고, 구체적인 발급·교체 방식은 서버 인증 계약과 함께 확정한다.
-
-### 16.6 제안 API 흐름
-
-```text
-POST /api/training-telemetry/sessions
-POST /api/training-telemetry/sessions/{sessionId}/events
-POST /api/training-telemetry/sessions/{sessionId}/complete
-
-GET /api/vr-dashboard/sessions
-GET /api/vr-dashboard/sessions/{sessionId}
-```
-
-- Unity 이벤트는 한 건마다 요청하지 않고 20~50건 단위 배치를 우선 검토한다.
-- 각 이벤트에 `eventId`, 각 배치에 `batchId`를 두고 고유 제약으로 재전송 중복을 제거한다.
-- 서버가 저장 성공을 확인하기 전에는 Quest의 원본 JSONL을 삭제하지 않는다.
-- 네트워크가 끊겨도 교육 진행을 막지 않고 로컬에 보관한 뒤 연결 복구 시 다시 전송한다.
-- `application_quitting`은 앱 종료 신호일 뿐 충돌·전원 종료·실수 종료를 확정하는 값으로 사용하지 않는다.
-
-### 16.7 검증 순서와 완료 조건
-
-```text
-Unity가 이벤트 20건 생성
-→ API가 20건 수락
-→ MySQL 원본 이벤트 20건 저장
-→ VR 대시보드가 같은 sessionId와 20건 표시
-```
-
-다음 단계를 각각 증거로 확인한다.
-
-1. 서버 API·신규 마이그레이션·저장소의 자동 테스트
-2. Unity Editor의 JSON 생성과 테스트 API 전송
-3. 서버 응답의 수락·중복·거부 건수
-4. 테스트 DB의 세션·원본 이벤트 수량
-5. 관리자 조회 API와 대시보드의 같은 `sessionId`·이벤트 수량
-6. Quest 개발 빌드의 HTTPS 전송과 오프라인 재전송
-7. Meta Horizon Alpha 채널 APK의 실제 Quest 수집
-
-`Unity 전송 수 = API 수락 수 = DB 저장 수 = 대시보드 원본 수`가 일치해야 한 회차의 통합 성공으로 판단한다. 정적 계약 테스트나 화면 HTTP `200`만으로 실제 수집 성공을 확정하지 않는다.
-
-### 16.8 작업 순서 결정
-
-1. 서버 저장소에서 API 계약, 신규 DB 마이그레이션, 인증 경계와 자동 테스트를 먼저 작성한다.
-2. 운영 DB를 변경하기 전에 테스트 저장소로 중복·재시도 계약을 검증한다.
-3. 서버 계약 문서와 서버 커밋 SHA를 Windows의 클라이언트 Codex 세션에 전달한다.
-4. 클라이언트 저장소에서 C# 업로더와 빌드 환경별 주소 설정을 구현한다.
-5. Unity Editor → 테스트 API → 테스트 DB → 비공개 대시보드 순서로 통합 검증한다.
-6. 검증 완료 뒤에만 운영 DB 마이그레이션, PM2 재시작과 Nginx 대시보드 공개를 각각 승인받아 진행한다.
-7. Quest 개발 빌드와 Meta Alpha 채널에서 실제 기기 검증 후 Production 심사를 준비한다.
-
-### 16.9 현재 완료·미완료 구분
-
-#### 완료
-
-- Unity 클라이언트와 Express 서버 저장소 분리
-- Unity 원본 텔레메트리 JSONL 기록 코드 존재
-- 로컬 Express 등록 요약 POST·GET 왕복 코드와 자동 테스트 존재
-- 로컬 JSONL 조회용 VR 대시보드 화면 존재
-- Vultr Express, MySQL과 서버 관리자 인증 기반 존재
-
-#### 미완료
-
-- Quest 전체 텔레메트리 운영 HTTPS 업로드
-- 기기별 인증과 토큰 폐기
-- 운영 MySQL 세션·이벤트 스키마
-- 중복 제거·배치·오프라인 재전송 통합 검증
-- VR 관리자 권한과 인증된 조회 API
-- Nginx VR 대시보드 공개
-- APK 릴리스 빌드와 Meta Horizon 입점
-- Quest → Vultr → MySQL → 대시보드 실제 전체 흐름 검증
-
-### 16.10 교차 저장소 인수인계
-
-클라이언트 작업은 Windows PC의 `chemical-safety-vr-client` 저장소를 연 별도 Codex 세션에서 수행한다. 현재 Vultr Linux 세션은 사용자 PC의 `C:\` 드라이브에 접근하지 못한다.
-
-서버 API 계약이 구현되면 다음 정보를 클라이언트 작업에 전달한다.
-
-- 서버 대상 브랜치와 커밋 SHA
-- API 계약 문서 경로
-- 개발·테스트·운영 기본 주소
-- 요청·응답 예시와 오류 코드
-- 기기 인증 발급·교체 방식
-- 서버 자동 테스트 결과
-- 남은 Quest 수동 검증 항목
-
-이 회의록은 `Docs/SharedDocumentManifest.md`의 공용 문서다. 현재 서버 미러에 이번 회의 내용을 먼저 반영했으며 클라이언트 기준본에도 같은 상대 경로와 내용으로 동기화해야 한다. 동기화 전에는 이 서버 미러만으로 클라이언트 구현 완료 상태를 확정하지 않는다.
 ## 15.11 2026-08-27 Windows에서 Vultr 서버 Codex 바로 접속
 
 ### 15.11.1 목적과 적용 범위
@@ -1143,6 +984,37 @@ cvr
 ### 15.11.6 다른 PC에서 재설정할 때의 주의사항
 
 `C:\Users\user`가 포함된 로컬 경로는 현재 PC 사용자 계정에만 해당한다. 다른 Windows 계정이나 PC에서는 Desktop, `%APPDATA%\npm`, PowerShell 및 OpenSSH 실제 경로를 다시 확인해야 한다. 또한 `tycheworks` SSH 별칭이 먼저 정상 연결되고, 원격 프로젝트와 Codex 절대 경로가 유지되는지 읽기 전용으로 검증한 뒤 바로가기를 만든다.
+
+## 2026-08-27 클라이언트 저장소 Unity 프로젝트 루트 평탄화
+
+### 적용한 변경
+
+- 별도 클라이언트 저장소 안의 `client/Assets`, `client/Packages`, `client/ProjectSettings`를 각각 저장소 루트의 `Assets`, `Packages`, `ProjectSettings`로 이동했다.
+- 모든 `.meta` 파일과 GUID를 그대로 보존했고, 동일했던 `client/.vsconfig` 중복본은 제거했다.
+- `.gitignore`, VS Code 설정, Codex 하네스 경로, 제작 스크립트, 저장소 안내와 현재 경로를 설명하는 문서를 새 Unity 프로젝트 루트에 맞췄다.
+- Unity Hub에서 잘못 저장소 루트를 열며 생성됐던 빈 프로젝트 설정과 이전 위치의 `Library`, `Logs`, `Temp`, `UserSettings` 캐시는 이동하지 않고 제거했다.
+- 서버 소스는 별도 저장소에 유지하며 이 저장소에 `server/` 트리를 추가하지 않았다.
+
+### 근본 원인과 영향 범위
+
+- 클라이언트와 서버를 별도 저장소로 분리한 뒤에도 기존 모노레포의 `client/` 하위 Unity 프로젝트 구조가 남아 있어, 저장소 루트와 Unity Hub에서 열 프로젝트 경로를 혼동할 수 있었다.
+- 평탄화 후 Unity 프로젝트 루트는 클라이언트 저장소 루트와 동일하다. Unity 내부의 `Assets/...` 경로와 직렬화 GUID는 바뀌지 않으므로 씬·프리팹·머티리얼 참조에는 의도된 변경이 없다.
+- 서버 API, 인증, 텔레메트리, 대시보드 및 서버 저장소 구조에는 변경이 없다.
+
+### 완료한 검증
+
+- Git이 이동된 8,602개 추적 항목을 내용이 동일한 `R100` rename으로 인식하는 것을 확인했다.
+- 루트 `Assets` 8,574개, `Packages` 2개, `ProjectSettings` 26개 추적 파일과 Unity `6000.4.8f1` 버전 파일을 확인했다.
+- 실행 설정과 도구에서 이전 `client/` 프로젝트 경로 참조가 0개인 것을 확인했다.
+- `Packages/manifest.json`, 활성 Build Settings 씬 경로, PowerShell 도구 구문과 `git diff --check`를 정적으로 확인했다.
+- Unity 배치 실행이 새 루트의 `Assets`와 `Library/` 재구성을 인식하고 초기 도메인 로드까지 진행한 것을 확인했다.
+
+### 아직 필요한 수동 검증
+
+- Unity 배치 검증은 Licensing Client 재연결 실패로 C# 전체 컴파일과 `DocumentationPolicyHarness.Validate()` 실행 전에 중단했다. 구조나 C# 컴파일 오류로 완료된 것으로 해석하지 않는다.
+- Unity Hub에서 저장소 루트를 Unity `6000.4.8f1`로 열고 최초 재임포트가 끝난 뒤 Console 컴파일 오류가 없는지 확인한다.
+- `Tools > Documentation > Validate Authoring Policy`를 실행하고 `Assets/Scenes/0_App.unity`의 Build Settings 및 정상 로드를 확인한다.
+- Quest/OpenXR Play Mode와 양안 렌더링은 이번 경로 이전의 정적 검증 범위에 포함하지 않았으며 별도 실기 확인이 필요하다.
 
 ## 2026-08-28 결정: Meta Horizon APK용 클라이언트 텔레메트리 전송 구조
 
@@ -1288,29 +1160,6 @@ POST /api/training-telemetry/sessions/{sessionId}/complete
 정적 계약이나 자동 테스트만 통과한 상태를 Meta Horizon 실기 수집 완료로 보고하지 않는다. 최종 완료는
 Meta Alpha APK의 실제 Quest 세션이 Vultr·MySQL·대시보드까지 같은 식별자와 수량으로 확인된 경우다.
 
-### 서버 수신·DB 적재 기반 구현 상태
-
-이번 서버 후속 작업에서는 최종 대시보드를 변경하지 않고 다음 기반만 추가했다.
-
-- 기존 실행기의 파일당 SQL 문 하나 규칙에 맞춘 `009`~`012` 신규 migration으로 참여자·식별자·세션·원본 이벤트 테이블 정의
-- `schemaVersion`, `eventId`, `sequence` 검증과 세션별 연속 ACK 계산
-- `eventId`와 `sessionId + sequence` 고유 제약을 기준으로 재전송 중복 제거
-- 세션 시작, 최대 50건 이벤트 배치, 세션 완료와 원본 조회 API
-- 기본 비활성화된 수집 기능과 16자 이상 테스트용 Bearer 토큰 경계
-- 샘플 3건 전송과 DB 원본 조회만 제공하는 `/telemetry-ingest-test/` 개발 확인 화면
-- Meta 테스트 ID가 있는 사용자와 ID가 없는 사용자를 모두 수용하는 식별 매핑
-- 인원·세션을 번호 위주로 확인하는 숫자형 서버 자체 `participantId`와 조회 API
-
-세션 시작 시 새 클라이언트는 로컬에 보존한 32자리 `clientInstanceId`를 항상 보낸다. Meta 테스트 ID를 얻은 세션은 숫자 문자열 `metaUserId`도 함께 보내며, 얻지 못한 Editor 세션은 해당 필드를 생략한다. 서버는 Meta ID가 있으면 이를 우선 식별자로, 없으면 클라이언트 설치 ID를 익명 식별자로 사용하고 두 유형 모두 숫자형 `participantId`를 발급한다. 같은 Meta ID는 다른 기기에서도 같은 자체 ID로 조회되고, ID가 없는 사용자는 같은 설치에서 같은 자체 ID로 조회된다. 공유 기기의 서로 다른 사람을 잘못 합칠 위험 때문에 익명 설치 ID와 이후의 Meta ID는 자동 병합하지 않는다.
-
-개발 확인 화면은 자체 ID별 인원 수와 세션 수를 표시하고 `participantId`로 세션을 필터링한다. 원본 Meta ID와 익명 설치 ID 값은 이 조회 API와 화면에 노출하지 않는다.
-
-이전 모노리포 `Prototype_Tyche_Jinyoung`이 생성한 기존 JSONL은 과거 계측 구조를 확인하는 참고 자료일 뿐 DB 적재나 자동 테스트 입력으로 사용하지 않는다. 서버는 세션 시작 요청의 `sourceProject`가 새 저장소명 `chemical-safety-vr-client`인 경우만 수락한다. 자동 테스트는 실제 사용자 데이터가 아닌 익명 합성 이벤트만 사용한다.
-
-인메모리 저장소 기반 API 계약, 중복 재전송, 출처 제한, 개인정보 필드·로컬 경로 거부와 migration SQL 정적 검사에 더해 로컬 MySQL 적재를 검증했다. 운영 DB, PM2, Nginx와 배포 상태는 변경하지 않았다. 새 클라이언트 Unity 전송 결과는 Play Mode 통합 시험 뒤 별도로 기록한다.
-
-현재 테스트용 Bearer 토큰을 출시 APK에 포함하지 않는다. 새 클라이언트 업로더가 완성되면 Meta User Proof 서버 검증과 단기 업로드 토큰으로 교체하고, 새 클라이언트가 보낸 같은 `sessionId`에 대해 API 수락 수, DB 고유 이벤트 수와 원본 조회 수를 대조해야 한다. 이 공용 문서의 서버 구현 상태는 클라이언트 기준본에 동기화가 필요하다.
-
 ### 새 클라이언트 로컬 Unity 업로드 로직 구현 상태
 
 이번 후속 작업은 이전 모노리포가 아니라 분리된 `chemical-safety-vr-client` 저장소의 로컬 Unity Editor 테스트 경로만 대상으로 한다.
@@ -1320,13 +1169,15 @@ Meta Alpha APK의 실제 Quest 세션이 Vultr·MySQL·대시보드까지 같은
 - `TycheTrainingTelemetryUploader`는 최대 25건 기본 배치로 세션 시작·원본 이벤트·세션 완료 API를 호출하고 서버의 `acceptedThroughSequence`를 별도 상태 파일에 보존한다.
 - 서버 연결 또는 앱 종료 뒤에도 로컬 JSONL을 먼저 보존하며, 다음 Editor 실행에서 미확인 sequence부터 재전송한다.
 - 현재 로컬 통합 시험은 `TYCHE_TELEMETRY_UPLOAD_TOKEN` 환경 변수와 loopback 서버 주소만 허용한다. 토큰은 저장소, `PlayerPrefs`, JSONL과 씬에 기록하지 않는다.
-- 새 클라이언트는 `client-instance-id.txt`에 32자리 익명 설치 ID를 보존한다. Meta 테스트 ID가 수집되면 세션 시작 요청에만 이를 선택적으로 포함하고, 없으면 설치 ID만으로 서버 자체 `participantId`를 받는다.
+- 새 클라이언트는 `client-instance-id.txt`에 32자리 익명 설치 ID를 보존한다. Meta 테스트 ID가 수집되면 세션 시작 요청에만 이를 선택적으로 포함하고, 없으면 설치 ID만 보낸다.
+- 서버는 두 경우 모두 숫자형 자체 `participantId`를 발급한다. 같은 Meta ID는 기기가 달라도 같은 자체 ID로, Meta ID가 없는 경우에는 같은 설치 ID가 같은 자체 ID로 조회된다.
+- 공유 기기에서 서로 다른 사용자를 잘못 합치지 않기 위해 익명 설치 ID와 이후 확인된 Meta ID는 자동 병합하지 않는다. 원본 Meta ID와 설치 ID 값은 개발 조회 화면에 노출하지 않는다.
 - 업로드 DTO에서 `metaAppScopedUserId`와 `metaAgeCategory`를 제외하고 로컬 파일 경로가 포함된 note는 전송 전에 대체한다.
 - Player와 출시 APK에서는 현재 테스트 토큰 업로드를 시작하지 않는다. Meta User Proof와 서버 단기 토큰 인증은 출시 전 별도 구현·검증한다.
 
 `Tools > PPE > Configure Local Telemetry DB Upload`은 사용자가 `0_App` 씬을 명시적으로 연 상태에서만 `AppMain`에 업로더를 추가한다. 기존 컴포넌트가 있으면 Inspector 값을 덮어쓰지 않는다. Unity가 생성한 컴파일 응답 설정으로 런타임 업로더와 Editor 설정 도구의 최신 소스를 별도 임시 DLL에 컴파일해 오류가 없음을 확인했다. 테스트 DB migration과 Express → MySQL 합성 데이터 왕복은 완료했으며, 열린 Unity의 자동 재컴파일, 설정 메뉴 실행, 씬 저장과 실제 Unity → Express → MySQL 전송은 아직 남아 있다.
 
-서버 텔레메트리 구현은 서버 `main`의 `a036897fce5f8c6e2244f217ead418458402721b`에 커밋·푸시했다. 클라이언트 연동 구현은 `260828_ppe_client_integration_followup` 브랜치의 `ae997d68970deeeacf34af27137425047ffaff72`에 커밋·푸시했으며 아직 클라이언트 `main`에는 병합하지 않았다. 아래 로컬 MySQL·실기 결과는 이 구현의 검증 근거지만 운영 DB migration, 운영 수집과 Meta Alpha APK 통합 완료를 의미하지 않는다.
+서버 텔레메트리 구현은 서버 `main`의 `a036897453724f5ab9bc9f0aecbfb3c3b36d4a23`에 커밋·푸시했다. 클라이언트 연동 구현은 `260828_ppe_client_integration_followup` 브랜치의 `ae997d68970deeeacf34af27137425047ffaff72`에 커밋했고, 저장소 이력상 2026-08-28 18:24:28 KST의 `e4c34177bdb2e9cd962592f863edb661c53d52a1`에서 클라이언트 `main`에 병합됐다. 아래 로컬 MySQL·실기 결과는 이 구현의 검증 근거지만 운영 DB migration, 운영 수집과 Meta Alpha APK 통합 완료를 의미하지 않는다.
 
 ### 2026-08-28 로컬 MySQL·인코딩 통합 검증
 
@@ -1449,3 +1300,25 @@ Meta Horizon Link의 Public Test Channel 전환은 Editor에서 SDK 205를 진�
 8. 네트워크 차단·복구, 중복 전송, 강제 종료·재실행 뒤에도 고유 이벤트 수와 완료 상태가 유지되는지 검증한다.
 
 현재 확정된 완료 범위는 `HMD 실기 원본 수집 → 로컬 Editor 업로드 → Express → 로컬 MySQL → 상세 조회`다. Meta ID, Quest Player 업로드, User Proof 서버 검증, 운영 HTTPS, 운영 DB와 Meta Alpha APK 통합은 후속작업으로 보류한다. 다음 재개 때 정적 하네스나 과거 익명 세션을 Meta 인증 성공으로 확대 해석하지 않는다.
+
+### 2026-08-29 교차 저장소 병렬 DB 실테스트 기록 해석
+
+2026-08-28에는 서버 저장소 작업과 클라이언트 저장소 작업이 별도 작업 트리에서 동시에 진행됐고, 그 과정에서 Unity 원본 수집, Editor 업로드, Express 수신과 로컬 MySQL 적재를 실제로 시험했다. Git 커밋 시각은 각 작업 트리의 스냅샷이 저장된 시점이지 Unity 실행, HTTP 전송 또는 DB 적재의 시작·종료 시각이 아니다. 따라서 당시 시험 순서를 커밋 시각만으로 재구성하거나, 한 저장소가 다른 저장소의 최신 병합 상태를 즉시 알고 있었다고 가정하지 않는다.
+
+위에 기록된 세션 `32bf72164cbf4e19a655679b17721522`, `2e3a04b3f9be40b68d729e5b554650c6`, `2ac1c70158554c658c7b14f291ff235c`와 이벤트 수·ACK 결과는 당시 실테스트 기록으로 보존한다. 이번 문서 재검토에서는 클라이언트 `main`이 `ae997d68970deeeacf34af27137425047ffaff72`의 코드와 씬을 포함하고 현재 작업 트리의 핵심 파일 blob도 같은 것을 확인했다. 서버 구현 커밋은 `a036897453724f5ab9bc9f0aecbfb3c3b36d4a23`으로 확인했다.
+
+현재 PC의 `Application.persistentDataPath/tyche-training-telemetry`에는 2026-08-26 세션 파일만 남아 있고 위 2026-08-28 세션 JSONL과 `.upload-state.json`은 다시 찾지 못했다. 이번 재검토에서는 당시 MySQL 행과 Express 요청 로그도 재조회하지 않았다. 이는 기존 실테스트가 수행되지 않았다는 반증이 아니라, 현재 환경에서 원본을 독립적으로 재검증할 수 없는 상태라는 뜻이다. 최종 제출자료나 운영 전환 판단에 이 수치를 다시 사용할 때는 원본 JSONL·ACK, Express 로그와 MySQL 세션·이벤트 행을 같은 `sessionId`로 재대조한다.
+
+현재 상태는 다음과 같이 구분한다.
+
+- 서버 수신·로컬 DB 기반 구현과 클라이언트 코드 병합: Git 코드와 씬 기준 확인 완료
+- 2026-08-28 Unity Editor/HMD → Express → 로컬 MySQL 실테스트: 당시 기록 유지, 이번 재검토에서 원본 재조회는 미완료
+- Meta ID, Quest Player 업로드, User Proof 검증, 운영 HTTPS·DB와 Meta Alpha APK 통합: 후속작업
+
+2026-08-29 재연동 전 로컬 실행 상태를 확인한 결과 MariaDB `wampstackMariaDB-1`은 TCP `3306`에서 실행 중이었지만 Express의 TCP `3000` 리스너, 서버 `.env`, 서버 업로드 토큰과 Unity Editor용 `TYCHE_TELEMETRY_UPLOAD_TOKEN`은 없었다. 이 시점에는 `Unity → Express → 로컬 DB` 업로드 경로를 실행할 수 없었고 `PPETrainingTelemetryCapture`의 로컬 JSONL 기록만 별도로 계속 가능한 상태였다.
+
+같은 날 사용자 승인 후 로컬 서버 경로를 복구했다. `npm ci`로 서버 의존성을 복원하고, 기존 MariaDB에 `tyche_training` 데이터베이스와 `tyche_app` 계정이 존재하지 않는 것을 확인한 뒤 로컬 전용 계정·데이터베이스를 새로 만들었다. 저장소의 기존 migration `001`~`012`를 적용했으며, Git에서 제외되는 서버 `.env`와 Windows 사용자 범위 Unity Editor 토큰에 같은 로컬 전용 업로드 토큰을 설정했다. 자격 값은 문서·Git·씬·JSONL에 기록하지 않았다.
+
+복구 뒤 Express는 `127.0.0.1:3000`, MariaDB는 `127.0.0.1:3306`에서 실행된다. health, 대시보드와 `/telemetry-ingest-test/`는 HTTP `200`, 무토큰 DB API는 `401`, 토큰을 사용한 세션·참여자 조회는 `200`으로 확인했다. migration 12개는 재실행 시 모두 적용 완료로 판정됐고 서버 자동 테스트 34개가 통과했다. Unity 로컬 JSONL 조회에는 13개 세션이 있지만 새 DB의 참여자·세션·이벤트 행은 모두 0개다. 따라서 2026-08-28 MySQL 행을 현재 DB에서 복구 또는 재검증한 것은 아니며, 새 `0_App` Play에서 실제 Unity 이벤트가 DB에 적재되는지는 별도 수동 검증으로 남는다. Meta PTC·앱 범위 사용자 ID 진단은 DB 재연동과 구분한다.
+
+병렬 작업 중 생성된 서버·클라이언트 고유 기록은 한쪽 파일로 덮어쓰지 않는다. 공용 문서 기준본을 통합할 때 각 절의 서버 코드·DB 근거와 클라이언트 코드·씬·Unity 근거를 각각 확인한 뒤 시간순으로 합친다.
