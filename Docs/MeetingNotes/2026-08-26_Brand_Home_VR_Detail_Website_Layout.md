@@ -548,6 +548,8 @@
   푸터 그룹에 `VR PRIVACY POLICY` 링크를 한 개 추가했다.
 - 링크는 GitHub 저장소 화면이 아니라 실제 공개된 VR 전용 개인정보처리방침 페이지
   `https://softcastella.github.io/tycheworks-safetytrainingvr-privacy/`로 연결한다.
+- 개인정보처리방침은 새 창으로 열고, 새 창에서 원래 상세페이지를 제어하지 못하도록
+  `rel="noopener noreferrer"`를 함께 적용했다.
 - 해당 방침은 화학물질 안전훈련 VR과 Meta·XR 데이터 처리를 대상으로 하므로 TYCHE WORKS 전체
   서비스의 공용 개인정보처리방침으로 표시하지 않는다.
 
