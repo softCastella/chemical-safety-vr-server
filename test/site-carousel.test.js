@@ -53,3 +53,19 @@ test('홈과 세부 라인의 포인트 컬러 역할을 구분한다', async ()
   assert.match(css, /--loop\s*:\s*#f4c430/);
   assert.doesNotMatch(css, /var\(--orange\)/);
 });
+
+test('화학물질 안전훈련 VR 상세페이지 푸터는 공개 개인정보처리방침으로 연결한다', async () => {
+  const html = await readFile(
+    new URL('immersa/chemical-safety-training/index.html', siteRoot),
+    'utf8',
+  );
+  const privacyUrl =
+    'https://softcastella.github.io/tycheworks-safetytrainingvr-privacy/';
+
+  assert.equal(html.match(new RegExp(`href="${privacyUrl}"`, 'g'))?.length, 1);
+  assert.match(html, />VR PRIVACY POLICY<\/a>/);
+  assert.doesNotMatch(
+    html,
+    /href="https:\/\/github\.com\/softCastella\/tycheworks-safetytrainingvr-privacy"/,
+  );
+});
