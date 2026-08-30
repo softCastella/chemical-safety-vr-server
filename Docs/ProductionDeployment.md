@@ -219,12 +219,15 @@ sudo nginx -t
 
 2026-08-31 화학물질 안전훈련 VR 상세페이지 푸터에 VR 전용 개인정보처리방침 링크를 반영했다.
 
-- 개발 기준 커밋: `main@a59c247f026d3db4ff46cd4761a33f882985ac46`
+- 최초 링크 반영 커밋: `main@a59c247f026d3db4ff46cd4761a33f882985ac46`
+- 새 창 열기 반영 커밋: `main@25cf5aa6e7b845c9be2a90a5bb9f34df47677dae`
 - 운영 배포 브랜치: `production/privacy-policy-20260831`
-- 운영 배포 커밋: `45b1ad5c2a46d5e15e37bdb8413154d9651ed869`
+- 최초 운영 배포 커밋: `45b1ad5c2a46d5e15e37bdb8413154d9651ed869`
+- 새 창 열기 운영 배포 커밋: `ba93ee0ebe104bae4b7ec39c56fc0d328c4200eb`
 - 변경 파일: VR 상세페이지 HTML과 해당 링크 회귀 테스트 2개
 - 공개 링크 문구: `VR PRIVACY POLICY`
 - 연결 대상: `https://softcastella.github.io/tycheworks-safetytrainingvr-privacy/`
+- 열기 방식: 새 창(`target="_blank"`)과 원본 창 보호(`rel="noopener noreferrer"`)
 
 운영 서버의 기존 `main`은 배포 당시 `1f90b784204710ffd6ffab46408fbb78039a1239`였고, 최신 `main`까지
 fast-forward하면 아직 운영 반영 승인을 받지 않은 텔레메트리 코드·DB 마이그레이션·별도 랜딩 페이지가
@@ -235,5 +238,6 @@ fast-forward하면 아직 운영 반영 승인을 받지 않은 텔레메트리 
 운영 서버에서 자동 테스트 21개 통과, `npm audit --audit-level=high` 취약점 0건,
 `git diff --check`와 `nginx -t` 통과를 확인했다. 공개 VR 상세페이지, 개인정보처리방침 페이지와 운영
 헬스체크는 모두 HTTP 200이었고, 공개 상세페이지에서 링크 문구와 대상 URL이 각각 한 번 존재했다.
+운영 HTML에서 새 창 열기와 원본 창 보호 속성이 함께 적용된 것도 확인했다.
 Nginx가 정적 파일을 직접 제공하므로 PM2 재시작, Nginx reload, DB 마이그레이션과 운영 데이터 변경은
 수행하지 않았다.
