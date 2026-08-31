@@ -14,6 +14,7 @@ import { createLocalTelemetryRepository } from "./modules/local-telemetry/local-
 import { createServerAdminRepository } from "./modules/server-admin/server-admin-repository.js";
 import { createServerAdminRouter } from "./modules/server-admin/server-admin-routes.js";
 import { createServerAdminPushService } from "./modules/server-admin/server-admin-push.js";
+import { createGeoLiteCountryLookup } from "./modules/server-admin/server-admin-geoip.js";
 import { createTrainingTelemetryTokenAuthorizer } from "./modules/training-telemetry/training-telemetry-auth.js";
 import { createTrainingTelemetryRepository } from "./modules/training-telemetry/training-telemetry-repository.js";
 import { createTrainingTelemetryRouter } from "./modules/training-telemetry/training-telemetry-routes.js";
@@ -43,6 +44,7 @@ export function createApp({
   trainingTelemetryUploadToken = env.trainingTelemetryUploadToken,
   serverAdminRepository,
   serverAdminPushService,
+  geoLiteCountryLookup,
   enableServerAdmin = env.enableServerAdmin,
   contactMailer,
   enableContactForm = env.enableContactForm,
@@ -147,7 +149,8 @@ export function createApp({
   if (enableServerAdmin) {
     const resolvedAdminRepository = serverAdminRepository ?? createServerAdminRepository(databasePool);
     const resolvedPushService = serverAdminPushService ?? createServerAdminPushService(env.serverAdminPush);
-    const { router, requireAdmin } = createServerAdminRouter({ repository: resolvedAdminRepository, pushService: resolvedPushService });
+    const resolvedGeoLiteCountryLookup = geoLiteCountryLookup ?? createGeoLiteCountryLookup({ databasePath: env.geoLiteCountryDatabasePath });
+    const { router, requireAdmin } = createServerAdminRouter({ repository: resolvedAdminRepository, pushService: resolvedPushService, geoLiteCountryLookup: resolvedGeoLiteCountryLookup });
     app.use("/api/server-status", router);
     app.get("/server-status/login", (_request, response) => response.sendFile(path.join(serverStatusRoot, "login.html")));
     app.get("/server-status/login.html", (_request, response) => response.redirect(308, "/server-status/login"));

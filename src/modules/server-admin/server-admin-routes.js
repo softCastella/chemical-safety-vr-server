@@ -33,7 +33,7 @@ function readAlertOccurrences(keys) {
   return occurrences;
 }
 
-export function createServerAdminRouter({ repository, pushService }) {
+export function createServerAdminRouter({ repository, pushService, geoLiteCountryLookup }) {
   const router = express.Router();
   const requireAdmin = async (request, response, next) => {
     try {
@@ -144,7 +144,11 @@ export function createServerAdminRouter({ repository, pushService }) {
     try {
       const page = Number.parseInt(request.query.page, 10) || 1;
       if (page < 1 || page > 100000) return response.status(400).json({ error: "Invalid page." });
-      response.json(await repository.listSecurityEvents({ page, pageSize: 20 }));
+      const events = await repository.listSecurityEvents({ page, pageSize: 20 });
+      response.json({
+        ...events,
+        items: await geoLiteCountryLookup.enrichSecurityEvents(events.items),
+      });
     } catch (error) { next(error); }
   });
   router.delete("/security-events", requireAdmin, requireWriteAdmin, async (request, response, next) => {
