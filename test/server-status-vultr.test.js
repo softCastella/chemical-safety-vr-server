@@ -1,8 +1,16 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { nextInvoiceDate, readVultrBilling } from "../src/modules/server-admin/server-status.js";
+import { nextInvoiceDate, readVultrBilling, serverStatusServiceTargets } from "../src/modules/server-admin/server-status.js";
 
 const now = new Date("2026-08-27T12:00:00.000Z");
+
+test("서비스 현황 점검 대상에 화학 안전 VR 전용 랜딩을 포함한다", () => {
+  assert.ok(serverStatusServiceTargets.some((target) => (
+    target.name === "VR LANDING"
+    && target.host === "chemical-safety-vr.tycheworks.com"
+    && target.path === "/"
+  )));
+});
 
 test("Vultr 청구 예정일은 다음 달 1일 UTC로 계산한다", () => {
   assert.equal(nextInvoiceDate(now), "2026-09-01T00:00:00.000Z");

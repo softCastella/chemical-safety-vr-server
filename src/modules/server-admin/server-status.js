@@ -15,11 +15,12 @@ const uptimeLabel = (seconds) => {
   return `${days}일 ${hours}시간 ${minutes}분`;
 };
 
-const serviceTargets = Object.freeze([
+export const serverStatusServiceTargets = Object.freeze([
   { name: "TYCHE WORKS", host: "tycheworks.com", path: "/" },
   { name: "BRAND", host: "tycheworks.com", path: "/brand" },
   { name: "IMMERSA", host: "immersa.tycheworks.com", path: "/" },
   { name: "VR TRAINING", host: "immersa.tycheworks.com", path: "/chemical-safety-training" },
+  { name: "VR LANDING", host: "chemical-safety-vr.tycheworks.com", path: "/" },
   { name: "SPARK", host: "spark.tycheworks.com", path: "/" },
   { name: "LOOP", host: "loop.tycheworks.com", path: "/" },
 ]);
@@ -120,7 +121,7 @@ export async function collectServerOverview({ securityEvents = [], trustedIps = 
   const load = os.loadavg().map(round);
   const loadPerCpu = round(load[0] / cpuCount);
   const loadState = loadPerCpu >= 1 ? "비정상" : loadPerCpu >= 0.7 ? "주의" : "정상";
-  const [services, certificates, certificateRenewal, billing, operatingSystem] = await Promise.all([Promise.all(serviceTargets.map(checkService)), readCertificate(), readCertificateRenewal(), readVultrBilling(), readOperatingSystem()]);
+  const [services, certificates, certificateRenewal, billing, operatingSystem] = await Promise.all([Promise.all(serverStatusServiceTargets.map(checkService)), readCertificate(), readCertificateRenewal(), readVultrBilling(), readOperatingSystem()]);
   for (const service of services) if (service.status !== "online") alertItems.push({ id: `service:${service.host}${service.path}`, message: `${service.name} 서비스 응답을 확인해주세요.` });
   if (loadState === "비정상") alertItems.push({ id: "load-high", message: `1분 시스템 부하가 CPU 코어 수 이상입니다. (${load[0]} / ${cpuCount}코어)` });
   const alerts = alertItems.map((alert) => alert.message);
