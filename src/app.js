@@ -13,6 +13,7 @@ import { createLocalTelemetryRouter } from "./modules/local-telemetry/local-tele
 import { createLocalTelemetryRepository } from "./modules/local-telemetry/local-telemetry-repository.js";
 import { createServerAdminRepository } from "./modules/server-admin/server-admin-repository.js";
 import { createServerAdminRouter } from "./modules/server-admin/server-admin-routes.js";
+import { createServerAdminPushService } from "./modules/server-admin/server-admin-push.js";
 import { createTrainingTelemetryTokenAuthorizer } from "./modules/training-telemetry/training-telemetry-auth.js";
 import { createTrainingTelemetryRepository } from "./modules/training-telemetry/training-telemetry-repository.js";
 import { createTrainingTelemetryRouter } from "./modules/training-telemetry/training-telemetry-routes.js";
@@ -41,6 +42,7 @@ export function createApp({
   enableTrainingTelemetryIngest = env.enableTrainingTelemetryIngest,
   trainingTelemetryUploadToken = env.trainingTelemetryUploadToken,
   serverAdminRepository,
+  serverAdminPushService,
   enableServerAdmin = env.enableServerAdmin,
   contactMailer,
   enableContactForm = env.enableContactForm,
@@ -144,11 +146,12 @@ export function createApp({
 
   if (enableServerAdmin) {
     const resolvedAdminRepository = serverAdminRepository ?? createServerAdminRepository(databasePool);
-    const { router, requireAdmin } = createServerAdminRouter({ repository: resolvedAdminRepository });
+    const resolvedPushService = serverAdminPushService ?? createServerAdminPushService(env.serverAdminPush);
+    const { router, requireAdmin } = createServerAdminRouter({ repository: resolvedAdminRepository, pushService: resolvedPushService });
     app.use("/api/server-status", router);
     app.get("/server-status/login", (_request, response) => response.sendFile(path.join(serverStatusRoot, "login.html")));
     app.get("/server-status/login.html", (_request, response) => response.redirect(308, "/server-status/login"));
-    for (const asset of ["status.css", "controls.css", "login.js", "dashboard.js"]) {
+    for (const asset of ["status.css", "controls.css", "login.js", "dashboard.js", "push-worker.js", "manifest.webmanifest"]) {
       app.get(`/server-status/${asset}`, (_request, response) => response.sendFile(path.join(serverStatusRoot, asset)));
     }
     app.get("/server-status/favicon.svg", (_request, response) => response.sendFile(path.join(siteRoot, "assets", "favicon_round_crop.svg")));

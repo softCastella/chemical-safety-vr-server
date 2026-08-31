@@ -1,0 +1,17 @@
+{
+  "name": "Tyche Works Server Admin",
+  "short_name": "Tyche Server",
+  "start_url": "/server-status",
+  "scope": "/server-status/",
+  "display": "standalone",
+  "background_color": "#17191d",
+  "theme_color": "#17191d",
+  "icons": [
+    {
+      "src": "/server-status/favicon.svg?v=4",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -70,6 +70,11 @@
   letter-spacing: .08em;
 }
 
+[data-push-toggle][data-push-enabled="true"] {
+  border-color: rgba(31, 166, 106, .7);
+  color: #8ce0b8;
+}
+
 .security-warning {
   display: grid;
   grid-template-columns: auto 1fr auto;

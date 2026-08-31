@@ -1,11 +1,34 @@
 import { createApp } from "./app.js";
 import { env } from "./config/env.js";
 import { databasePool } from "./db/pool.js";
+import { createServerAdminRepository } from "./modules/server-admin/server-admin-repository.js";
+import { createServerAdminPushService } from "./modules/server-admin/server-admin-push.js";
+import { createServerAlertMonitor } from "./modules/server-admin/server-alert-monitor.js";
 
-const app = createApp();
+const serverAdminRepository = env.enableServerAdmin
+  ? createServerAdminRepository(databasePool)
+  : undefined;
+const serverAdminPushService = env.enableServerAdmin
+  ? createServerAdminPushService(env.serverAdminPush)
+  : undefined;
+const serverAlertMonitor = env.enableServerAdmin
+  ? createServerAlertMonitor({
+      repository: serverAdminRepository,
+      pushService: serverAdminPushService,
+      intervalMs: env.serverAdminPush.pollIntervalSeconds * 1000,
+    })
+  : undefined;
+
+const app = createApp({ serverAdminRepository, serverAdminPushService });
 
 const server = app.listen(env.port, () => {
   console.log(`Tyche server listening on http://localhost:${env.port}`);
+  serverAlertMonitor?.start().catch((error) => {
+    console.error("Failed to start server alert monitor.", {
+      code: error?.code ?? "UNKNOWN",
+      message: error?.message ?? "Unknown error",
+    });
+  });
 });
 
 let shuttingDown = false;
@@ -16,6 +39,7 @@ function shutdown(signal) {
   }
   shuttingDown = true;
   console.log(`${signal} received. Closing HTTP server.`);
+  serverAlertMonitor?.stop();
 
   server.close(async (error) => {
     if (error) {

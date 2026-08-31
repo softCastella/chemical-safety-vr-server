@@ -4,14 +4,23 @@ const setText=(selector,value)=>{const node=document.querySelector(selector);if(
 const setBar=(selector,value)=>{const node=document.querySelector(selector);if(node)node.style.width=`${Math.max(0,Math.min(100,value||0))}%`};
 let currentIp=null;
 const dismissedAlertStorageKey="tyche-server-admin-dismissed-alerts-v2";
-let dismissedAlertKeys=new Set();
+let legacyDismissedAlertKeys=new Set();
 let activeWarningKeys=[];
-try{const stored=JSON.parse(window.localStorage.getItem(dismissedAlertStorageKey)||"[]");if(Array.isArray(stored))dismissedAlertKeys=new Set(stored.filter((key)=>typeof key==="string"))}catch{}
+try{const stored=JSON.parse(window.localStorage.getItem(dismissedAlertStorageKey)||"[]");if(Array.isArray(stored))legacyDismissedAlertKeys=new Set(stored.filter((key)=>typeof key==="string"))}catch{}
 let securityEventPage=1;
 let securityEventPages=1;
 let isReadOnly=false;
-const saveDismissedAlerts=()=>{try{window.localStorage.setItem(dismissedAlertStorageKey,JSON.stringify([...dismissedAlertKeys].slice(-500)))}catch{}};
-const dismissWarning=()=>{const warning=document.querySelector("[data-security-warning]");if(warning){for(const key of activeWarningKeys)dismissedAlertKeys.add(key);saveDismissedAlerts();warning.hidden=true}};
+const acknowledgeAlerts=async(keys)=>{if(!keys.length)return true;const response=await fetch("/api/server-status/alerts/acknowledge",{method:"POST",credentials:"same-origin",headers:{"content-type":"application/json"},body:JSON.stringify({keys})});return response.ok};
+const dismissWarning=async()=>{const warning=document.querySelector("[data-security-warning]");if(warning){warning.hidden=true;try{await acknowledgeAlerts(activeWarningKeys)}catch{warning.hidden=false}}};
+
+const decodeVapidKey=(value)=>{const padding="=".repeat((4-value.length%4)%4);const base64=(value+padding).replaceAll("-","+").replaceAll("_","/");return Uint8Array.from(atob(base64),(character)=>character.charCodeAt(0))};
+const pushButton=document.querySelector("[data-push-toggle]");
+let pushRegistration;
+let pushSubscription;
+let pushConfig;
+const updatePushButton=()=>{if(!pushButton)return;if(!pushConfig?.enabled){pushButton.textContent="푸시 설정 필요";pushButton.disabled=true;return}if(!("serviceWorker" in navigator)||!("PushManager" in window)||!("Notification" in window)){pushButton.textContent="푸시 미지원";pushButton.disabled=true;return}if(Notification.permission==="denied"){pushButton.textContent="알림 차단됨";pushButton.disabled=true;return}pushButton.disabled=false;pushButton.textContent=pushSubscription?"이 기기 알림 끄기":"이 기기 알림 켜기";pushButton.dataset.pushEnabled=String(Boolean(pushSubscription))};
+async function preparePush(){if(!pushButton)return;try{const response=await fetch("/api/server-status/push-config",{credentials:"same-origin",headers:{accept:"application/json"}});if(!response.ok)throw new Error();pushConfig=await response.json();if(pushConfig.enabled&&"serviceWorker" in navigator){pushRegistration=await navigator.serviceWorker.register("/server-status/push-worker.js",{scope:"/server-status/"});pushSubscription=await pushRegistration.pushManager.getSubscription()}}catch{pushConfig={enabled:false}}updatePushButton()}
+async function togglePush(){if(!pushConfig?.enabled||!pushRegistration)return;pushButton.disabled=true;try{if(pushSubscription){await fetch("/api/server-status/push-subscriptions",{method:"DELETE",credentials:"same-origin",headers:{"content-type":"application/json"},body:JSON.stringify(pushSubscription)});await pushSubscription.unsubscribe();pushSubscription=null}else{const permission=await Notification.requestPermission();if(permission!=="granted")throw new Error("알림 권한을 허용해주세요.");pushSubscription=await pushRegistration.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:decodeVapidKey(pushConfig.publicKey)});const saved=await fetch("/api/server-status/push-subscriptions",{method:"POST",credentials:"same-origin",headers:{"content-type":"application/json"},body:JSON.stringify(pushSubscription)});if(!saved.ok)throw new Error("푸시 구독을 저장하지 못했습니다.");const tested=await fetch("/api/server-status/push-test",{method:"POST",credentials:"same-origin",headers:{"content-type":"application/json"},body:JSON.stringify(pushSubscription)});if(!tested.ok)throw new Error("테스트 알림을 보내지 못했습니다.")}}catch(error){window.alert(error.message||"휴대폰 알림 설정을 완료하지 못했습니다.")}finally{updatePushButton()}}
 
 async function refresh(){
   try{
@@ -44,12 +53,14 @@ async function refresh(){
     const alertPanel=document.querySelector("[data-system-alerts-panel]");
     const alertList=document.querySelector("[data-system-alerts]");
     if(serverAlerts.length>0){alertPanel.hidden=false;alertList.replaceChildren(...serverAlerts.map((message)=>{const item=document.createElement("li");item.textContent=message;return item}));setText("[data-system-alert-count]",`${serverAlerts.length}건 확인 필요`)}else{alertPanel.hidden=true;alertList.replaceChildren()}
-    const systemAlertKeys=serverAlerts.map((message,index)=>`system:${data.alertItems?.[index]?.id||message}`);
-    const securityAlertKeys=events.map((event)=>`security:${event.id??`${event.createdAt}:${event.ipAddress}`}`);
-    const activeSystemAlertKeys=new Set(systemAlertKeys);for(const key of dismissedAlertKeys)if(key.startsWith("system:")&&!activeSystemAlertKeys.has(key))dismissedAlertKeys.delete(key);
-    const unseenSystemAlerts=serverAlerts.filter((_,index)=>!dismissedAlertKeys.has(systemAlertKeys[index]));
-    const unseenSecurityEvents=events.filter((_,index)=>!dismissedAlertKeys.has(securityAlertKeys[index]));
-    activeWarningKeys=[...systemAlertKeys,...securityAlertKeys];saveDismissedAlerts();
+    const acknowledgedAlertKeys=new Set(Array.isArray(data.acknowledgedAlertKeys)?data.acknowledgedAlertKeys:[]);
+    const systemAlertKeys=serverAlerts.map((message,index)=>data.alertItems?.[index]?.occurrenceKey||`system:${data.alertItems?.[index]?.id||message}@1`);
+    const securityAlertKeys=events.map((event)=>event.occurrenceKey||`security:${event.id??`${event.createdAt}:${event.ipAddress}`}@1`);
+    const legacyOccurrences=[...systemAlertKeys,...securityAlertKeys].filter((key)=>legacyDismissedAlertKeys.has(key.replace(/@\d+$/,"")));
+    if(legacyOccurrences.length>0){acknowledgeAlerts(legacyOccurrences).then((saved)=>{if(saved){legacyDismissedAlertKeys.clear();try{window.localStorage.removeItem(dismissedAlertStorageKey)}catch{}}})}
+    const unseenSystemAlerts=serverAlerts.filter((_,index)=>!acknowledgedAlertKeys.has(systemAlertKeys[index])&&!legacyOccurrences.includes(systemAlertKeys[index]));
+    const unseenSecurityEvents=events.filter((_,index)=>!acknowledgedAlertKeys.has(securityAlertKeys[index])&&!legacyOccurrences.includes(securityAlertKeys[index]));
+    activeWarningKeys=[...systemAlertKeys,...securityAlertKeys];
     const warningCount=unseenSystemAlerts.length+unseenSecurityEvents.length;
     const alertDetails=document.querySelector("[data-alert-details]");if(alertDetails)alertDetails.href=unseenSystemAlerts.length>0?"#system-alerts":"#security-events";
     if(warningCount>0){warning.hidden=false;setText("[data-warning-title]",unseenSystemAlerts.length>0?"새 서버 이상 상태가 감지되었습니다.":"새 비정상 접속이 감지되었습니다.");setText("[data-warning-message]",`새 서버 경고 ${unseenSystemAlerts.length}건, 새 비정상 접속 ${unseenSecurityEvents.length}건을 확인해주세요.`);setText("[data-security-event-count]",events.length?`${events.length}건 확인 필요`:"기록 없음")}else{warning.hidden=true;if(!events.length)setText("[data-security-event-count]","기록 없음")}
@@ -58,6 +69,7 @@ async function refresh(){
 }
 
 document.querySelector("[data-refresh]")?.addEventListener("click",refresh);
+pushButton?.addEventListener("click",togglePush);
 document.querySelector("[data-logout]")?.addEventListener("click",async()=>{await fetch("/api/server-status/logout",{method:"POST",credentials:"same-origin"});window.location.assign("/server-status/login")});
 async function addTrustedIp(){const label=window.prompt("위치 이름을 입력하세요. (예: 집)");if(!label)return;const suggested=/^(?:\d{1,3}\.){3}\d{1,3}$/.test(currentIp||"")?`${currentIp}/32`:"";const message=suggested?"현재 접속 IP를 자동 입력했습니다. 필요하면 수정하세요.":"현재 접속 IP를 자동 확인하지 못했습니다. IPv4/CIDR을 직접 입력하세요. (예: 123.123.123.123/32)";const cidr=window.prompt(message,suggested);if(!cidr)return;const response=await fetch("/api/server-status/trusted-ips",{method:"POST",credentials:"same-origin",headers:{"content-type":"application/json"},body:JSON.stringify({label,cidr})});if(!response.ok){window.alert("IP를 추가하지 못했습니다.");return}await refresh()}
 async function removeTrustedIp(id){if(!window.confirm("이 신뢰 IP를 삭제할까요?"))return;const response=await fetch(`/api/server-status/trusted-ips/${id}`,{method:"DELETE",credentials:"same-origin"});if(!response.ok){window.alert("마지막 신뢰 IP는 삭제할 수 없습니다.");return}await refresh()}
@@ -72,4 +84,4 @@ document.querySelector("[data-select-page]")?.addEventListener("change",(event)=
 document.querySelector("[data-delete-events]")?.addEventListener("click",deleteSelectedEvents);
 document.querySelector("[data-events-prev]")?.addEventListener("click",()=>{if(securityEventPage>1){securityEventPage-=1;loadSecurityEvents()}});
 document.querySelector("[data-events-next]")?.addEventListener("click",()=>{if(securityEventPage<securityEventPages){securityEventPage+=1;loadSecurityEvents()}});
-refresh();setInterval(refresh,30000);
+preparePush();refresh();setInterval(refresh,30000);

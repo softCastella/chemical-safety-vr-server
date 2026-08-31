@@ -70,6 +70,18 @@ export const env = Object.freeze({
     process.env.TRAINING_TELEMETRY_UPLOAD_TOKEN ?? "",
   enableServerAdmin: readBoolean("ENABLE_SERVER_ADMIN", nodeEnv === "production"),
   vultrApiKey: process.env.VULTR_API_KEY ?? "",
+  serverAdminPush: Object.freeze({
+    enabled: readBoolean("ENABLE_SERVER_ADMIN_PUSH", false),
+    vapidPublicKey: process.env.WEB_PUSH_VAPID_PUBLIC_KEY ?? "",
+    vapidPrivateKey: process.env.WEB_PUSH_VAPID_PRIVATE_KEY ?? "",
+    subject: process.env.WEB_PUSH_SUBJECT ?? "",
+    pollIntervalSeconds: readInteger(
+      "SERVER_ALERT_POLL_INTERVAL_SECONDS",
+      60,
+      30,
+      3600,
+    ),
+  }),
   enableContactForm: readBoolean("ENABLE_CONTACT_FORM", false),
   kakaoJavaScriptKey: process.env.KAKAO_JAVASCRIPT_KEY ?? "",
   contact: Object.freeze({
