@@ -67,14 +67,14 @@ sudo systemctl reload nginx
 
 `public/site/robots.txt`에는 정상 검색엔진의 일반 접근은 허용하면서 알려진 AI 학습·데이터 수집 사용자 에이전트에 수집 거부 의사를 표시했다. `robots.txt`는 자발적으로 규칙을 지키는 봇에만 유효하므로 악성 수집기를 강제로 막는 보안 장치는 아니다. 강제 방어는 Nginx 속도 제한, 방화벽과 추후 필요 시 CDN/WAF 규칙으로 보완한다.
 
-문의 UI는 현재 표시되지만 제출 버튼은 `문의 폼 준비 중` 상태로 비활성화되어 있다. `/api/contact` 메일 전송 기능, SMTP/API 자격 증명과 운영 메일 연동은 적용하지 않았다. 기능을 다시 열 때에는 다음 항목을 함께 구현하고 검증해야 한다.
+문의 UI는 `POST /api/contact`를 호출하며 `ENABLE_CONTACT_FORM=true`일 때만 서버 라우트가 활성화된다.
+운영 메일은 Resend API로 전달한다. 서버는 허용 필드만 받고 이름·이메일·문의 종류·문의 내용의 형식과
+길이를 검사하며, 문의 내용은 10자 이상 5,000자 이하로 제한한다. 시간당 IP 요청 제한과 숨김
+`website` 입력을 이용한 허니팟을 적용했고, 전송 실패 로그에는 이름·이메일·문의 본문을 기록하지 않는다.
+Resend API 키와 실제 발신·수신 주소는 저장소 밖 운영 `.env`에서만 관리한다.
 
-- 서버 측 길이·형식 검증과 허용 필드 목록
-- 요청 속도 제한
-- 허니팟 및 Cloudflare Turnstile 같은 스팸봇 방어
-- CSRF와 Origin 정책 검토
-- 로그에 이름, 이메일, 문의 본문을 불필요하게 남기지 않는 정책
-- 운영 메일 공급자와 비밀정보의 저장소 외부 관리
+상세페이지 공유 모달의 `이메일`은 문의 폼과 별개다. 사용자의 기본 메일 프로그램을 여는 `mailto:`
+링크이며 Resend나 서버 API를 호출하지 않는다.
 
 ## 완료한 검증
 
@@ -276,19 +276,107 @@ Nginx가 정적 파일을 직접 제공하므로 PM2 재시작, Nginx reload, DB
 - 파비콘은 브라우저 캐시 때문에 이전 이미지가 보일 수 있으므로 강력 새로고침 또는 새 탭·시크릿 창에서
   최종 시각 확인한다.
 
-## Resend 문의 폼과 VR 상세 자산 운영 배포
+## Resend 문의 폼과 VR 상세 공유 운영 배포
 
-2026-08-31 홈페이지 문의 폼, VR 상세 공유 버튼, OG 배너와 HD 이미지를 운영에 반영했다.
+2026-08-31 홈페이지 문의 폼, VR 상세 공유 버튼, OG 배너와 HD 이미지를 운영에 반영했다. 최초
+문의·자산 배포 기준은 `main@d08c8cd8d8ea9708a1c4e79de6e2c432b0d6de33`이며, SNS 공유 설정과
+카카오·네이버 수정까지 포함한 현재 기준은
+`main@ed35fc3c58101b81123e88eef1b0cc9b52621e99`이다.
 
-- 운영 커밋: `main@d08c8cd8d8ea9708a1c4e79de6e2c432b0d6de33`
 - 운영 설정: `ENABLE_CONTACT_FORM`, `RESEND_API_KEY`, `CONTACT_FROM_EMAIL`, `CONTACT_TO_EMAIL`을
   저장소 밖 `.env`에 설정하고 기존 파일을 `/home/linuxuser/.config/tycheworks/env-backups`에 백업했다.
-- Resend 발신 도메인 DKIM·SPF·DMARC 검증과 로컬 실제 Gmail 수신을 확인했다.
+- Resend 발신 도메인 DKIM·SPF·DMARC 검증과 실제 Gmail 수신을 확인했다.
 - 운영 `POST https://tycheworks.com/api/contact`는 실제 Resend 호출에서 HTTP `202`와 접수 ID를 반환했다.
 - 홈페이지, VR 상세페이지, 전용 랜딩과 1200×630 OG 이미지는 모두 HTTP `200`을 반환했다.
 - 공개 HTML에서 `contact.js`, `detail-share.js`, `metahorizon_hero_v2.png`,
   `metahorizon_title_v2_hd.png`, `metahorizon_og_banner_1200x630.png` 참조를 확인했다.
-- 운영 자동 테스트 50개, `npm audit --audit-level=high` 취약점 0건, `git diff --check`,
-  `nginx -t`, PM2 `online`과 내부 헬스체크를 확인했다.
-- DB 마이그레이션, 운영 DB 변경과 Nginx 설정 변경은 수행하지 않았다.
-- 운영 요청으로 발송한 `운영 배포 확인` 메일의 Gmail 최종 도착 확인은 사용자 수동 검증으로 남겼다.
+- 최초 배포 당시 운영 자동 테스트 50개, `npm audit --audit-level=high` 취약점 0건,
+  `git diff --check`, `nginx -t`, PM2 `online`과 내부 헬스체크를 확인했다.
+- DB 마이그레이션과 운영 DB 변경은 수행하지 않았다.
+
+### 문의 메일 운영 설정
+
+문의 폼을 활성화할 때 운영 `.env`에서 다음 변수를 설정한다.
+
+```dotenv
+ENABLE_CONTACT_FORM=true
+RESEND_API_KEY=
+CONTACT_FROM_EMAIL=
+CONTACT_TO_EMAIL=
+CONTACT_RATE_LIMIT_PER_HOUR=5
+```
+
+- `RESEND_API_KEY`: Resend에서 발급한 비밀 API 키다. 클라이언트 JavaScript에 넣지 않는다.
+- `CONTACT_FROM_EMAIL`: Resend에서 발신 인증한 도메인의 주소다.
+- `CONTACT_TO_EMAIL`: 실제 문의를 받을 메일함 주소다. Gmail로 받으려면 해당 Gmail 주소를 입력한다.
+- `CONTACT_RATE_LIMIT_PER_HOUR`: 한 IP에서 한 시간 동안 허용할 문의 수이며 기본값은 5다.
+
+Resend 발신 도메인은 가비아 DNS 관리 화면에서 Resend가 제시한 DKIM TXT와 발신용 CNAME 레코드를
+그대로 등록하고, 필요하면 DMARC TXT도 추가한다. 레코드 이름과 값은 Resend 화면에 표시된 값을
+기준으로 하며 문서나 Git에 복사하지 않는다. 문의 메일 발신만 필요하므로 Resend의 수신 기능과 MX
+레코드는 활성화하지 않아도 된다. Resend에서 도메인과 각 발신 레코드가 `Verified`가 된 뒤 실제
+문의 폼으로 전송하고 Resend의 `Delivered` 상태와 최종 수신 메일함을 각각 확인한다.
+
+### 상세페이지 공유 구성
+
+- 구현 파일: `public/site/immersa/chemical-safety-training/index.html`, 같은 디렉터리의
+  `detail-share.js`
+- 공유 대상: 카카오톡, 네이버, Facebook, X, LinkedIn, Telegram, LINE, 이메일과 링크 복사
+- 네이버·Facebook·X·LinkedIn·Telegram·LINE은 각 서비스의 웹 공유 URL을 새 탭에서 연다.
+- 네이버는 공식 `https://share.naver.com/web/shareView`를 사용한다. 이전
+  `https://blog.naver.com/openapi/share` 주소는 사용하지 않는다.
+- 이메일은 `mailto:`, 링크 복사는 Clipboard API를 사용한다. 둘 다 Resend와 무관하다.
+- 페이지 OG와 X 카드 이미지는 `metahorizon_og_banner_1200x630.png`이며, OG 너비·높이는
+  1,200×630, X 카드 타입은 `summary_large_image`다.
+- 플랫폼의 공유 선택 화면에서 이미지를 작은 썸네일로 축소하는 것은 해당 플랫폼 UI다. 원본 이미지
+  크기 오류로 판단하지 않는다.
+
+### 카카오톡 공유 설정
+
+카카오톡은 `Kakao.Share.sendDefault()`와 Kakao JavaScript SDK 2.8.2를 사용한다. 브라우저에는
+서버의 `GET /api/public-site-config`를 통해 공개 JavaScript 키만 전달하고 응답은 `no-store`로
+제공한다. 실제 환경 변수 값은 문서나 저장소에 기록하지 않는다.
+
+카카오 Developers에서 다음 항목을 설정한다.
+
+1. `앱` → `플랫폼 키` → `JavaScript 키` → `JavaScript SDK 도메인`에
+   `https://immersa.tycheworks.com`을 등록한다.
+2. `앱` → `제품 링크 관리` → `웹 도메인`에 `https://immersa.tycheworks.com`을 등록하고 기본
+   웹 도메인으로 선택한다. 이 설정이 없으면 공유된 카드의 이미지·본문·버튼을 눌러도 페이지로
+   이동하지 않을 수 있다.
+3. 홈페이지 이동만 제공하므로 기본 네이티브 앱 스킴과 Android·iOS 스토어 주소는 설정하지 않는다.
+4. 카카오 로그인용 Redirect URI와 OpenID Connect는 카카오톡 링크 공유에 필요하지 않다.
+
+서버 운영 `.env`에는 다음 변수 이름만 사용한다.
+
+```dotenv
+KAKAO_JAVASCRIPT_KEY=
+```
+
+공유 콘텐츠와 버튼의 `mobileWebUrl`, `webUrl`은 모두
+`https://immersa.tycheworks.com/chemical-safety-training`을 사용한다. 카카오 카드가 1200×630
+배너를 임의로 세로 크롭하지 않도록 `imageWidth: 1200`, `imageHeight: 630`을 함께 전달한다.
+
+Kakao SDK가 공유 팝업의 크기와 로그인·친구 선택 흐름을 관리하므로 애플리케이션 코드에서
+`window.open`을 재정의하지 않는다. 이미 열려 있던 상세페이지는 배포 후에도 이전 JavaScript를
+계속 실행할 수 있다. 팝업이 전체 탭으로 열리는 등 이전 동작이 남으면 카카오 공유 탭을 닫고
+상세페이지에서 강력 새로고침한 뒤 다시 시도한다.
+
+### 보안 헤더와 운영 검증
+
+카카오 SDK와 공유 폼이 CSP에 차단되지 않도록 운영 Nginx 정책에 다음 출처를 허용했다.
+
+- `script-src`: `https://t1.kakaocdn.net`
+- `form-action`: `https://sharer.kakao.com`
+
+Nginx 변경 전 기존 설정을 백업했고 `nginx -t` 통과 후 다시 불러왔다. 현재 공유 기준 자동 테스트는
+52개가 통과하며 PM2 애플리케이션은 `online`이다. 공유 플랫폼은 외부 로그인 상태와 캐시의 영향을
+받으므로 다음 수동 검증을 별도로 수행한다.
+
+1. 상세페이지 공유 모달 열기·닫기와 키보드 `Escape` 동작을 확인한다.
+2. 카카오톡에서 새 메시지를 공유하고 이미지 비율, 본문과 `VR 상세페이지 보기` 링크를 확인한다.
+3. 카카오 Developers 설정 변경은 이미 보낸 메시지에 소급 적용되지 않으므로 반드시 새 카드로
+   확인한다.
+4. 네이버 공유가 빈 페이지가 아닌 공식 공유 화면을 열고 제목과 URL을 전달하는지 확인한다.
+5. Facebook, X, LinkedIn, Telegram과 LINE에서 공개 URL 및 OG 미리보기를 확인한다. 각 서비스가
+   이전 미리보기를 캐시하면 서비스별 캐시 갱신 도구 또는 새 공유 요청으로 다시 확인한다.
