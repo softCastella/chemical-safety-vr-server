@@ -122,7 +122,7 @@ test('화학물질 안전훈련 VR 상세페이지는 SNS 공유 모달을 제�
     ),
   ]);
 
-  assert.match(html, /<script src="detail-share\.js\?v=20260831-3" defer><\/script>/);
+  assert.match(html, /<script src="\/chemical-safety-training\/detail-share\.js\?v=20260831-4" defer><\/script>/);
   assert.match(html, /class="detail-share-button"/);
   assert.match(html, /aria-label="이 페이지 공유하기"/);
   assert.match(html, /role="dialog" aria-modal="true"/);
