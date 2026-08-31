@@ -122,7 +122,7 @@ test('화학물질 안전훈련 VR 상세페이지는 SNS 공유 모달을 제�
     ),
   ]);
 
-  assert.match(html, /<script src="\/chemical-safety-training\/detail-share\.js\?v=20260831-10" defer><\/script>/);
+  assert.match(html, /<script src="\/chemical-safety-training\/detail-share\.js\?v=20260831-11" defer><\/script>/);
   assert.match(html, /class="detail-share-button"/);
   assert.match(html, /aria-label="이 페이지 공유하기"/);
   assert.match(html, /role="dialog" aria-modal="true"/);
@@ -150,7 +150,8 @@ test('화학물질 안전훈련 VR 상세페이지는 SNS 공유 모달을 제�
   assert.match(script, /imageWidth:\s*1200/);
   assert.match(script, /imageHeight:\s*630/);
   assert.doesNotMatch(script, /window\.open\s*=/);
-  assert.match(script, /blog\.naver\.com\/openapi\/share/);
+  assert.match(script, /share\.naver\.com\/web\/shareView/);
+  assert.doesNotMatch(script, /blog\.naver\.com\/openapi\/share/);
   assert.match(script, /facebook\.com\/sharer\/sharer\.php/);
   assert.match(script, /twitter\.com\/intent\/tweet/);
   assert.match(script, /linkedin\.com\/sharing\/share-offsite/);
