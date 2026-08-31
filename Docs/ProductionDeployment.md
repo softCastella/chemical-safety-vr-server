@@ -241,3 +241,40 @@ fast-forward하면 아직 운영 반영 승인을 받지 않은 텔레메트리 
 운영 HTML에서 새 창 열기와 원본 창 보호 속성이 함께 적용된 것도 확인했다.
 Nginx가 정적 파일을 직접 제공하므로 PM2 재시작, Nginx reload, DB 마이그레이션과 운영 데이터 변경은
 수행하지 않았다.
+
+## 화학 안전 VR 전용 랜딩 배포 상태
+
+화학 안전 VR 전용 랜딩은 `https://chemical-safety-vr.tycheworks.com/`에서 제공한다. 배포 요청 기준
+서버 커밋은 `main@5b7125745fa187d4472ac488d32669d6129f0de0`이며, 배포 응답에는 운영 checkout SHA가
+별도로 포함되지 않았다.
+
+### 적용 변경
+
+- 랜딩 루트와 `/light/`, `/campaign/` 정적 페이지를 전용 도메인에서 제공한다.
+- 이전 `/landing/` 접근은 전용 도메인 루트로 `301` 이동한다.
+- 공용 `favicon_round_crop.svg`를 랜딩, 홈페이지, IMMERSA와 서버 관리자 화면의 파비콘으로 사용한다.
+- 새 파비콘은 사각 PNG 원본을 자체 포함한 SVG이며 원 내부는 흰색, 원 바깥은 투명하다.
+- TLS 인증서 자동 갱신, Nginx 설정과 PM2 애플리케이션 구성은 기존 운영 정책을 유지한다.
+- DB 마이그레이션 `009`~`012`는 이번 배포에서 실행하지 않았고 텔레메트리 수집 기능도 비활성 상태를
+  유지한다.
+
+### 완료 검증
+
+- `https://chemical-safety-vr.tycheworks.com/`: HTTP `200`
+- `https://chemical-safety-vr.tycheworks.com/landing/`: 루트로 HTTP `301`
+- `https://chemical-safety-vr.tycheworks.com/light/`: HTTP `200`
+- `https://chemical-safety-vr.tycheworks.com/campaign/`: HTTP `200`
+- `https://chemical-safety-vr.tycheworks.com/assets/favicon_round_crop.svg`: HTTP `200`,
+  `Content-Type: image/svg+xml`
+- 배포 응답 기준 Nginx 설정 검사 통과, PM2 애플리케이션 `online`, 새 헬스체크 정상, 정적 파일 소유권
+  정상과 홈페이지·IMMERSA·서버 관리자 화면의 새 파비콘 HTTP `200`을 확인했다.
+
+### 남은 후속 검증과 수정
+
+- 랜딩 세 페이지의 `og:image`와 `twitter:image`는 현재
+  `https://tycheworks.com/assets/metahorizon_title_clean_v2.png`를 참조한다.
+- 배포 응답에서는 이 URL을 존재하지 않는 기존 도메인 경로로 보고했지만, 별도 HTTP 재확인에서는
+  `200 image/png`가 반환됐다. 따라서 현재 깨진 링크로 확정하지 않으며, 전용 랜딩 도메인의 자산으로
+  옮겨 외부 호스트 의존성을 제거할지 다음 배포에서 결정한다.
+- 파비콘은 브라우저 캐시 때문에 이전 이미지가 보일 수 있으므로 강력 새로고침 또는 새 탭·시크릿 창에서
+  최종 시각 확인한다.
