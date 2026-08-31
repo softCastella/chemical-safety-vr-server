@@ -7,7 +7,7 @@ let server;
 let baseUrl;
 
 before(async () => {
-  server = createApp().listen(0);
+  server = createApp({ kakaoJavaScriptKey: "test-kakao-javascript-key" }).listen(0);
   await new Promise((resolve) => server.once("listening", resolve));
 
   const address = server.address();
@@ -39,6 +39,17 @@ test("GET / serves the Tyche Works site", async () => {
 
   assert.equal(response.status, 200);
   assert.match(body, /<title>TYCHE WORKS<\/title>/);
+});
+
+test("GET /api/public-site-config returns the public Kakao JavaScript key", async () => {
+  const response = await fetch(`${baseUrl}/api/public-site-config`);
+  const body = await response.json();
+
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get("cache-control"), "no-store");
+  assert.deepEqual(body, {
+    kakaoJavaScriptKey: "test-kakao-javascript-key",
+  });
 });
 
 test("GET /assets/favicon_round_crop.svg serves the self-contained round favicon", async () => {

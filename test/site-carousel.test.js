@@ -122,15 +122,18 @@ test('화학물질 안전훈련 VR 상세페이지는 SNS 공유 모달을 제�
     ),
   ]);
 
-  assert.match(html, /<script src="\/chemical-safety-training\/detail-share\.js\?v=20260831-5" defer><\/script>/);
+  assert.match(html, /<script src="\/chemical-safety-training\/detail-share\.js\?v=20260831-6" defer><\/script>/);
   assert.match(html, /class="detail-share-button"/);
   assert.match(html, /aria-label="이 페이지 공유하기"/);
   assert.match(html, /role="dialog" aria-modal="true"/);
   assert.doesNotMatch(html, /data-share-native|기기에서 공유/);
+  assert.match(html, /data-share-kakao/);
   assert.match(html, /data-share-platform="naver"/);
   assert.match(html, /data-share-platform="facebook"/);
   assert.match(html, /data-share-platform="x"/);
   assert.match(html, /data-share-platform="linkedin"/);
+  assert.match(html, /data-share-platform="telegram"/);
+  assert.match(html, /data-share-platform="line"/);
   assert.match(html, /data-share-platform="email"/);
   assert.match(html, /data-share-copy/);
   assert.match(html, /\.detail-share-status\s*\{[\s\S]*?top:\s*76px/);
@@ -141,12 +144,28 @@ test('화학물질 안전훈련 VR 상세페이지는 SNS 공유 모달을 제�
   assert.match(html, /linear-gradient\(#fff, #fff\) padding-box/);
   assert.match(html, /linear-gradient\(135deg, #70a0f8 0%, #7cebf0 100%\) border-box/);
   assert.doesNotMatch(script, /navigator\.share|data-share-native/);
+  assert.match(script, /fetch\("\/api\/public-site-config"/);
+  assert.match(script, /t1\.kakaocdn\.net\/kakao_js_sdk\/2\.8\.2\/kakao\.min\.js/);
+  assert.match(script, /kakaoSdk\.Share\.sendDefault/);
   assert.match(script, /blog\.naver\.com\/openapi\/share/);
   assert.match(script, /facebook\.com\/sharer\/sharer\.php/);
   assert.match(script, /twitter\.com\/intent\/tweet/);
   assert.match(script, /linkedin\.com\/sharing\/share-offsite/);
+  assert.match(script, /t\.me\/share\/url/);
+  assert.match(script, /social-plugins\.line\.me\/lineit\/share/);
   assert.match(script, /navigator\.clipboard\.writeText\(shareUrl\)/);
   assert.match(script, /event\.key === "Escape"/);
+});
+
+test('서버 어드민 로그인과 대시보드는 새 원형 파비콘을 사용한다', async () => {
+  const [login, dashboard] = await Promise.all([
+    readFile(new URL('../server-status/login.html', siteRoot), 'utf8'),
+    readFile(new URL('../server-status/index.html', siteRoot), 'utf8'),
+  ]);
+
+  for (const html of [login, dashboard]) {
+    assert.match(html, /<link rel="icon" type="image\/svg\+xml" href="\/server-status\/favicon\.svg\?v=4">/);
+  }
 });
 
 test('화학물질 안전훈련 VR 페이지는 전용 OG 배너와 HD 히어로 이미지를 사용한다', async () => {

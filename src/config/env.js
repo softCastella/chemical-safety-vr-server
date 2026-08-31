@@ -71,6 +71,7 @@ export const env = Object.freeze({
   enableServerAdmin: readBoolean("ENABLE_SERVER_ADMIN", nodeEnv === "production"),
   vultrApiKey: process.env.VULTR_API_KEY ?? "",
   enableContactForm: readBoolean("ENABLE_CONTACT_FORM", false),
+  kakaoJavaScriptKey: process.env.KAKAO_JAVASCRIPT_KEY ?? "",
   contact: Object.freeze({
     resendApiKey: process.env.RESEND_API_KEY ?? "",
     fromEmail: process.env.CONTACT_FROM_EMAIL ?? "",

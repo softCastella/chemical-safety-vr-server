@@ -22,6 +22,11 @@ import { createResendContactMailer } from "./modules/contact/resend-contact-mail
 const publicRoot = fileURLToPath(new URL("../public/", import.meta.url));
 const dashboardRoot = path.join(publicRoot, "dashboard");
 const siteRoot = path.join(publicRoot, "site");
+const chemicalSafetyTrainingRoot = path.join(
+  siteRoot,
+  "immersa",
+  "chemical-safety-training",
+);
 const serverStatusRoot = path.join(publicRoot, "server-status");
 const telemetryIngestTestRoot = path.join(publicRoot, "telemetry-ingest-test");
 
@@ -40,6 +45,7 @@ export function createApp({
   contactMailer,
   enableContactForm = env.enableContactForm,
   contactRateLimitPerHour = env.contact.rateLimitPerHour,
+  kakaoJavaScriptKey = env.kakaoJavaScriptKey,
 } = {}) {
   const app = express();
   const resolvedUserRepository =
@@ -54,6 +60,20 @@ export function createApp({
       status: "ok",
       service: "tyche-safety-training-server",
     });
+  });
+
+  app.get("/api/public-site-config", (_request, response) => {
+    response.set("Cache-Control", "no-store");
+
+    if (!kakaoJavaScriptKey) {
+      response.status(503).json({
+        code: "KAKAO_SHARE_UNAVAILABLE",
+        message: "KAKAO_JAVASCRIPT_KEY is not configured.",
+      });
+      return;
+    }
+
+    response.status(200).json({ kakaoJavaScriptKey });
   });
 
   if (enableContactForm) {
@@ -136,6 +156,10 @@ export function createApp({
   }
 
   app.use("/dashboard", express.static(dashboardRoot));
+  app.use(
+    "/chemical-safety-training",
+    express.static(chemicalSafetyTrainingRoot),
+  );
   app.use(express.static(siteRoot));
   app.use(notFoundHandler);
   app.use(errorHandler);

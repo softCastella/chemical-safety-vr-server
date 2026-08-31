@@ -21,7 +21,7 @@
     <meta name="twitter:image" content="https://tycheworks.com/assets/metahorizon_og_banner_1200x630.png">
     <meta name="twitter:image:alt" content="화학물질 안전훈련 VR 대표 이미지">
     <link rel="stylesheet" href="../immersa.css">
-    <script src="/chemical-safety-training/detail-share.js?v=20260831-5" defer></script>
+    <script src="/chemical-safety-training/detail-share.js?v=20260831-6" defer></script>
     <style>
         .line-brand img {
             width: 205px !important;
@@ -392,7 +392,7 @@
 
         .detail-share-grid {
             display: grid;
-            grid-template-columns: repeat(5, minmax(0, 1fr));
+            grid-template-columns: repeat(4, minmax(0, 1fr));
             gap: 10px;
             margin: 14px 0;
         }
@@ -434,9 +434,14 @@
         }
 
         .detail-share-brand-naver { background: #03c75a; }
+        .detail-share-brand-kakao { color: #191919; background: #fee500; }
+        .detail-share-brand-kakao svg { width: 21px; height: 21px; }
         .detail-share-brand-facebook { background: #1877f2; }
         .detail-share-brand-x { background: #111; }
         .detail-share-brand-linkedin { background: #0a66c2; font-size: 13px; }
+        .detail-share-brand-telegram { background: #229ed9; }
+        .detail-share-brand-telegram svg { width: 20px; height: 20px; }
+        .detail-share-brand-line { background: #06c755; font-size: 9px; letter-spacing: -.04em; }
         .detail-share-brand-email { background: linear-gradient(135deg, #6aaeff, #6979ea); }
 
         .detail-share-copy {
@@ -905,10 +910,13 @@
                         <button class="detail-share-close" type="button" data-share-close aria-label="공유 창 닫기">×</button>
                     </div>
                     <div class="detail-share-grid">
+                        <button class="detail-share-option" type="button" data-share-kakao><span class="detail-share-brand detail-share-brand-kakao"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 3C6.48 3 2 6.58 2 11c0 2.84 1.85 5.33 4.64 6.75l-.91 3.34a.45.45 0 0 0 .68.49l3.94-2.61c.54.07 1.09.1 1.65.1 5.52 0 10-3.58 10-8.07S17.52 3 12 3Z"/></svg></span><span>카카오톡</span></button>
                         <a class="detail-share-option" data-share-platform="naver" target="_blank" rel="noopener noreferrer"><span class="detail-share-brand detail-share-brand-naver">N</span><span>네이버</span></a>
                         <a class="detail-share-option" data-share-platform="facebook" target="_blank" rel="noopener noreferrer"><span class="detail-share-brand detail-share-brand-facebook">f</span><span>Facebook</span></a>
                         <a class="detail-share-option" data-share-platform="x" target="_blank" rel="noopener noreferrer"><span class="detail-share-brand detail-share-brand-x">𝕏</span><span>X</span></a>
                         <a class="detail-share-option" data-share-platform="linkedin" target="_blank" rel="noopener noreferrer"><span class="detail-share-brand detail-share-brand-linkedin">in</span><span>LinkedIn</span></a>
+                        <a class="detail-share-option" data-share-platform="telegram" target="_blank" rel="noopener noreferrer"><span class="detail-share-brand detail-share-brand-telegram"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="m20.4 4.1-3 15c-.23 1.06-.82 1.32-1.66.82l-4.57-3.37-2.2 2.12c-.25.24-.45.44-.93.44l.33-4.66 8.48-7.67c.37-.33-.08-.52-.57-.2L5.8 13.18 1.28 11.76c-.98-.31-1-1 .2-1.47L19.1 3.5c.82-.3 1.53.2 1.3.6Z"/></svg></span><span>Telegram</span></a>
+                        <a class="detail-share-option" data-share-platform="line" target="_blank" rel="noopener noreferrer"><span class="detail-share-brand detail-share-brand-line">LINE</span><span>LINE</span></a>
                         <a class="detail-share-option" data-share-platform="email"><span class="detail-share-brand detail-share-brand-email">@</span><span>이메일</span></a>
                     </div>
                     <button class="detail-share-copy" type="button" data-share-copy>
