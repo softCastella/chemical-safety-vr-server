@@ -207,6 +207,7 @@ test("홈 문의 폼은 활성 버튼과 비동기 전송 스크립트를 제공
   assert.match(html, /action="\/api\/contact"/);
   assert.match(html, /문의 보내기/);
   assert.doesNotMatch(html, /문의 폼 준비 중/);
+  assert.match(html, /placeholder="문의 내용을 입력해주세요 \(10자 이상\)"/);
   assert.match(html, /name="website"/);
   assert.match(html, /<script src="contact\.js"><\/script>/);
   assert.match(script, /fetch\(contactForm\.action/);

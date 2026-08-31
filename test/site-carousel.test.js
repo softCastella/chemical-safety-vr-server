@@ -122,22 +122,18 @@ test('화학물질 안전훈련 VR 상세페이지는 Gmail 공유 작성창을 
     ),
   ]);
 
-  assert.match(html, /<script src="detail-share\.js" defer><\/script>/);
+  assert.match(html, /<script src="detail-share\.js\?v=20260831-2" defer><\/script>/);
   assert.match(html, /class="detail-share-button"/);
   assert.match(html, /aria-label="Gmail로 이 페이지 공유하기"/);
+  assert.match(html, /href="https:\/\/mail\.google\.com\/mail\/\?view=cm&amp;fs=1&amp;su=/);
   assert.match(html, /\.detail-share-status\s*\{[\s\S]*?top:\s*76px/);
   assert.match(html, /linear-gradient\(145deg, rgba\(124, 235, 240, 0\.22\), rgba\(112, 160, 248, 0\.34\)\)/);
   assert.match(html, /stroke-width="2\.25"/);
   assert.match(html, /border:\s*1px solid transparent !important/);
   assert.match(html, /linear-gradient\(#fff, #fff\) padding-box/);
   assert.match(html, /linear-gradient\(135deg, #70a0f8 0%, #7cebf0 100%\) border-box/);
-  assert.match(script, /window\.location\.protocol !== "http:"/);
-  assert.match(script, /로컬 서버에서 공유를 확인해주세요/);
-  assert.match(script, /new URL\("https:\/\/mail\.google\.com\/mail\/"\)/);
-  assert.match(script, /gmailUrl\.searchParams\.set\(\s*"su"/);
-  assert.match(script, /gmailUrl\.searchParams\.set\(\s*"body"/);
-  assert.match(script, /window\.open\(gmailUrl\.toString\(\), "_blank"/);
-  assert.match(script, /Gmail 작성창을 열었습니다/);
+  assert.doesNotMatch(script, /window\.open/);
+  assert.match(script, /Gmail 작성창을 엽니다/);
 });
 
 test('화학물질 안전훈련 VR 페이지는 전용 OG 배너와 HD 히어로 이미지를 사용한다', async () => {
