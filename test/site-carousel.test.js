@@ -110,7 +110,7 @@ test('화학물질 안전훈련 VR 상세페이지 푸터는 공개 개인정보
   );
 });
 
-test('화학물질 안전훈련 VR 상세페이지는 Gmail 공유 작성창을 제공한다', async () => {
+test('화학물질 안전훈련 VR 상세페이지는 SNS 공유 모달을 제공한다', async () => {
   const [html, script] = await Promise.all([
     readFile(
       new URL('immersa/chemical-safety-training/index.html', siteRoot),
@@ -122,18 +122,31 @@ test('화학물질 안전훈련 VR 상세페이지는 Gmail 공유 작성창을 
     ),
   ]);
 
-  assert.match(html, /<script src="detail-share\.js\?v=20260831-2" defer><\/script>/);
+  assert.match(html, /<script src="detail-share\.js\?v=20260831-3" defer><\/script>/);
   assert.match(html, /class="detail-share-button"/);
-  assert.match(html, /aria-label="Gmail로 이 페이지 공유하기"/);
-  assert.match(html, /href="https:\/\/mail\.google\.com\/mail\/\?view=cm&amp;fs=1&amp;su=/);
+  assert.match(html, /aria-label="이 페이지 공유하기"/);
+  assert.match(html, /role="dialog" aria-modal="true"/);
+  assert.match(html, /카카오톡 · Instagram · 메시지 앱 등/);
+  assert.match(html, /data-share-platform="naver"/);
+  assert.match(html, /data-share-platform="facebook"/);
+  assert.match(html, /data-share-platform="x"/);
+  assert.match(html, /data-share-platform="linkedin"/);
+  assert.match(html, /data-share-platform="email"/);
+  assert.match(html, /data-share-copy/);
   assert.match(html, /\.detail-share-status\s*\{[\s\S]*?top:\s*76px/);
+  assert.match(html, /\.detail-share-dialog\s*\{[\s\S]*?position:\s*fixed/);
   assert.match(html, /linear-gradient\(145deg, rgba\(124, 235, 240, 0\.22\), rgba\(112, 160, 248, 0\.34\)\)/);
   assert.match(html, /stroke-width="2\.25"/);
   assert.match(html, /border:\s*1px solid transparent !important/);
   assert.match(html, /linear-gradient\(#fff, #fff\) padding-box/);
   assert.match(html, /linear-gradient\(135deg, #70a0f8 0%, #7cebf0 100%\) border-box/);
-  assert.doesNotMatch(script, /window\.open/);
-  assert.match(script, /Gmail 작성창을 엽니다/);
+  assert.match(script, /navigator\.share\(\{ title: shareTitle, text: shareText, url: shareUrl \}\)/);
+  assert.match(script, /blog\.naver\.com\/openapi\/share/);
+  assert.match(script, /facebook\.com\/sharer\/sharer\.php/);
+  assert.match(script, /twitter\.com\/intent\/tweet/);
+  assert.match(script, /linkedin\.com\/sharing\/share-offsite/);
+  assert.match(script, /navigator\.clipboard\.writeText\(shareUrl\)/);
+  assert.match(script, /event\.key === "Escape"/);
 });
 
 test('화학물질 안전훈련 VR 페이지는 전용 OG 배너와 HD 히어로 이미지를 사용한다', async () => {
