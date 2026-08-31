@@ -100,10 +100,10 @@ Resend API 키와 실제 발신·수신 주소는 저장소 밖 운영 `.env`에
 - 서버 대시보드는 `VULTR_API_KEY`가 설정된 경우 Vultr Account API에서 최근 결제일을 조회하고, Vultr의 월별 청구 기준에 따라 다음 달 1일을 다음 청구서 발행 예정일로 표시한다. 운영 API 키는 저장소에 기록하지 않는다. API 키가 없거나 호출에 실패하면 대시보드에 실패 지점을 표시한다.
 - OTP와 관리자 보안 이벤트 이메일 알림은 연결하지 않았다. 웹 푸시는 코드와 migration `013`~`016`까지
   구현했으며 운영 DB migration과 VAPID 환경 변수 적용 전에는 비활성 상태다.
-- 비정상 접속 IP의 국가 조회 코드는 MaxMind GeoLite2 Country 로컬 데이터베이스 방식으로 구현했다.
-  운영 서버의 데이터베이스 설치, MaxMind 자격 증명과 환경 변수 적용 전에는 비활성 상태다. 접속 IP를
-  외부 조회 API로 전송하지 않으며 VPN·프록시 사용 시 실제 사용자 위치가 아니라 출구 IP의 국가로
-  판정되므로 국가 정보만으로 접속 원인이나 사용자 위치를 확정하지 않는다.
+- 비정상 접속 IP의 국가는 MaxMind GeoLite2 Country 로컬 데이터베이스로 조회한다. 운영 서버의
+  `geoipupdate.timer`가 DB 갱신을 확인하며, 접속 IP를 외부 조회 API로 전송하지 않는다. VPN·프록시
+  사용 시 실제 사용자 위치가 아니라 출구 IP의 국가로 판정되므로 국가 정보만으로 접속 원인이나 사용자
+  위치를 확정하지 않는다.
 - 운영 비밀번호와 API 키는 저장소에 기록하지 않았다.
 - 문의 폼과 VR 상세 웹사이트 변경은 `main@d08c8cd8d8ea9708a1c4e79de6e2c432b0d6de33`으로 운영 배포했다.
 
@@ -215,7 +215,8 @@ ENABLE_SERVER_ADMIN_COUNTRY_LOOKUP=true
 GEOLITE2_COUNTRY_DB_PATH=/var/lib/GeoIP/GeoLite2-Country.mmdb
 ```
 
-MaxMind 공식 `geoipupdate` 프로그램을 운영 서버에 설치한 뒤 다음 systemd 템플릿을 사용한다.
+MaxMind 공식 `geoipupdate` 프로그램과 Ubuntu 제공 `geoipupdate.timer`를 사용한다. 저장소의 다음
+systemd 템플릿은 별도 배포 환경에서 갱신 시각을 고정해야 할 때만 사용한다.
 
 - `ops/systemd/tyche-geoipupdate.service`
 - `ops/systemd/tyche-geoipupdate.timer`
@@ -271,8 +272,9 @@ test -r /var/lib/GeoIP/GeoLite2-Country.mmdb
 - 인증서의 다음 점검 시각이 운영 서버의 `certbot.timer` 출력과 일치하는지 갱신 실행 이후 다시 확인한다.
 - 웹 푸시는 운영 migration·환경 변수 적용과 실제 휴대전화 테스트가 끝나기 전까지 운영 성공으로
   표시하지 않는다. 이메일 보안 알림은 보류 항목이다.
-- 국가 조회는 운영 서버에서 GeoLite2 최초 다운로드, 자동 갱신 타이머, 한국·해외·VPN·사설 IP 표시와
-  파일 갱신 후 무중단 재로딩을 확인하기 전까지 운영 성공으로 표시하지 않는다.
+- 국가 조회는 운영 서버에서 GeoLite2 최초 다운로드와 `geoipupdate.timer` 활성 상태를 확인했다.
+  실제 관리자 브라우저에서 한국·해외·VPN·사설 IP 표시와 파일 갱신 후 무중단 재로딩은 별도 수동 검증
+  대상으로 남긴다.
 
 ## MySQL 운영 구성
 
