@@ -1,16 +1,39 @@
 import assert from 'node:assert/strict';
-import { access, readFile } from 'node:fs/promises';
+import { access, readFile, readdir } from 'node:fs/promises';
 import test from 'node:test';
 
 const siteRoot = new URL('../public/site/', import.meta.url);
 
-test('브랜드 페이지는 원형 파비콘을 한 번만 참조한다', async () => {
-  const html = await readFile(new URL('brand/index.html', siteRoot), 'utf8');
-  const faviconPath = '../assets/Favicon_round.svg';
+async function findHtmlFiles(directory) {
+  const entries = await readdir(directory, { withFileTypes: true });
+  const nestedFiles = await Promise.all(
+    entries.map((entry) => {
+      const entryUrl = new URL(entry.name + (entry.isDirectory() ? '/' : ''), directory);
+      return entry.isDirectory() ? findHtmlFiles(entryUrl) : [entryUrl];
+    }),
+  );
 
-  await access(new URL('assets/Favicon_round.svg', siteRoot));
-  assert.equal(html.match(new RegExp(`href="${faviconPath}"`, 'g'))?.length, 1);
-  assert.doesNotMatch(html, /<header[^>]*>\s*<link\s+rel="icon"/);
+  return nestedFiles.flat().filter((file) => file.pathname.endsWith('.html'));
+}
+
+test('모든 사이트 페이지는 흰 원형 파비콘을 한 번만 참조한다', async () => {
+  const faviconUrl = new URL('assets/Favicon_round.svg', siteRoot);
+  const htmlFiles = await findHtmlFiles(siteRoot);
+  const faviconSvg = await readFile(faviconUrl, 'utf8');
+
+  await access(faviconUrl);
+  assert.match(faviconSvg, /<circle cx="608" cy="608" r="608" fill="#ffffff"\/>/);
+  assert.equal(htmlFiles.length, 15);
+
+  for (const htmlFile of htmlFiles) {
+    const html = await readFile(htmlFile, 'utf8');
+    const faviconLinks = html.match(/<link\b[^>]*\brel="icon"[^>]*>/g) ?? [];
+
+    assert.equal(faviconLinks.length, 1, `${htmlFile.pathname} favicon link count`);
+    const href = faviconLinks[0].match(/\bhref="([^"]+)"/)?.[1];
+    assert.ok(href, `${htmlFile.pathname} favicon href`);
+    assert.equal(new URL(href, htmlFile).href, faviconUrl.href);
+  }
 });
 
 test('홈 작품 캐러셀은 세 배너를 유지하고 이동 트랙에서 슬라이드를 자르지 않는다', async () => {
