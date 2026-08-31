@@ -103,7 +103,10 @@ if (shareButton && shareDialog && shareBackdrop && shareStatus) {
       return;
     }
 
+    const originalWindowOpen = window.open;
+
     try {
+      window.open = (url, target) => originalWindowOpen.call(window, url, target);
       kakaoSdk.Share.sendDefault({
         objectType: "feed",
         content: {
@@ -122,6 +125,8 @@ if (shareButton && shareDialog && shareBackdrop && shareStatus) {
       setDialogOpen(false);
     } catch {
       showStatus("카카오톡 공유를 열지 못했습니다");
+    } finally {
+      window.open = originalWindowOpen;
     }
   });
 
