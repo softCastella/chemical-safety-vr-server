@@ -7,7 +7,6 @@ if (shareButton && shareDialog && shareBackdrop && shareStatus) {
   const shareTitle = "화학물질 안전훈련 VR — TYCHE IMMERSA";
   const shareText = "PPE 착용 과정을 직접 수행하며 학습하는 화학물질 안전훈련 VR";
   const shareUrl = "https://immersa.tycheworks.com/chemical-safety-training";
-  const nativeButton = shareDialog.querySelector("[data-share-native]");
   const copyButton = shareDialog.querySelector("[data-share-copy]");
   const closeButtons = document.querySelectorAll("[data-share-close]");
   const platformLinks = shareDialog.querySelectorAll("[data-share-platform]");
@@ -50,10 +49,6 @@ if (shareButton && shareDialog && shareBackdrop && shareStatus) {
     });
   }
 
-  if (typeof navigator.share !== "function") {
-    nativeButton.hidden = true;
-  }
-
   shareButton.addEventListener("click", () => {
     setDialogOpen(true);
   });
@@ -63,18 +58,6 @@ if (shareButton && shareDialog && shareBackdrop && shareStatus) {
       setDialogOpen(false);
     });
   }
-
-  nativeButton.addEventListener("click", async () => {
-    try {
-      await navigator.share({ title: shareTitle, text: shareText, url: shareUrl });
-      setDialogOpen(false);
-      showStatus("공유 메뉴를 열었습니다");
-    } catch (error) {
-      if (error?.name !== "AbortError") {
-        showStatus("기기 공유를 사용할 수 없습니다");
-      }
-    }
-  });
 
   copyButton.addEventListener("click", async () => {
     try {

@@ -122,11 +122,11 @@ test('화학물질 안전훈련 VR 상세페이지는 SNS 공유 모달을 제�
     ),
   ]);
 
-  assert.match(html, /<script src="\/chemical-safety-training\/detail-share\.js\?v=20260831-4" defer><\/script>/);
+  assert.match(html, /<script src="\/chemical-safety-training\/detail-share\.js\?v=20260831-5" defer><\/script>/);
   assert.match(html, /class="detail-share-button"/);
   assert.match(html, /aria-label="이 페이지 공유하기"/);
   assert.match(html, /role="dialog" aria-modal="true"/);
-  assert.match(html, /카카오톡 · Instagram · 메시지 앱 등/);
+  assert.doesNotMatch(html, /data-share-native|기기에서 공유/);
   assert.match(html, /data-share-platform="naver"/);
   assert.match(html, /data-share-platform="facebook"/);
   assert.match(html, /data-share-platform="x"/);
@@ -140,7 +140,7 @@ test('화학물질 안전훈련 VR 상세페이지는 SNS 공유 모달을 제�
   assert.match(html, /border:\s*1px solid transparent !important/);
   assert.match(html, /linear-gradient\(#fff, #fff\) padding-box/);
   assert.match(html, /linear-gradient\(135deg, #70a0f8 0%, #7cebf0 100%\) border-box/);
-  assert.match(script, /navigator\.share\(\{ title: shareTitle, text: shareText, url: shareUrl \}\)/);
+  assert.doesNotMatch(script, /navigator\.share|data-share-native/);
   assert.match(script, /blog\.naver\.com\/openapi\/share/);
   assert.match(script, /facebook\.com\/sharer\/sharer\.php/);
   assert.match(script, /twitter\.com\/intent\/tweet/);
