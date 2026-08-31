@@ -6,7 +6,22 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>화학물질 안전훈련 VR — TYCHE IMMERSA</title>
+    <meta name="description" content="작업계획 확인부터 보호구 선택과 상태 점검까지 직접 수행하는 Meta Quest 기반 화학물질 안전훈련 VR입니다.">
+    <meta property="og:title" content="화학물질 안전훈련 VR — TYCHE IMMERSA">
+    <meta property="og:description" content="위험한 작업을 먼저 안전하게 경험하는 Meta Quest 기반 VR 안전교육 프로젝트입니다.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://immersa.tycheworks.com/chemical-safety-training">
+    <meta property="og:image" content="https://tycheworks.com/assets/metahorizon_og_banner_1200x630.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="화학물질 안전훈련 VR 대표 이미지">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="화학물질 안전훈련 VR — TYCHE IMMERSA">
+    <meta name="twitter:description" content="위험한 작업을 먼저 안전하게 경험하는 Meta Quest 기반 VR 안전교육 프로젝트입니다.">
+    <meta name="twitter:image" content="https://tycheworks.com/assets/metahorizon_og_banner_1200x630.png">
+    <meta name="twitter:image:alt" content="화학물질 안전훈련 VR 대표 이미지">
     <link rel="stylesheet" href="../immersa.css">
+    <script src="detail-share.js" defer></script>
     <style>
         .line-brand img {
             width: 205px !important;
@@ -216,6 +231,99 @@
             background: #f6faff;
         }
 
+        .detail-share-button {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            z-index: 1;
+            display: grid;
+            width: 44px;
+            height: 44px;
+            place-items: center;
+            padding: 0;
+            border: 1px solid rgba(255, 255, 255, 0.82);
+            border-radius: 13px;
+            color: #fff;
+            background:
+                radial-gradient(circle at 28% 18%, rgba(255, 255, 255, 0.52), transparent 38%),
+                linear-gradient(145deg, rgba(124, 235, 240, 0.22), rgba(112, 160, 248, 0.34));
+            box-shadow:
+                0 7px 18px rgba(24, 74, 116, 0.16),
+                inset 0 1px 0 rgba(255, 255, 255, 0.74),
+                inset 0 -1px 0 rgba(71, 126, 184, 0.14);
+            backdrop-filter: blur(12px) saturate(1.28);
+            -webkit-backdrop-filter: blur(12px) saturate(1.28);
+            cursor: pointer;
+            transition: transform .2s ease, color .2s ease, background .2s ease, box-shadow .2s ease;
+        }
+
+        .detail-share-button::after {
+            position: absolute;
+            right: 58px;
+            padding: 7px 10px;
+            border-radius: 9px;
+            color: #fff;
+            background: rgba(16, 31, 49, 0.88);
+            content: "Gmail로 공유";
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: -0.01em;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateX(5px);
+            transition: opacity .18s ease, transform .18s ease;
+            white-space: nowrap;
+        }
+
+        .detail-share-button:hover,
+        .detail-share-button:focus-visible {
+            color: #fff;
+            background:
+                radial-gradient(circle at 28% 18%, rgba(255, 255, 255, 0.62), transparent 40%),
+                linear-gradient(145deg, rgba(124, 235, 240, 0.32), rgba(112, 160, 248, 0.44));
+            box-shadow:
+                0 9px 22px rgba(24, 74, 116, 0.22),
+                inset 0 1px 0 rgba(255, 255, 255, 0.82),
+                inset 0 -1px 0 rgba(71, 126, 184, 0.16);
+            outline: none;
+            transform: translateY(-1px);
+        }
+
+        .detail-share-button:hover::after,
+        .detail-share-button:focus-visible::after {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .detail-share-button svg {
+            width: 26px;
+            height: 26px;
+            filter: drop-shadow(0 1px 2px rgba(7, 30, 49, 0.48));
+        }
+
+        .detail-share-status {
+            position: absolute;
+            right: 18px;
+            top: 76px;
+            z-index: 1;
+            padding: 9px 13px;
+            border-radius: 999px;
+            color: #fff;
+            background: rgba(16, 31, 49, 0.9);
+            box-shadow: 0 10px 24px rgba(12, 43, 80, 0.2);
+            font-size: 12px;
+            font-weight: 800;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(6px);
+            transition: opacity .2s ease, transform .2s ease;
+        }
+
+        .detail-share-status.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
         .detail-hero-image-tags {
             position: static;
             display: flex;
@@ -253,6 +361,21 @@
         .detail-hero-meta .meta-horizon-banner {
             flex: 0 0 auto;
             margin: 0 !important;
+            border: 1px solid transparent !important;
+            background:
+                linear-gradient(#fff, #fff) padding-box,
+                linear-gradient(135deg, #70a0f8 0%, #7cebf0 100%) border-box !important;
+            box-shadow: 0 10px 26px rgba(68, 151, 229, 0.12) !important;
+        }
+
+        .detail-hero-meta .meta-horizon-banner:hover,
+        .detail-hero-meta .meta-horizon-banner:focus-visible {
+            border-color: transparent !important;
+            background:
+                linear-gradient(#fff, #fff) padding-box,
+                linear-gradient(135deg, #82aafa 0%, #8df0f3 100%) border-box !important;
+            box-shadow: 0 13px 30px rgba(68, 151, 229, 0.2) !important;
+            outline: none;
         }
 
         .detail-hero-meta .meta-horizon-caption {
@@ -533,6 +656,22 @@
                 padding: 48px 0 72px;
             }
 
+            .detail-share-button {
+                top: 10px;
+                right: 10px;
+                width: 42px;
+                height: 42px;
+            }
+
+            .detail-share-button::after {
+                display: none;
+            }
+
+            .detail-share-status {
+                top: 60px;
+                right: 10px;
+            }
+
             .detail-hero-badges {
                 align-items: flex-start;
                 flex-direction: column;
@@ -594,7 +733,16 @@
                 </div>
             </div>
             <div class="detail-hero-visual">
-                <img src="../../assets/metahorizon_title_clean_v2.png" width="1672" height="941" alt="화학물질 안전훈련 VR">
+                <button class="detail-share-button" type="button" aria-label="Gmail로 이 페이지 공유하기" title="Gmail로 공유하기">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="m9.2 10.2 5.5-3.1M9.3 13.8l5.7 3.3" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" />
+                        <circle cx="17.5" cy="5.5" r="3.2" stroke="currentColor" stroke-width="2.25" />
+                        <circle cx="6.2" cy="12" r="3.5" stroke="currentColor" stroke-width="2.25" />
+                        <circle cx="18" cy="18.5" r="3.2" stroke="currentColor" stroke-width="2.25" />
+                    </svg>
+                </button>
+                <div class="detail-share-status" role="status" aria-live="polite"></div>
+                <img src="../../assets/metahorizon_title_v2_hd.png" width="1920" height="1080" alt="화학물질 안전훈련 VR">
             </div>
             <div class="detail-hero-meta">
                 <div class="meta-horizon-group">

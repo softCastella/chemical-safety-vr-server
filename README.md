@@ -12,6 +12,7 @@ Unity XR 클라이언트와 전체 프로젝트 문서는 별도 비공개 저�
 - Unity 로컬 텔레메트리 세션 조회
 - PPE 훈련 데이터 대시보드 제공
 - Tyche Works 브랜드 및 VR 상세 웹페이지 제공
+- Resend 기반 웹사이트 문의 메일 API
 - MySQL 사용자 데이터 저장과 SQL 마이그레이션
 - PM2 기반 개발·운영 프로세스 실행
 
@@ -52,10 +53,11 @@ npm run dev
 - 사용자: `/api/users`
 - 훈련 등록: `/api/training-registrations`
 - 로컬 텔레메트리: `/api/local-telemetry`
+- 문의 메일: `POST /api/contact` (`ENABLE_CONTACT_FORM=true`일 때만 활성화)
 - 대시보드: `/dashboard/`
 - 정적 사이트: `/`
 
-사용자 CRUD, 로컬 훈련 등록과 텔레메트리 조회는 환경 변수로 활성화 여부를 제어합니다. 운영 적용 전 인증·권한, HTTPS, DB 마이그레이션과 데이터 보관 정책을 별도로 검증해야 합니다.
+사용자 CRUD, 로컬 훈련 등록, 텔레메트리 조회와 문의 메일은 환경 변수로 활성화 여부를 제어합니다. 문의 메일을 켤 때에는 `RESEND_API_KEY`, Resend에서 인증한 `CONTACT_FROM_EMAIL`과 `CONTACT_TO_EMAIL`을 모두 설정해야 합니다. 운영 적용 전 인증·권한, HTTPS, DB 마이그레이션과 데이터 보관 정책을 별도로 검증해야 합니다.
 
 ## 검증
 

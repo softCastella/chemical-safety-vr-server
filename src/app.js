@@ -16,6 +16,8 @@ import { createServerAdminRouter } from "./modules/server-admin/server-admin-rou
 import { createTrainingTelemetryTokenAuthorizer } from "./modules/training-telemetry/training-telemetry-auth.js";
 import { createTrainingTelemetryRepository } from "./modules/training-telemetry/training-telemetry-repository.js";
 import { createTrainingTelemetryRouter } from "./modules/training-telemetry/training-telemetry-routes.js";
+import { createContactRouter } from "./modules/contact/contact-routes.js";
+import { createResendContactMailer } from "./modules/contact/resend-contact-mailer.js";
 
 const publicRoot = fileURLToPath(new URL("../public/", import.meta.url));
 const dashboardRoot = path.join(publicRoot, "dashboard");
@@ -35,6 +37,9 @@ export function createApp({
   trainingTelemetryUploadToken = env.trainingTelemetryUploadToken,
   serverAdminRepository,
   enableServerAdmin = env.enableServerAdmin,
+  contactMailer,
+  enableContactForm = env.enableContactForm,
+  contactRateLimitPerHour = env.contact.rateLimitPerHour,
 } = {}) {
   const app = express();
   const resolvedUserRepository =
@@ -50,6 +55,23 @@ export function createApp({
       service: "tyche-safety-training-server",
     });
   });
+
+  if (enableContactForm) {
+    const resolvedContactMailer =
+      contactMailer ??
+      createResendContactMailer({
+        apiKey: env.contact.resendApiKey,
+        fromEmail: env.contact.fromEmail,
+        toEmail: env.contact.toEmail,
+      });
+    app.use(
+      "/api/contact",
+      createContactRouter({
+        mailer: resolvedContactMailer,
+        rateLimitPerHour: contactRateLimitPerHour,
+      }),
+    );
+  }
 
   if (enableUserCrud) {
     app.use(

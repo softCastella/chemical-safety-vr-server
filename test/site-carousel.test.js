@@ -109,3 +109,71 @@ test('화학물질 안전훈련 VR 상세페이지 푸터는 공개 개인정보
     /href="https:\/\/github\.com\/softCastella\/tycheworks-safetytrainingvr-privacy"/,
   );
 });
+
+test('화학물질 안전훈련 VR 상세페이지는 Gmail 공유 작성창을 제공한다', async () => {
+  const [html, script] = await Promise.all([
+    readFile(
+      new URL('immersa/chemical-safety-training/index.html', siteRoot),
+      'utf8',
+    ),
+    readFile(
+      new URL('immersa/chemical-safety-training/detail-share.js', siteRoot),
+      'utf8',
+    ),
+  ]);
+
+  assert.match(html, /<script src="detail-share\.js" defer><\/script>/);
+  assert.match(html, /class="detail-share-button"/);
+  assert.match(html, /aria-label="Gmail로 이 페이지 공유하기"/);
+  assert.match(html, /\.detail-share-status\s*\{[\s\S]*?top:\s*76px/);
+  assert.match(html, /linear-gradient\(145deg, rgba\(124, 235, 240, 0\.22\), rgba\(112, 160, 248, 0\.34\)\)/);
+  assert.match(html, /stroke-width="2\.25"/);
+  assert.match(html, /border:\s*1px solid transparent !important/);
+  assert.match(html, /linear-gradient\(#fff, #fff\) padding-box/);
+  assert.match(html, /linear-gradient\(135deg, #70a0f8 0%, #7cebf0 100%\) border-box/);
+  assert.match(script, /window\.location\.protocol !== "http:"/);
+  assert.match(script, /로컬 서버에서 공유를 확인해주세요/);
+  assert.match(script, /new URL\("https:\/\/mail\.google\.com\/mail\/"\)/);
+  assert.match(script, /gmailUrl\.searchParams\.set\(\s*"su"/);
+  assert.match(script, /gmailUrl\.searchParams\.set\(\s*"body"/);
+  assert.match(script, /window\.open\(gmailUrl\.toString\(\), "_blank"/);
+  assert.match(script, /Gmail 작성창을 열었습니다/);
+});
+
+test('화학물질 안전훈련 VR 페이지는 전용 OG 배너와 HD 히어로 이미지를 사용한다', async () => {
+  const [home, detail, landing, light, campaign] = await Promise.all([
+    readFile(new URL('index.html', siteRoot), 'utf8'),
+    readFile(
+      new URL('immersa/chemical-safety-training/index.html', siteRoot),
+      'utf8',
+    ),
+    readFile(new URL('chemical-safety-vr-landing/index.html', siteRoot), 'utf8'),
+    readFile(
+      new URL('chemical-safety-vr-landing/light/index.html', siteRoot),
+      'utf8',
+    ),
+    readFile(
+      new URL('chemical-safety-vr-landing/campaign/index.html', siteRoot),
+      'utf8',
+    ),
+  ]);
+  const ogImage =
+    'https://tycheworks.com/assets/metahorizon_og_banner_1200x630.png';
+
+  assert.match(
+    home,
+    /<img src="assets\/metahorizon_hero_v2\.png" width="3000" height="900"/,
+  );
+  assert.doesNotMatch(home, /safety_vr_banner_(?:small|big)\.png/);
+  assert.match(
+    detail,
+    /<img src="\.\.\/\.\.\/assets\/metahorizon_title_v2_hd\.png" width="1920" height="1080"/,
+  );
+
+  for (const html of [detail, landing, light, campaign]) {
+    assert.match(html, new RegExp(`<meta property="og:image" content="${ogImage}">`));
+    assert.match(html, /<meta property="og:image:width" content="1200">/);
+    assert.match(html, /<meta property="og:image:height" content="630">/);
+    assert.match(html, new RegExp(`<meta name="twitter:image" content="${ogImage}">`));
+  }
+});

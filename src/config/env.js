@@ -70,6 +70,13 @@ export const env = Object.freeze({
     process.env.TRAINING_TELEMETRY_UPLOAD_TOKEN ?? "",
   enableServerAdmin: readBoolean("ENABLE_SERVER_ADMIN", nodeEnv === "production"),
   vultrApiKey: process.env.VULTR_API_KEY ?? "",
+  enableContactForm: readBoolean("ENABLE_CONTACT_FORM", false),
+  contact: Object.freeze({
+    resendApiKey: process.env.RESEND_API_KEY ?? "",
+    fromEmail: process.env.CONTACT_FROM_EMAIL ?? "",
+    toEmail: process.env.CONTACT_TO_EMAIL ?? "",
+    rateLimitPerHour: readInteger("CONTACT_RATE_LIMIT_PER_HOUR", 5, 1, 100),
+  }),
   unityTelemetryDirectory:
     process.env.UNITY_TELEMETRY_DIRECTORY ?? defaultUnityTelemetryDirectory,
   database: Object.freeze({
