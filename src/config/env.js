@@ -70,6 +70,10 @@ export const env = Object.freeze({
     process.env.TRAINING_TELEMETRY_UPLOAD_TOKEN ?? "",
   enableServerAdmin: readBoolean("ENABLE_SERVER_ADMIN", nodeEnv === "production"),
   vultrApiKey: process.env.VULTR_API_KEY ?? "",
+  serverAdminCountryLookup: Object.freeze({
+    enabled: readBoolean("ENABLE_SERVER_ADMIN_COUNTRY_LOOKUP", false),
+    databasePath: process.env.GEOLITE2_COUNTRY_DB_PATH ?? "",
+  }),
   serverAdminPush: Object.freeze({
     enabled: readBoolean("ENABLE_SERVER_ADMIN_PUSH", false),
     vapidPublicKey: process.env.WEB_PUSH_VAPID_PUBLIC_KEY ?? "",

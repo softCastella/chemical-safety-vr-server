@@ -100,7 +100,10 @@ Resend API 키와 실제 발신·수신 주소는 저장소 밖 운영 `.env`에
 - 서버 대시보드는 `VULTR_API_KEY`가 설정된 경우 Vultr Account API에서 최근 결제일을 조회하고, Vultr의 월별 청구 기준에 따라 다음 달 1일을 다음 청구서 발행 예정일로 표시한다. 운영 API 키는 저장소에 기록하지 않는다. API 키가 없거나 호출에 실패하면 대시보드에 실패 지점을 표시한다.
 - OTP와 관리자 보안 이벤트 이메일 알림은 연결하지 않았다. 웹 푸시는 코드와 migration `013`~`016`까지
   구현했으며 운영 DB migration과 VAPID 환경 변수 적용 전에는 비활성 상태다.
-- 비정상 접속 이력의 국가 조회는 연결하지 않았다. 현재 감사 로그에는 발생 시각, IP 주소와 이벤트 종류만 저장하며 화면에는 `국가 조회 미연동`으로 표시한다. 향후 적용 시 접속 IP를 외부 업체로 전송하지 않는 MaxMind GeoLite2 Country 로컬 데이터베이스 방식을 우선 검토하고, 데이터베이스 정기 갱신과 조회 실패 처리를 포함한다. VPN·프록시 사용 시 실제 사용자 위치가 아니라 출구 IP의 국가로 판정되므로 국가 정보만으로 접속 원인이나 사용자 위치를 확정하지 않는다.
+- 비정상 접속 IP의 국가 조회 코드는 MaxMind GeoLite2 Country 로컬 데이터베이스 방식으로 구현했다.
+  운영 서버의 데이터베이스 설치, MaxMind 자격 증명과 환경 변수 적용 전에는 비활성 상태다. 접속 IP를
+  외부 조회 API로 전송하지 않으며 VPN·프록시 사용 시 실제 사용자 위치가 아니라 출구 IP의 국가로
+  판정되므로 국가 정보만으로 접속 원인이나 사용자 위치를 확정하지 않는다.
 - 운영 비밀번호와 API 키는 저장소에 기록하지 않았다.
 - 문의 폼과 VR 상세 웹사이트 변경은 `main@d08c8cd8d8ea9708a1c4e79de6e2c432b0d6de33`으로 운영 배포했다.
 
@@ -142,6 +145,8 @@ VR 사용자 데이터는 서버 상태 대시보드에 섞어 표시하지 않�
 - HTTPS 인증서는 대상 도메인, 최근 갱신일, 만료일, 남은 일수, Certbot 자동 갱신 점검 상태와 다음 점검 시각을 표시한다.
 - 신뢰 IP는 번호, 위치명, CIDR, 상태와 삭제 동작을 분리하고 위치 행 사이 간격을 적용했다. 새 IP 추가 시 현재 접속 IPv4를 `/32` 후보로 제시한다.
 - 비정상 접속 이력은 선택 삭제, 페이지당 20건, 최대 5개의 숫자 페이지 버튼, 요일을 포함한 발생 시각을 제공한다. 관리자만 삭제할 수 있고 `viewer`에는 선택·삭제 동작을 노출하지 않는다.
+- 비정상 접속 이력의 IP는 로컬 GeoLite2 Country 데이터베이스에서 조회해 한국어 국가명과 ISO 국가
+  코드를 함께 표시한다. 외부 IP 조회 API 호출과 DB 스키마 변경은 없다.
 - 경고 배너의 `×` 또는 `상세 확인`을 누르면 현재 표시된 경고를 건별로 확인 처리한다. 비정상 접속은
   DB 이벤트 ID, 서버 이상은 메모리·디스크·서비스·부하별 고정 ID와 발생 세대로 구분한다. 확인 상태는
   관리자 계정별 DB 기록으로 저장하므로 로그아웃·재접속 뒤에도 같은 건을 다시 알리지 않는다. 서버
@@ -154,7 +159,9 @@ VR 사용자 데이터는 서버 상태 대시보드에 섞어 표시하지 않�
 - 기존 화면은 `1280px` 콘텐츠 영역과 폭 `100%`인 목록·표가 함께 적용돼 정보량보다 가로 폭이 과도하게 늘어났다. 서버 관리자 정적 화면의 레이아웃만 조정했으며 공개 사이트와 VR 데이터 대시보드에는 영향을 주지 않는다.
 - 인증서 자동 갱신 표시는 인증서의 정적 문구만 사용해 실제 Certbot 타이머 상태를 구분하지 못했다. 현재는 `certbot.timer` 조회 성공·실패를 별도 상태로 반환한다.
 - Vultr 결제 정보는 API 키 미설정, 계정 API 비활성화와 허용 IP 누락 시 조회할 수 없다. 대시보드는 이 경우 임의 값을 만들지 않고 실패 지점을 표시한다.
-- 국가 열은 감사 로그의 IP를 국가로 변환하는 기능이 없어 미연동 상태다. 국가 조회가 추가되기 전에는 국가를 근거로 해외 접속 여부를 확정하지 않는다.
+- 감사 로그에는 기존과 같이 원본 IP만 저장하고, 국가 정보는 화면 조회 시점의 GeoLite2 데이터로
+  계산한다. 파일이 없거나 손상되면 `국가 조회 실패`, 유효한 국가 결과가 없으면 `확인 불가`로 표시한다.
+  국가 정보는 보조 정보이며 해외 접속 여부나 실제 사용자 위치를 확정하는 근거로 사용하지 않는다.
 - 기존 경고 확인 이력은 브라우저 로컬 저장소에만 있어 다른 기기나 새 브라우저에서는 같은 경고가 다시
   표시될 수 있었다. 현재는 경고 ID와 발생 세대별 확인 이력을 DB에 저장하고, 기존 로컬 확인 이력은
   최초 접속 때 서버 기록으로 이관한다. 서버 상태 API의 기존 `alerts` 문자열 배열은 유지하므로 공개
@@ -193,12 +200,66 @@ VAPID 키는 운영 적용 시 한 번 생성해 서버 `.env`에만 저장한�
 4. 버튼이 `이 기기 알림 끄기`로 바뀌면 구독 저장이 완료된 상태다.
 5. 다른 휴대전화에도 알림이 필요하면 해당 기기에서 같은 절차를 반복한다.
 
+### 국가 조회와 GeoLite2 자동 갱신
+
+국가 조회는 `maxmind` Node.js 라이브러리가 운영 서버의 `GeoLite2-Country.mmdb` 파일을 직접 읽는다.
+외부 서비스에 관리자 접속 IP를 전달하지 않는다. GeoLite2 파일이 갱신되면 애플리케이션의 파일 감시가
+새 데이터베이스를 다시 읽으므로 정상적인 파일 교체에는 PM2 재시작이 필요하지 않다.
+
+운영 적용에는 무료 MaxMind 계정의 Account ID와 License Key가 필요하다. 실제 값은 저장소나 서버
+애플리케이션 `.env`에 기록하지 않고 권한 `0600`인 `/etc/GeoIP.conf`에만 저장한다. 기준 템플릿은
+`ops/maxmind/GeoIP.conf.example`이다. 애플리케이션에는 다음 설정만 추가한다.
+
+```dotenv
+ENABLE_SERVER_ADMIN_COUNTRY_LOOKUP=true
+GEOLITE2_COUNTRY_DB_PATH=/var/lib/GeoIP/GeoLite2-Country.mmdb
+```
+
+MaxMind 공식 `geoipupdate` 프로그램을 운영 서버에 설치한 뒤 다음 systemd 템플릿을 사용한다.
+
+- `ops/systemd/tyche-geoipupdate.service`
+- `ops/systemd/tyche-geoipupdate.timer`
+
+타이머는 매일 `04:15`에 최대 45분의 무작위 지연을 더해 새 버전을 확인한다. GeoLite2 Country의 정기
+배포일 사이에도 업데이트 확인만 수행할 수 있으며, 새 데이터가 있을 때만 파일을 내려받는다. 여러 서버가
+동시에 MaxMind에 요청하는 것을 피하려고 무작위 지연을 적용했다.
+
+운영 설치 순서는 다음과 같다. 아래 작업은 실제 Account ID와 License Key를 `/etc/GeoIP.conf`에 입력하고
+파일 권한을 확인한 뒤 실행한다.
+
+```bash
+sudo add-apt-repository ppa:maxmind/ppa
+sudo apt update
+sudo apt install geoipupdate
+sudo install -d -m 0755 /var/lib/GeoIP
+sudo install -m 0600 ops/maxmind/GeoIP.conf.example /etc/GeoIP.conf
+sudoedit /etc/GeoIP.conf
+sudo install -m 0644 ops/systemd/tyche-geoipupdate.service /etc/systemd/system/
+sudo install -m 0644 ops/systemd/tyche-geoipupdate.timer /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl start tyche-geoipupdate.service
+sudo systemctl enable --now tyche-geoipupdate.timer
+```
+
+운영 확인 명령은 다음과 같다.
+
+```bash
+systemctl status tyche-geoipupdate.timer --no-pager
+systemctl list-timers tyche-geoipupdate.timer --no-pager
+journalctl -u tyche-geoipupdate.service -n 50 --no-pager
+test -r /var/lib/GeoIP/GeoLite2-Country.mmdb
+```
+
+갱신에 실패하면 systemd 서비스가 실패 상태와 로그를 남기고, 애플리케이션은 이미 읽은 마지막 정상
+데이터베이스를 계속 사용한다. 애플리케이션 시작 후에도 파일을 전혀 읽을 수 없으면 국가 열에
+`국가 조회 실패`를 표시하고 다른 서버 상태 조회는 계속 제공한다.
+
 ### 완료 검증
 
 - Vultr Account API: 운영 서버에서 HTTP `200`, `last_payment_date` 필드 확인
 - PM2: `tyche-safety-training-server` 재시작 후 `online`
 - 로컬 헬스체크: `/api/health` 응답 `status: ok`
-- 자동 테스트: 19개 통과, 실패 0개
+- 현재 로컬 자동 테스트: 64개 통과, 실패 0개
 - 의존성 검사: 운영 의존성 취약점 0개
 - JavaScript 문법 검사와 `git diff --check`: 통과
 - 파비콘: 로컬 Express와 `admin.tycheworks.com` HTTPS 경로에서 HTTP `200`
@@ -209,7 +270,9 @@ VAPID 키는 운영 적용 시 한 번 생성해 서버 `.env`에만 저장한�
 - 실제 브라우저에서 같은 보안 이벤트와 서버 이상 경고가 `×` 및 `상세 확인` 뒤 재표시되지 않고, 새 이벤트 발생 또는 서버 상태 정상화 후 재발 시에만 다시 표시되는지 확인한다.
 - 인증서의 다음 점검 시각이 운영 서버의 `certbot.timer` 출력과 일치하는지 갱신 실행 이후 다시 확인한다.
 - 웹 푸시는 운영 migration·환경 변수 적용과 실제 휴대전화 테스트가 끝나기 전까지 운영 성공으로
-  표시하지 않는다. 이메일 보안 알림과 국가 조회는 보류 항목이다.
+  표시하지 않는다. 이메일 보안 알림은 보류 항목이다.
+- 국가 조회는 운영 서버에서 GeoLite2 최초 다운로드, 자동 갱신 타이머, 한국·해외·VPN·사설 IP 표시와
+  파일 갱신 후 무중단 재로딩을 확인하기 전까지 운영 성공으로 표시하지 않는다.
 
 ## MySQL 운영 구성
 

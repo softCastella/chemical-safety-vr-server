@@ -13,6 +13,7 @@ import { createLocalTelemetryRouter } from "./modules/local-telemetry/local-tele
 import { createLocalTelemetryRepository } from "./modules/local-telemetry/local-telemetry-repository.js";
 import { createServerAdminRepository } from "./modules/server-admin/server-admin-repository.js";
 import { createServerAdminRouter } from "./modules/server-admin/server-admin-routes.js";
+import { createServerAdminCountryLookup } from "./modules/server-admin/server-admin-country-lookup.js";
 import { createServerAdminPushService } from "./modules/server-admin/server-admin-push.js";
 import { createTrainingTelemetryTokenAuthorizer } from "./modules/training-telemetry/training-telemetry-auth.js";
 import { createTrainingTelemetryRepository } from "./modules/training-telemetry/training-telemetry-repository.js";
@@ -42,6 +43,7 @@ export function createApp({
   enableTrainingTelemetryIngest = env.enableTrainingTelemetryIngest,
   trainingTelemetryUploadToken = env.trainingTelemetryUploadToken,
   serverAdminRepository,
+  serverAdminCountryLookupService,
   serverAdminPushService,
   enableServerAdmin = env.enableServerAdmin,
   contactMailer,
@@ -146,8 +148,14 @@ export function createApp({
 
   if (enableServerAdmin) {
     const resolvedAdminRepository = serverAdminRepository ?? createServerAdminRepository(databasePool);
+    const resolvedCountryLookupService = serverAdminCountryLookupService
+      ?? createServerAdminCountryLookup(env.serverAdminCountryLookup);
     const resolvedPushService = serverAdminPushService ?? createServerAdminPushService(env.serverAdminPush);
-    const { router, requireAdmin } = createServerAdminRouter({ repository: resolvedAdminRepository, pushService: resolvedPushService });
+    const { router, requireAdmin } = createServerAdminRouter({
+      repository: resolvedAdminRepository,
+      countryLookupService: resolvedCountryLookupService,
+      pushService: resolvedPushService,
+    });
     app.use("/api/server-status", router);
     app.get("/server-status/login", (_request, response) => response.sendFile(path.join(serverStatusRoot, "login.html")));
     app.get("/server-status/login.html", (_request, response) => response.redirect(308, "/server-status/login"));
