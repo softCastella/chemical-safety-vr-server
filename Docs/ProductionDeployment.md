@@ -92,17 +92,16 @@ sudo systemctl reload nginx
 - 서비스 상태 점검: 브랜드 홈·BRAND·IMMERSA·VR TRAINING·SPARK·LOOP 모두 `200`
 - 인증서 상태 조회: 인증서 1개와 대상 도메인 6개 확인
 
-이 검증은 정적 웹사이트, 서버 상태 대시보드와 현재 서버 회귀 테스트의 결과다. 실제 Unity 전송, VR 데이터 대시보드 운영 공개와 문의 메일 전송 성공을 의미하지 않는다.
+이 검증은 정적 웹사이트, 서버 상태 대시보드와 당시 서버 회귀 테스트의 결과다. 실제 Unity 전송과 VR 데이터 대시보드 운영 공개를 의미하지 않는다. 문의 메일은 아래의 별도 운영 배포 기록을 기준으로 판단한다.
 
 ## 배포에서 제외하거나 보류한 항목
 
 - VR 데이터용 `/dashboard/`는 공개하지 않았다.
-- 문의 폼은 Resend Email API를 호출하는 `POST /api/contact`와 연결했지만 운영 배포와 실제 메일 전송 검증은 아직 수행하지 않았다. 운영에서는 `ENABLE_CONTACT_FORM=true`, `RESEND_API_KEY`, `CONTACT_FROM_EMAIL`, `CONTACT_TO_EMAIL`을 저장소 밖 환경 변수로 설정하고 Resend 발신 도메인 인증을 완료해야 한다.
 - 서버 대시보드는 `VULTR_API_KEY`가 설정된 경우 Vultr Account API에서 최근 결제일을 조회하고, Vultr의 월별 청구 기준에 따라 다음 달 1일을 다음 청구서 발행 예정일로 표시한다. 운영 API 키는 저장소에 기록하지 않는다. API 키가 없거나 호출에 실패하면 대시보드에 실패 지점을 표시한다.
 - OTP, Android 웹 푸시와 관리자 보안 이벤트 이메일 알림은 연결하지 않았다. 관리자 알림을 도입할 때에는 로그인 실패, 해외 IP 접속 시도, 서버 이상과 인증서 만료 임박을 우선 대상으로 삼고, 동일 IP·사유에 대한 발송 간격 제한과 중복 억제를 적용해 메일 폭주를 방지해야 한다. API 키와 수신 주소는 저장소가 아닌 운영 환경 변수로 관리한다.
 - 비정상 접속 이력의 국가 조회는 연결하지 않았다. 현재 감사 로그에는 발생 시각, IP 주소와 이벤트 종류만 저장하며 화면에는 `국가 조회 미연동`으로 표시한다. 향후 적용 시 접속 IP를 외부 업체로 전송하지 않는 MaxMind GeoLite2 Country 로컬 데이터베이스 방식을 우선 검토하고, 데이터베이스 정기 갱신과 조회 실패 처리를 포함한다. VPN·프록시 사용 시 실제 사용자 위치가 아니라 출구 IP의 국가로 판정되므로 국가 정보만으로 접속 원인이나 사용자 위치를 확정하지 않는다.
 - 운영 비밀번호와 API 키는 저장소에 기록하지 않았다.
-- 웹사이트 변경 사항은 현재 서버 작업 트리에 있으며, 커밋·푸시는 별도 확인 후 수행해야 한다.
+- 문의 폼과 VR 상세 웹사이트 변경은 `main@d08c8cd8d8ea9708a1c4e79de6e2c432b0d6de33`으로 운영 배포했다.
 
 ## 관리자 대시보드 접근 정책
 
@@ -271,10 +270,25 @@ Nginx가 정적 파일을 직접 제공하므로 PM2 재시작, Nginx reload, DB
 
 ### 남은 후속 검증과 수정
 
-- 랜딩 세 페이지의 `og:image`와 `twitter:image`는 현재
-  `https://tycheworks.com/assets/metahorizon_title_clean_v2.png`를 참조한다.
-- 배포 응답에서는 이 URL을 존재하지 않는 기존 도메인 경로로 보고했지만, 별도 HTTP 재확인에서는
-  `200 image/png`가 반환됐다. 따라서 현재 깨진 링크로 확정하지 않으며, 전용 랜딩 도메인의 자산으로
-  옮겨 외부 호스트 의존성을 제거할지 다음 배포에서 결정한다.
+- 랜딩 세 페이지의 `og:image`와 `twitter:image`는
+  `https://tycheworks.com/assets/metahorizon_og_banner_1200x630.png`로 교체했고 운영에서
+  `200 image/png`를 확인했다.
 - 파비콘은 브라우저 캐시 때문에 이전 이미지가 보일 수 있으므로 강력 새로고침 또는 새 탭·시크릿 창에서
   최종 시각 확인한다.
+
+## Resend 문의 폼과 VR 상세 자산 운영 배포
+
+2026-08-31 홈페이지 문의 폼, VR 상세 공유 버튼, OG 배너와 HD 이미지를 운영에 반영했다.
+
+- 운영 커밋: `main@d08c8cd8d8ea9708a1c4e79de6e2c432b0d6de33`
+- 운영 설정: `ENABLE_CONTACT_FORM`, `RESEND_API_KEY`, `CONTACT_FROM_EMAIL`, `CONTACT_TO_EMAIL`을
+  저장소 밖 `.env`에 설정하고 기존 파일을 `/home/linuxuser/.config/tycheworks/env-backups`에 백업했다.
+- Resend 발신 도메인 DKIM·SPF·DMARC 검증과 로컬 실제 Gmail 수신을 확인했다.
+- 운영 `POST https://tycheworks.com/api/contact`는 실제 Resend 호출에서 HTTP `202`와 접수 ID를 반환했다.
+- 홈페이지, VR 상세페이지, 전용 랜딩과 1200×630 OG 이미지는 모두 HTTP `200`을 반환했다.
+- 공개 HTML에서 `contact.js`, `detail-share.js`, `metahorizon_hero_v2.png`,
+  `metahorizon_title_v2_hd.png`, `metahorizon_og_banner_1200x630.png` 참조를 확인했다.
+- 운영 자동 테스트 50개, `npm audit --audit-level=high` 취약점 0건, `git diff --check`,
+  `nginx -t`, PM2 `online`과 내부 헬스체크를 확인했다.
+- DB 마이그레이션, 운영 DB 변경과 Nginx 설정 변경은 수행하지 않았다.
+- 운영 요청으로 발송한 `운영 배포 확인` 메일의 Gmail 최종 도착 확인은 사용자 수동 검증으로 남겼다.
