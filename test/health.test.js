@@ -41,6 +41,16 @@ test("GET / serves the Tyche Works site", async () => {
   assert.match(body, /<title>TYCHE WORKS<\/title>/);
 });
 
+test("GET /assets/favicon_round_crop.svg serves the self-contained round favicon", async () => {
+  const response = await fetch(`${baseUrl}/assets/favicon_round_crop.svg`);
+  const body = await response.text();
+
+  assert.equal(response.status, 200);
+  assert.match(response.headers.get("content-type"), /image\/svg\+xml/);
+  assert.match(body, /<clipPath id="round-crop">/);
+  assert.match(body, /href="data:image\/png;base64,/);
+});
+
 test("GET /dashboard/ serves the PPE dashboard", async () => {
   const response = await fetch(`${baseUrl}/dashboard/`);
   const body = await response.text();

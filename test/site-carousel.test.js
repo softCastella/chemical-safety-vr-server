@@ -17,12 +17,15 @@ async function findHtmlFiles(directory) {
 }
 
 test('모든 사이트 페이지는 흰 원형 파비콘을 한 번만 참조한다', async () => {
-  const faviconUrl = new URL('assets/Favicon_round.svg', siteRoot);
+  const faviconUrl = new URL('assets/favicon_round_crop.svg', siteRoot);
   const htmlFiles = await findHtmlFiles(siteRoot);
   const faviconSvg = await readFile(faviconUrl, 'utf8');
 
   await access(faviconUrl);
-  assert.match(faviconSvg, /<circle cx="608" cy="608" r="608" fill="#ffffff"\/>/);
+  assert.match(faviconSvg, /<clipPath id="round-crop">/);
+  assert.match(faviconSvg, /<circle cx="627" cy="627" r="627"\/>/);
+  assert.match(faviconSvg, /clip-path="url\(#round-crop\)"/);
+  assert.match(faviconSvg, /href="data:image\/png;base64,/);
   assert.equal(htmlFiles.length, 15);
 
   for (const htmlFile of htmlFiles) {
