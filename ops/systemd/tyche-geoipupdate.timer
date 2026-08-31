@@ -1,0 +1,11 @@
+[Unit]
+Description=Check for Tyche GeoLite2 Country updates daily
+
+[Timer]
+OnCalendar=*-*-* 04:15:00
+RandomizedDelaySec=45m
+Persistent=true
+Unit=tyche-geoipupdate.service
+
+[Install]
+WantedBy=timers.target

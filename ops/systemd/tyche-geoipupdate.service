@@ -1,0 +1,17 @@
+[Unit]
+Description=Update Tyche GeoLite2 Country database
+Documentation=https://dev.maxmind.com/geoip/updating-databases/
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/geoipupdate
+ExecStartPost=/usr/bin/test -r /var/lib/GeoIP/GeoLite2-Country.mmdb
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+NoNewPrivileges=true
+ReadOnlyPaths=/etc/GeoIP.conf
+ReadWritePaths=/var/lib/GeoIP
+UMask=0022

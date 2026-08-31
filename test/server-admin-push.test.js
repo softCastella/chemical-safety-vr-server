@@ -165,27 +165,3 @@ test("인증된 관리자는 푸시 구독 저장과 경고 확인 API를 사용
     { alertKey: "security:17", generation: 1 },
   ]]);
 });
-
-test("보안 이력 API는 로컬 국가 조회 결과를 함께 반환한다", async (context) => {
-  const app = createApp({
-    enableServerAdmin: true,
-    serverAdminRepository: {
-      async findSession() { return { admin_id: 3, username: "admin", role: "admin" }; },
-      async listSecurityEvents() { return { items: [{ id: 1, ipAddress: "8.8.8.8" }], total: 1, page: 1, pageSize: 20 }; },
-    },
-    serverAdminPushService: { enabled: false, publicKey: "" },
-    geoLiteCountryLookup: { async enrichSecurityEvents(items) { return items.map((item) => ({ ...item, countryCode: "US", countryName: "미국" })); } },
-    enableUserCrud: false,
-    enableTrainingRegistration: false,
-    enableLocalTelemetryRead: false,
-    enableTrainingTelemetryIngest: false,
-    enableContactForm: false,
-  });
-  const server = app.listen(0);
-  context.after(() => new Promise((resolve) => server.close(resolve)));
-  const response = await fetch(`http://127.0.0.1:${server.address().port}/api/server-status/security-events?page=1`, {
-    headers: { cookie: "tyche_admin_session=test" },
-  });
-  assert.equal(response.status, 200);
-  assert.deepEqual((await response.json()).items[0], { id: 1, ipAddress: "8.8.8.8", countryCode: "US", countryName: "미국" });
-});

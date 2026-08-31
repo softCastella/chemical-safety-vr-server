@@ -1,0 +1,6 @@
+# Copy to /etc/GeoIP.conf and keep the real file readable by root only (0600).
+AccountID YOUR_MAXMIND_ACCOUNT_ID
+LicenseKey YOUR_MAXMIND_LICENSE_KEY
+EditionIDs GeoLite2-Country
+DatabaseDirectory /var/lib/GeoIP
+RetryFor 5m

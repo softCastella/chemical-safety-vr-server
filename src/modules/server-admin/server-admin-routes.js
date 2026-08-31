@@ -33,7 +33,7 @@ function readAlertOccurrences(keys) {
   return occurrences;
 }
 
-export function createServerAdminRouter({ repository, pushService, geoLiteCountryLookup }) {
+export function createServerAdminRouter({ repository, countryLookupService, pushService }) {
   const router = express.Router();
   const requireAdmin = async (request, response, next) => {
     try {
@@ -124,7 +124,10 @@ export function createServerAdminRouter({ repository, pushService, geoLiteCountr
   });
   router.get("/overview", requireAdmin, async (request, response, next) => {
     try {
-      const overview = await collectServerOverview({ securityEvents: await repository.recentSecurityEvents(), trustedIps: await repository.listTrustedIps(), currentIp: clientIp(request) });
+      const enrichedSecurityEvents = await countryLookupService.enrichEvents(
+        await repository.recentSecurityEvents(),
+      );
+      const overview = await collectServerOverview({ securityEvents: enrichedSecurityEvents, trustedIps: await repository.listTrustedIps(), currentIp: clientIp(request) });
       const systemAlerts = overview.alertItems.map((alert) => ({ key: `system:${alert.id}`, message: alert.message }));
       await repository.syncSystemAlertOccurrences(systemAlerts);
       const occurrenceKeys = [
@@ -144,10 +147,10 @@ export function createServerAdminRouter({ repository, pushService, geoLiteCountr
     try {
       const page = Number.parseInt(request.query.page, 10) || 1;
       if (page < 1 || page > 100000) return response.status(400).json({ error: "Invalid page." });
-      const events = await repository.listSecurityEvents({ page, pageSize: 20 });
+      const result = await repository.listSecurityEvents({ page, pageSize: 20 });
       response.json({
-        ...events,
-        items: await geoLiteCountryLookup.enrichSecurityEvents(events.items),
+        ...result,
+        items: await countryLookupService.enrichEvents(result.items),
       });
     } catch (error) { next(error); }
   });

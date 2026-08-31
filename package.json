@@ -24,7 +24,7 @@
   "dependencies": {
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
-    "maxmind": "^5.0.7",
+    "maxmind": "5.0.7",
     "mysql2": "^3.24.2",
     "pm2": "^7.0.4",
     "web-push": "^3.6.7"
