@@ -1,8 +1,17 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { access, readFile } from 'node:fs/promises';
 import test from 'node:test';
 
 const siteRoot = new URL('../public/site/', import.meta.url);
+
+test('브랜드 페이지는 원형 파비콘을 한 번만 참조한다', async () => {
+  const html = await readFile(new URL('brand/index.html', siteRoot), 'utf8');
+  const faviconPath = '../assets/Favicon_round.svg';
+
+  await access(new URL('assets/Favicon_round.svg', siteRoot));
+  assert.equal(html.match(new RegExp(`href="${faviconPath}"`, 'g'))?.length, 1);
+  assert.doesNotMatch(html, /<header[^>]*>\s*<link\s+rel="icon"/);
+});
 
 test('홈 작품 캐러셀은 세 배너를 유지하고 이동 트랙에서 슬라이드를 자르지 않는다', async () => {
   const [html, css] = await Promise.all([
