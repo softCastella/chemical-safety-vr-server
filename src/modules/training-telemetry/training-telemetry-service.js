@@ -29,6 +29,7 @@ const eventFields = new Set([
   "scene",
   "mode",
   "workPlan",
+  "modeSessionId",
   "flowState",
   "itemType",
   "itemName",
@@ -50,6 +51,14 @@ const eventFields = new Set([
   "hoveredPpeItems",
   "attemptOutcome",
   "attemptElapsedSec",
+  "quizTopic",
+  "quizQuestionIndex",
+  "quizQuestionCount",
+  "quizSelectedOptionIndex",
+  "quizCorrect",
+  "quizCorrectCount",
+  "ppeWrongCount",
+  "modeElapsedSec",
 ]);
 
 const optionalStringLimits = Object.freeze({
@@ -57,6 +66,7 @@ const optionalStringLimits = Object.freeze({
   scene: 512,
   mode: 64,
   workPlan: 128,
+  modeSessionId: 64,
   flowState: 128,
   itemType: 128,
   itemName: 256,
@@ -74,7 +84,11 @@ const optionalStringLimits = Object.freeze({
   inputControl: 256,
   hoveredPpeItems: 1024,
   attemptOutcome: 128,
+  quizTopic: 64,
 });
+
+const measuredModes = new Set(["Education", "Training", "Test"]);
+const modeSessionIdPattern = /^[a-f0-9]{32}$/;
 
 function requireObject(value, name) {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
@@ -149,6 +163,55 @@ function readNonNegativeNumber(value, name, maximum) {
   return value;
 }
 
+function readNonNegativeInteger(value, name, maximum) {
+  const normalized = readNonNegativeNumber(value, name, maximum);
+  if (!Number.isInteger(normalized)) {
+    throw badRequest(`${name} must be an integer.`);
+  }
+  return normalized;
+}
+
+function readOptionalBoolean(value, name) {
+  if (value === undefined || value === null) {
+    return false;
+  }
+  if (typeof value !== "boolean") {
+    throw badRequest(`${name} must be a boolean.`);
+  }
+  return value;
+}
+
+function validateModeMeasurement(event, name) {
+  if (!["mode_session_started", "quiz_answer_resolved", "mode_session_completed"]
+    .includes(event.eventType)) {
+    return;
+  }
+  if (!event.modeSessionId || !modeSessionIdPattern.test(event.modeSessionId)) {
+    throw badRequest(`${name}.modeSessionId must be a 32-character lowercase hexadecimal ID.`);
+  }
+  if (!measuredModes.has(event.mode)) {
+    throw badRequest(`${name}.mode must be Education, Training, or Test for mode measurement events.`);
+  }
+
+  if (event.eventType === "quiz_answer_resolved") {
+    if (!event.quizTopic) {
+      throw badRequest(`${name}.quizTopic is required for quiz_answer_resolved.`);
+    }
+    if (event.quizQuestionCount < 1 ||
+        event.quizQuestionIndex < 1 ||
+        event.quizQuestionIndex > event.quizQuestionCount ||
+        event.quizSelectedOptionIndex < 1) {
+      throw badRequest(`${name} contains invalid quiz answer indexes.`);
+    }
+  }
+
+  if (event.eventType === "mode_session_completed" &&
+      (event.quizQuestionCount < 1 ||
+       event.quizCorrectCount > event.quizQuestionCount)) {
+    throw badRequest(`${name} contains invalid mode completion counts.`);
+  }
+}
+
 function rejectLocalPath(note) {
   if (note && (/[A-Za-z]:[\\/]/.test(note) || /\/(?:Users|home)\//.test(note))) {
     throw badRequest("note must not contain a local filesystem path.");
@@ -217,8 +280,43 @@ function normalizeEvent(event, expectedSessionId, index) {
     `${name}.attemptElapsedSec`,
     86_400,
   );
+  normalized.quizQuestionIndex = readNonNegativeInteger(
+    event.quizQuestionIndex,
+    `${name}.quizQuestionIndex`,
+    10_000,
+  );
+  normalized.quizQuestionCount = readNonNegativeInteger(
+    event.quizQuestionCount,
+    `${name}.quizQuestionCount`,
+    10_000,
+  );
+  normalized.quizSelectedOptionIndex = readNonNegativeInteger(
+    event.quizSelectedOptionIndex,
+    `${name}.quizSelectedOptionIndex`,
+    10_000,
+  );
+  normalized.quizCorrect = readOptionalBoolean(
+    event.quizCorrect,
+    `${name}.quizCorrect`,
+  );
+  normalized.quizCorrectCount = readNonNegativeInteger(
+    event.quizCorrectCount,
+    `${name}.quizCorrectCount`,
+    10_000,
+  );
+  normalized.ppeWrongCount = readNonNegativeInteger(
+    event.ppeWrongCount,
+    `${name}.ppeWrongCount`,
+    10_000,
+  );
+  normalized.modeElapsedSec = readNonNegativeNumber(
+    event.modeElapsedSec,
+    `${name}.modeElapsedSec`,
+    86_400,
+  );
 
   rejectLocalPath(normalized.note);
+  validateModeMeasurement(normalized, name);
   return normalized;
 }
 
