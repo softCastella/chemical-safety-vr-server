@@ -52,14 +52,18 @@ test("별빛 스도쿠 상세 페이지는 5개 언어와 언어별 타이틀 �
   const css = await readFile(new URL("spark/spark.css", siteRoot), "utf8");
   assert.match(css, /\.detail-identity img\{[^}]*width:92px;[^}]*height:92px;[^}]*object-fit:contain/);
   assert.match(css, /\.title-poster img\{[^}]*width:100%;[^}]*height:auto;[^}]*object-fit:contain/);
-  assert.match(html, /href="detail\.css\?v=20260903-3"/);
-  assert.match(html, /class="detail-language-bar"/);
-  assert.doesNotMatch(html, /class="detail-header"/);
-  assert.doesNotMatch(html, /class="detail-subnav"/);
-  assert.doesNotMatch(html, /class="detail-toc"/);
-  assert.doesNotMatch(html, /class="spark-nav"/);
+  assert.match(html, /href="detail\.css\?v=20260903-4"/);
+  assert.match(html, /src="i18n\.js\?v=20260903-3"/);
+  assert.match(html, /class="detail-header"/);
+  assert.match(html, /class="detail-subnav"/);
+  assert.match(html, /class="detail-toc"/);
+  assert.match(html, /class="spark-nav"/);
+  for (const title of ["별빛 스도쿠", "Starlight Sudoku", "スターライト数独", "星光数独", "星光數獨"]) {
+    assert.ok(script.includes(`pageTitle: "${title} | TYCHE SPARK"`));
+  }
+  assert.match(script, /document\.title = copy\.pageTitle/);
   assert.match(detailCss, /\.starlight-detail\{[\s\S]*background-color:var\(--starlight-night\)/);
-  assert.match(detailCss, /\.starlight-detail \.detail-language-bar \.locale-switcher\{[^}]*position:static/);
+  assert.match(css, /\.detail-subnav \.locale-switcher\{[^}]*position:static/);
   assert.match(detailCss, /\.starlight-detail \.detail-hero,[\s\S]*\.starlight-detail \.detail-final\{[^}]*background:transparent/);
   assert.doesNotMatch(detailCss, /\.starlight-detail \.detail-section:after/);
   assert.match(detailCss, /--starlight-ivory:#fffdf8/);
