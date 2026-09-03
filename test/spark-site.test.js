@@ -22,9 +22,10 @@ test("SPARK 메인에서 별빛 스도쿠 상세 페이지로 연결한다", asy
 });
 
 test("별빛 스도쿠 상세 페이지는 5개 언어와 언어별 타이틀 이미지를 지원한다", async () => {
-  const [html, script] = await Promise.all([
+  const [html, script, detailCss] = await Promise.all([
     readFile(new URL("spark/starlight-sudoku/index.html", siteRoot), "utf8"),
     readFile(new URL("spark/starlight-sudoku/i18n.js", siteRoot), "utf8"),
+    readFile(new URL("spark/starlight-sudoku/detail.css", siteRoot), "utf8"),
   ]);
 
   for (const locale of ["ko", "zh-CN", "zh-TW", "ja", "en"]) {
@@ -51,11 +52,15 @@ test("별빛 스도쿠 상세 페이지는 5개 언어와 언어별 타이틀 �
   const css = await readFile(new URL("spark/spark.css", siteRoot), "utf8");
   assert.match(css, /\.detail-identity img\{[^}]*width:92px;[^}]*height:92px;[^}]*object-fit:contain/);
   assert.match(css, /\.title-poster img\{[^}]*width:100%;[^}]*height:auto;[^}]*object-fit:contain/);
-  assert.match(html, /class="detail-toc"/);
-  assert.match(html, /class="detail-subnav"/);
-  assert.match(html, /href="https:\/\/tycheworks\.com\/">TYCHE WORKS<\/a>/);
-  assert.match(html, /href="https:\/\/tycheworks\.com\/#contact">CONTACT<\/a>/);
-  assert.match(css, /\.detail-subnav \.[\w-]*locale-switcher\{[^}]*position:static/);
+  assert.match(html, /href="detail\.css\?v=20260903-1"/);
+  assert.match(html, /class="detail-language-bar"/);
+  assert.doesNotMatch(html, /class="detail-header"/);
+  assert.doesNotMatch(html, /class="detail-subnav"/);
+  assert.doesNotMatch(html, /class="detail-toc"/);
+  assert.doesNotMatch(html, /class="spark-nav"/);
+  assert.match(detailCss, /\.starlight-detail\{[\s\S]*background-color:var\(--starlight-night\)/);
+  assert.match(detailCss, /\.starlight-detail \.detail-language-bar \.locale-switcher\{[^}]*position:static/);
+  assert.match(detailCss, /\.starlight-detail \.overview-section,[\s\S]*\.starlight-detail \.detail-final\{[^}]*background:transparent/);
 });
 
 test("별빛 스도쿠 개인정보처리방침은 5개 언어와 상세 복귀 경로를 제공한다", async () => {
