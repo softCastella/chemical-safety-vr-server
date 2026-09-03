@@ -492,3 +492,32 @@ Nginx 변경 전 기존 설정을 백업했고 `nginx -t` 통과 후 다시 불�
 4. 네이버 공유가 빈 페이지가 아닌 공식 공유 화면을 열고 제목과 URL을 전달하는지 확인한다.
 5. Facebook, X, LinkedIn, Telegram과 LINE에서 공개 URL 및 OG 미리보기를 확인한다. 각 서비스가
    이전 미리보기를 캐시하면 서비스별 캐시 갱신 도구 또는 새 공유 요청으로 다시 확인한다.
+
+## SPARK 별빛 스도쿠 운영 배포
+
+2026-09-03에 SPARK 홈, 별빛 스도쿠 랜딩·상세·개인정보처리방침과 사이트 공용
+개인정보처리방침을 운영에 반영했다.
+
+- 메인 구현 기준: `main@ecac56dbadcbaa4e275ab6dc5dcb68b6b0a4729e`
+- 운영 분기: `production/spark-starlight-20260903`
+- 운영 콘텐츠 기준: `fc7a9f9b474eee7fce15f3610cfd55b45a6d1e5d`
+- 운영 서버 체크아웃: `/home/linuxuser/workspace/chemical-safety-vr`
+- 운영 서버 자동 테스트: 70개 통과
+- 메인 브랜치 자동 테스트: 71개 통과
+- `git diff --check`, `nginx -t` 통과, PM2 `tyche-safety-training-server` 상태 `online`
+- DB 마이그레이션, 운영 데이터 변경, 환경 변수 변경과 Nginx 설정 재적용은 수행하지 않았다.
+
+다음 공개 경로에서 HTTP `200`을 확인했다.
+
+- `https://spark.tycheworks.com/`
+- `https://spark.tycheworks.com/starlight-sudoku/`
+- `https://spark.tycheworks.com/starlight-sudoku/privacy/`
+- `https://tycheworks.com/starlight-sudoku-landing/`
+- `https://tycheworks.com/privacy/`
+- `https://tycheworks.com/brand`
+- `https://immersa.tycheworks.com/chemical-safety-training`
+- `https://tycheworks.com/api/health`
+
+별빛 스도쿠 앱은 입점 예정 상태이므로 현재 개인정보처리방침은 공개 랜딩·상세 페이지에서
+확인 가능한 처리 범위만 확정해서 기록했다. 출시 전 실제 앱 빌드의 권한, SDK, 광고·분석,
+계정, 저장·전송 항목을 재검증하고 앱 내부와 스토어 등록 정보에 같은 최신 정책을 연결한다.
