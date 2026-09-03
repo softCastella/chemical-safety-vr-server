@@ -12,6 +12,14 @@ test("서비스 현황 점검 대상에 화학 안전 VR 전용 랜딩을 포함
   )));
 });
 
+test("서비스 현황 점검 대상에 별빛 스도쿠 전용 랜딩을 포함한다", () => {
+  assert.ok(serverStatusServiceTargets.some((target) => (
+    target.name === "STARLIGHT SUDOKU"
+    && target.host === "starlight-sudoku.tycheworks.com"
+    && target.path === "/"
+  )));
+});
+
 test("Vultr 청구 예정일은 다음 달 1일 UTC로 계산한다", () => {
   assert.equal(nextInvoiceDate(now), "2026-09-01T00:00:00.000Z");
   assert.equal(nextInvoiceDate(new Date("2026-12-31T23:59:59.000Z")), "2027-01-01T00:00:00.000Z");

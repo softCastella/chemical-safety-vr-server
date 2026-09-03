@@ -27,7 +27,7 @@
 | `https://spark.tycheworks.com/` | `public/site/spark/index.html` |
 | `https://spark.tycheworks.com/starlight-sudoku` | `public/site/spark/starlight-sudoku/index.html` |
 | `https://spark.tycheworks.com/starlight-sudoku/privacy/` | `public/site/spark/starlight-sudoku/privacy/index.html` |
-| `https://tycheworks.com/starlight-sudoku-landing/` | `public/site/starlight-sudoku-landing/index.html` |
+| `https://starlight-sudoku.tycheworks.com/` | `public/site/starlight-sudoku-landing/index.html` |
 | `https://loop.tycheworks.com/` | `public/site/loop/index.html` |
 
 사이트 내부 링크는 위 정식 HTTPS URL을 사용한다. `#contact`와 `#featured-releases`처럼 `#`이 붙은 값은 API가 아니라 같은 HTML 문서 안의 요소로 이동하는 앵커다.
@@ -512,7 +512,7 @@ Nginx 변경 전 기존 설정을 백업했고 `nginx -t` 통과 후 다시 불�
 - `https://spark.tycheworks.com/`
 - `https://spark.tycheworks.com/starlight-sudoku/`
 - `https://spark.tycheworks.com/starlight-sudoku/privacy/`
-- `https://tycheworks.com/starlight-sudoku-landing/`
+- `https://starlight-sudoku.tycheworks.com/`
 - `https://tycheworks.com/privacy/`
 - `https://tycheworks.com/brand`
 - `https://immersa.tycheworks.com/chemical-safety-training`
