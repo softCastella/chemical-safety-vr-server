@@ -154,6 +154,25 @@ test('브랜드 홈은 공용 개인정보처리방침으로 연결한다', asyn
   assert.match(policy, /최대 14일간 보관/);
 });
 
+test('세부 라인 홈 푸터는 공용 개인정보처리방침으로 연결한다', async () => {
+  const lineHomes = await Promise.all([
+    readFile(new URL('immersa/index.html', siteRoot), 'utf8'),
+    readFile(new URL('spark/index.html', siteRoot), 'utf8'),
+    readFile(new URL('loop/index.html', siteRoot), 'utf8'),
+  ]);
+
+  for (const html of lineHomes) {
+    assert.equal(
+      html.match(/href="https:\/\/tycheworks\.com\/privacy\/">개인정보처리방침<\/a>/g)?.length,
+      1,
+    );
+    assert.match(
+      html,
+      /<nav[^>]*><strong>COMPANY<\/strong>[\s\S]*?href="https:\/\/tycheworks\.com\/privacy\/">개인정보처리방침<\/a><\/nav>/,
+    );
+  }
+});
+
 test('화학물질 안전훈련 VR 상세페이지는 SNS 공유 모달을 제공한다', async () => {
   const [html, script] = await Promise.all([
     readFile(
