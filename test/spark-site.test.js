@@ -52,7 +52,7 @@ test("별빛 스도쿠 상세 페이지는 5개 언어와 언어별 타이틀 �
   const css = await readFile(new URL("spark/spark.css", siteRoot), "utf8");
   assert.match(css, /\.detail-identity img\{[^}]*width:92px;[^}]*height:92px;[^}]*object-fit:contain/);
   assert.match(css, /\.title-poster img\{[^}]*width:100%;[^}]*height:auto;[^}]*object-fit:contain/);
-  assert.match(html, /href="detail\.css\?v=20260903-2"/);
+  assert.match(html, /href="detail\.css\?v=20260903-3"/);
   assert.match(html, /class="detail-language-bar"/);
   assert.doesNotMatch(html, /class="detail-header"/);
   assert.doesNotMatch(html, /class="detail-subnav"/);
@@ -60,10 +60,12 @@ test("별빛 스도쿠 상세 페이지는 5개 언어와 언어별 타이틀 �
   assert.doesNotMatch(html, /class="spark-nav"/);
   assert.match(detailCss, /\.starlight-detail\{[\s\S]*background-color:var\(--starlight-night\)/);
   assert.match(detailCss, /\.starlight-detail \.detail-language-bar \.locale-switcher\{[^}]*position:static/);
-  assert.match(detailCss, /\.starlight-detail \.overview-section\{background:rgba\(22,48,88,\.74\)\}/);
-  assert.match(detailCss, /\.starlight-detail \.play-section\{background:rgba\(5,18,40,\.58\)\}/);
-  assert.match(detailCss, /\.starlight-detail \.world-section\{background:rgba\(20,45,83,\.78\)\}/);
-  assert.match(detailCss, /\.starlight-detail \.detail-section:after,[\s\S]*width:72px;height:3px/);
+  assert.match(detailCss, /\.starlight-detail \.detail-hero,[\s\S]*\.starlight-detail \.detail-final\{[^}]*background:transparent/);
+  assert.doesNotMatch(detailCss, /\.starlight-detail \.detail-section:after/);
+  assert.match(detailCss, /--starlight-ivory:#fffdf8/);
+  assert.match(detailCss, /\.starlight-detail \.overview-grid>div,[\s\S]*background:var\(--starlight-ivory\)/);
+  assert.doesNotMatch(detailCss, /\.starlight-detail \.info-layout\{[^}]*background:var\(--starlight-ivory\)/);
+  assert.doesNotMatch(detailCss, /\.starlight-detail \.final-card\{[^}]*var\(--starlight-ivory\)/);
 });
 
 test("별빛 스도쿠 개인정보처리방침은 5개 언어와 상세 복귀 경로를 제공한다", async () => {
