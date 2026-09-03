@@ -52,8 +52,8 @@ test("GET /api/public-site-config returns the public Kakao JavaScript key", asyn
   });
 });
 
-test("GET /assets/favicon_round_crop.svg serves the self-contained round favicon", async () => {
-  const response = await fetch(`${baseUrl}/assets/favicon_round_crop.svg`);
+test("GET /assets/Immersa/Chemical%20Safety%20Training%20VR/favicon_round_crop.svg serves the self-contained round favicon", async () => {
+  const response = await fetch(`${baseUrl}/assets/Immersa/Chemical%20Safety%20Training%20VR/favicon_round_crop.svg`);
   const body = await response.text();
 
   assert.equal(response.status, 200);

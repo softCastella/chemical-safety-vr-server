@@ -109,7 +109,7 @@ if (shareButton && shareDialog && shareBackdrop && shareStatus) {
         content: {
           title: shareTitle,
           description: shareText,
-          imageUrl: "https://tycheworks.com/assets/metahorizon_og_banner_1200x630.png",
+          imageUrl: "https://tycheworks.com/assets/Immersa/Chemical%20Safety%20Training%20VR/metahorizon_og_banner_1200x630.png",
           imageWidth: 1200,
           imageHeight: 630,
           link: { mobileWebUrl: shareUrl, webUrl: shareUrl },
