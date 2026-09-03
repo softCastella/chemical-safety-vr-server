@@ -595,9 +595,9 @@ Google Search Console 소유권 확인 TXT는 Vultr DNS의 `tycheworks.com` 루�
 
 ### 최종 배포와 검증
 
-- 메인 최종 콘텐츠 기준: `main@748c18b73ed8f13b8bf0765a7aed3f9a8d95c463`
+- 메인 최종 콘텐츠 기준: `main@383ce6f9c964892b4c7b464c6606e98930150d23`
 - 운영 최종 콘텐츠 기준:
-  `production/spark-starlight-20260903@b07ba6b0fd03c5a17e4be9aec6aaec7bb5317289`
+  `production/spark-starlight-20260903@f4bdaaa6d1f1e5ed13a6b4f1fc37b35027fcaccd`
 - 메인 브랜치 자동 테스트 74개 통과
 - 운영 브랜치 자동 테스트 73개 통과
 - 운영 Nginx 설정 검사 통과
