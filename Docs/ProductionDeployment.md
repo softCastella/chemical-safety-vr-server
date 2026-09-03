@@ -594,14 +594,18 @@ Google Search Console 소유권 확인 TXT는 Vultr DNS의 `tycheworks.com` 루�
 
 ### 최종 배포와 검증
 
-- 메인 최종 콘텐츠 기준: `main@b8db1a1d84916cb61ce1f81498eae0811eb1ac7f`
+- 메인 최종 콘텐츠 기준: `main@e077691743fd126fb4d0daa6b820607675394851`
 - 운영 최종 콘텐츠 기준:
-  `production/spark-starlight-20260903@c0e68206b64dd789fd1ce28401179436a53069f0`
-- 메인 브랜치 자동 테스트 73개 통과
-- 운영 브랜치와 운영 서버 자동 테스트 72개 통과
+  `production/spark-starlight-20260903@3bdd5683c4422d2f9fc5b4caacfda243543c2f3a`
+- 메인 브랜치 자동 테스트 74개 통과
+- 운영 브랜치 자동 테스트 73개 통과
 - 운영 Nginx 설정 검사 통과
 - PM2 `tyche-safety-training-server` 상태 `online`, 불안정 재시작 0회
 - SPARK 홈, 별빛 스도쿠 상세, 별빛 스도쿠 랜딩 모두 HTTP `200`
 - 운영 랜딩 HTML이 `landing.css?v=20260903-4`를 참조하고 공개 CSS가 흰색 링크 규칙
   `.project-label{color:#fff;text-shadow:none}`을 제공하는 것을 확인했다.
+- 운영 상세 HTML이 `detail.css?v=20260903-2`를 참조하며 상단 네비게이션 없이 언어 전환만 제공하고,
+  섹션별 남색 배경과 72px 별빛 골드 구분 표시를 사용하는 것을 확인했다.
+- IMMERSA·SPARK·LOOP 운영 홈은 공용 개인정보처리방침 링크를 각각 한 번 제공하고,
+  공용 정책 URL은 HTTP `200`으로 응답한다.
 - DB 마이그레이션, 운영 DB와 사용자 데이터 변경은 수행하지 않았다.
