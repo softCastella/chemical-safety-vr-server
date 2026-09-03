@@ -16,17 +16,29 @@ async function findHtmlFiles(directory) {
   return nestedFiles.flat().filter((file) => file.pathname.endsWith('.html'));
 }
 
-test('모든 사이트 페이지는 흰 원형 파비콘을 한 번만 참조한다', async () => {
-  const faviconUrl = new URL('assets/favicon_round_crop.svg', siteRoot);
+test('모든 사이트 페이지는 공용 또는 프로젝트 전용 파비콘을 한 번만 참조한다', async () => {
+  const immersaFaviconUrl = new URL(
+    'assets/Immersa/Chemical%20Safety%20Training%20VR/favicon_round_crop.svg',
+    siteRoot,
+  );
+  const sparkFaviconUrl = new URL('assets/Spark/favicon_round_crop.svg', siteRoot);
+  const vrFaviconUrl = new URL(
+    'assets/Immersa/Chemical%20Safety%20Training%20VR/safety_vr_banner_square.png',
+    siteRoot,
+  );
+  const starlightFaviconUrl = new URL(
+    'assets/Spark/Starlight%20Sudoku/Icon_Starlight_Sudoku_v4.png',
+    siteRoot,
+  );
   const htmlFiles = await findHtmlFiles(siteRoot);
-  const faviconSvg = await readFile(faviconUrl, 'utf8');
+  const faviconSvg = await readFile(immersaFaviconUrl, 'utf8');
 
-  await access(faviconUrl);
+  await Promise.all([access(immersaFaviconUrl), access(sparkFaviconUrl), access(vrFaviconUrl), access(starlightFaviconUrl)]);
   assert.match(faviconSvg, /<clipPath id="round-crop">/);
   assert.match(faviconSvg, /<circle cx="627" cy="627" r="627"\/>/);
   assert.match(faviconSvg, /clip-path="url\(#round-crop\)"/);
   assert.match(faviconSvg, /href="data:image\/png;base64,/);
-  assert.equal(htmlFiles.length, 15);
+  assert.equal(htmlFiles.length, 19);
 
   for (const htmlFile of htmlFiles) {
     const html = await readFile(htmlFile, 'utf8');
@@ -35,7 +47,23 @@ test('모든 사이트 페이지는 흰 원형 파비콘을 한 번만 참조한
     assert.equal(faviconLinks.length, 1, `${htmlFile.pathname} favicon link count`);
     const href = faviconLinks[0].match(/\bhref="([^"]+)"/)?.[1];
     assert.ok(href, `${htmlFile.pathname} favicon href`);
-    assert.equal(new URL(href, htmlFile).href, faviconUrl.href);
+    assert.ok(
+      [immersaFaviconUrl.href, sparkFaviconUrl.href, vrFaviconUrl.href, starlightFaviconUrl.href].includes(new URL(href, htmlFile).href),
+      `${htmlFile.pathname} favicon asset`,
+    );
+  }
+
+  const projectFavicons = [
+    ['immersa/chemical-safety-training/index.html', vrFaviconUrl],
+    ['chemical-safety-vr-landing/index.html', vrFaviconUrl],
+    ['spark/starlight-sudoku/index.html', starlightFaviconUrl],
+    ['starlight-sudoku-landing/index.html', starlightFaviconUrl],
+  ];
+  for (const [relativePath, expectedFavicon] of projectFavicons) {
+    const pageUrl = new URL(relativePath, siteRoot);
+    const html = await readFile(pageUrl, 'utf8');
+    const href = html.match(/<link\b[^>]*\brel="icon"[^>]*\bhref="([^"]+)"/)?.[1];
+    assert.equal(new URL(href, pageUrl).href, expectedFavicon.href, `${relativePath} project favicon`);
   }
 });
 
@@ -108,6 +136,22 @@ test('화학물질 안전훈련 VR 상세페이지 푸터는 공개 개인정보
     html,
     /href="https:\/\/github\.com\/softCastella\/tycheworks-safetytrainingvr-privacy"/,
   );
+  assert.match(html, /rel="icon" type="image\/png" href="\.\.\/\.\.\/assets\/Immersa\/Chemical%20Safety%20Training%20VR\/safety_vr_banner_square\.png"/);
+});
+
+test('브랜드 홈은 공용 개인정보처리방침으로 연결한다', async () => {
+  const [home, brand, policy] = await Promise.all([
+    readFile(new URL('index.html', siteRoot), 'utf8'),
+    readFile(new URL('brand/index.html', siteRoot), 'utf8'),
+    readFile(new URL('privacy/index.html', siteRoot), 'utf8'),
+  ]);
+
+  for (const html of [home, brand]) {
+    assert.match(html, /href="https:\/\/tycheworks\.com\/privacy\/">개인정보처리방침<\/a>/);
+  }
+  assert.match(policy, /TYCHE WORKS는 웹사이트 방문자와 문의자의 개인정보/);
+  assert.match(policy, /Resend 서비스를 사용/);
+  assert.match(policy, /최대 14일간 보관/);
 });
 
 test('화학물질 안전훈련 VR 상세페이지는 SNS 공유 모달을 제공한다', async () => {
@@ -190,16 +234,16 @@ test('화학물질 안전훈련 VR 페이지는 전용 OG 배너와 HD 히어로
     ),
   ]);
   const ogImage =
-    'https://tycheworks.com/assets/metahorizon_og_banner_1200x630.png';
+    'https://tycheworks.com/assets/Immersa/Chemical%20Safety%20Training%20VR/metahorizon_og_banner_1200x630.png';
 
   assert.match(
     home,
-    /<img src="assets\/metahorizon_hero_v2\.png" width="3000" height="900"/,
+    /<img src="assets\/Immersa\/Chemical%20Safety%20Training%20VR\/metahorizon_hero_v2\.png" width="3000" height="900"/,
   );
   assert.doesNotMatch(home, /safety_vr_banner_(?:small|big)\.png/);
   assert.match(
     detail,
-    /<img src="\.\.\/\.\.\/assets\/metahorizon_title_v2_hd\.png" width="1920" height="1080"/,
+    /<img src="\.\.\/\.\.\/assets\/Immersa\/Chemical%20Safety%20Training%20VR\/metahorizon_title_v2_hd\.png" width="1920" height="1080"/,
   );
 
   for (const html of [detail, landing, light, campaign]) {

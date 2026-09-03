@@ -21,12 +21,18 @@
 | --- | --- |
 | `https://tycheworks.com/` | `public/site/index.html` |
 | `https://tycheworks.com/brand` | `public/site/brand/index.html` |
+| `https://tycheworks.com/privacy/` | `public/site/privacy/index.html` |
 | `https://immersa.tycheworks.com/` | `public/site/immersa/index.html` |
 | `https://immersa.tycheworks.com/chemical-safety-training` | `public/site/immersa/chemical-safety-training/index.html` |
 | `https://spark.tycheworks.com/` | `public/site/spark/index.html` |
+| `https://spark.tycheworks.com/starlight-sudoku` | `public/site/spark/starlight-sudoku/index.html` |
+| `https://spark.tycheworks.com/starlight-sudoku/privacy/` | `public/site/spark/starlight-sudoku/privacy/index.html` |
+| `https://tycheworks.com/starlight-sudoku-landing/` | `public/site/starlight-sudoku-landing/index.html` |
 | `https://loop.tycheworks.com/` | `public/site/loop/index.html` |
 
 사이트 내부 링크는 위 정식 HTTPS URL을 사용한다. `#contact`와 `#featured-releases`처럼 `#`이 붙은 값은 API가 아니라 같은 HTML 문서 안의 요소로 이동하는 앵커다.
+
+개인정보처리방침은 서비스 범위별로 구분한다. 브랜드 홈의 공용 방침은 웹 문의 양식과 일반 접속 로그를 다루고, 화학물질 안전훈련 VR 상세페이지는 기존 VR 전용 공개 방침으로 연결한다. 별빛 스도쿠 상세페이지는 5개 언어를 지원하는 전용 방침으로 연결한다. 별빛 스도쿠 전용 방침은 현재 사전 공개 웹페이지에서 확인된 언어 설정과 웹 로그만 확정 사실로 기재하며, 출시 앱의 최종 권한·SDK·데이터 흐름은 출시 빌드 검증 후 Google Play 데이터 보안 양식과 함께 갱신한다.
 
 대시보드는 현재 공개 대상이 아니다. Nginx에서 `https://tycheworks.com/dashboard/` 요청은 `404`로 처리한다.
 
