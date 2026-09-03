@@ -92,6 +92,8 @@ test("별빛 스도쿠 랜딩은 상세 페이지와 언어 상태를 연결한�
   assert.match(script, /localHost \? "\.\.\/spark\/starlight-sudoku\/"/);
   assert.match(css, /\.splash-art\{[^}]*background-position:right center[^}]*background-size:contain/);
   assert.match(css, /\.hero-character\{[^}]*bottom:0[^}]*object-fit:contain/);
+  assert.match(css, /\.project-label\{[^}]*color:rgba\(255,227,160,\.86\)[^}]*text-decoration:none/);
+  assert.match(css, /\.project-label:focus-visible\{[^}]*outline:/);
 });
 
 test("별빛 스도쿠 페이지가 참조하는 핵심 자산이 존재한다", async () => {
