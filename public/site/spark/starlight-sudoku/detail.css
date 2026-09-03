@@ -1,0 +1,70 @@
+.starlight-detail{
+  --starlight-night:#07152f;
+  --starlight-panel:rgba(15,35,70,.72);
+  --starlight-line:rgba(255,232,172,.2);
+  min-height:100%;
+  color:#f7f4ed;
+  background-color:var(--starlight-night);
+  background-image:
+    radial-gradient(circle at 22px 28px,rgba(255,232,172,.72) 0 1px,transparent 1.5px),
+    radial-gradient(circle at 71px 83px,rgba(255,255,255,.5) 0 1px,transparent 1.5px),
+    radial-gradient(circle at 74% 10%,rgba(96,143,218,.2),transparent 28%),
+    linear-gradient(180deg,#07152f 0%,#0b1d3d 48%,#07152f 100%);
+  background-size:113px 113px,157px 157px,100% 100%,100% 100%;
+  background-attachment:fixed;
+}
+
+.starlight-detail main{overflow:hidden;background:linear-gradient(180deg,rgba(15,37,75,.12),rgba(3,12,29,.22))}
+.starlight-detail .detail-language-bar{position:absolute;top:24px;right:max(20px,calc((100vw - var(--shell))/2));z-index:60}
+.starlight-detail .detail-language-bar .locale-switcher{position:static;margin:0;border-color:rgba(255,232,172,.3);background:rgba(5,17,39,.72);box-shadow:0 12px 32px rgba(0,0,0,.22);backdrop-filter:blur(14px)}
+.starlight-detail .detail-language-bar .locale-switcher button{color:rgba(255,255,255,.68)}
+.starlight-detail .detail-language-bar .locale-switcher button:hover,
+.starlight-detail .detail-language-bar .locale-switcher button[aria-pressed="true"]{color:#07152f;background:var(--gold-light)}
+
+.starlight-detail .detail-hero,
+.starlight-detail .overview-section,
+.starlight-detail .play-section,
+.starlight-detail .world-section,
+.starlight-detail .restore-section,
+.starlight-detail .info-section,
+.starlight-detail .detail-final{color:#f7f4ed;background:transparent;border-bottom:1px solid rgba(255,255,255,.07)}
+.starlight-detail .detail-hero-grid{padding-top:106px}
+.starlight-detail .detail-section{position:relative}
+.starlight-detail .detail-section:before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 12% 18%,rgba(75,119,190,.08),transparent 27%);opacity:.85}
+.starlight-detail .detail-section>.shell{position:relative}
+.starlight-detail .eyebrow.orange,
+.starlight-detail .overview-grid small,
+.starlight-detail .world-compare figcaption span{color:var(--gold)}
+.starlight-detail .split-heading>div>p,
+.starlight-detail .section-heading>p,
+.starlight-detail .world-compare figcaption p,
+.starlight-detail .restore-card p{color:rgba(255,255,255,.66)}
+
+.starlight-detail .overview-grid>div,
+.starlight-detail .play-grid article,
+.starlight-detail .world-compare figure,
+.starlight-detail .restore-card{border-color:var(--starlight-line);color:#f7f4ed;background:var(--starlight-panel);box-shadow:0 22px 60px rgba(0,0,0,.14);backdrop-filter:blur(8px)}
+.starlight-detail .restore-card img{background:rgba(255,255,255,.04)}
+.starlight-detail .world-compare figure{box-shadow:0 22px 60px rgba(0,0,0,.14)}
+.starlight-detail .info-layout dl,
+.starlight-detail .info-layout dl>div{border-color:rgba(255,255,255,.14)}
+.starlight-detail .final-card{border:1px solid var(--starlight-line);background:radial-gradient(circle at 88% 0,rgba(242,206,121,.16),transparent 28%),rgba(12,31,63,.76);box-shadow:0 28px 70px rgba(0,0,0,.18)}
+
+.starlight-detail .spark-footer{border-top:1px solid rgba(255,232,172,.24);color:#f7f4ed;background:rgba(3,12,29,.68)}
+.starlight-detail .footer-wordmark span,
+.starlight-detail .footer-grid nav a,
+.starlight-detail .footer-grid>div>span,
+.starlight-detail .footer-bottom{color:rgba(255,255,255,.58)}
+.starlight-detail .footer-grid nav a:hover{color:var(--gold-light)}
+.starlight-detail .footer-grid small{color:var(--gold)}
+.starlight-detail .footer-bottom{border-color:rgba(255,255,255,.12)}
+
+@media(max-width:720px){
+  .starlight-detail{background-attachment:scroll}
+  .starlight-detail .detail-language-bar{top:16px;right:14px}
+  .starlight-detail .detail-hero-grid{padding-top:86px}
+}
+
+@media(max-width:480px){
+  .starlight-detail .detail-language-bar .locale-switcher button{min-width:28px;padding:0 6px}
+}
