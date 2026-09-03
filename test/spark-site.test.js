@@ -44,7 +44,7 @@ test("별빛 스도쿠 상세 페이지는 5개 언어와 언어별 타이틀 �
   assert.match(script, /document\.documentElement\.lang = resolvedLocale/);
   assert.match(script, /url\.searchParams\.set\("lang", resolvedLocale\)/);
   assert.match(html, /data-landing-link/);
-  assert.match(script, /https:\/\/tycheworks\.com\/starlight-sudoku-landing\//);
+  assert.match(script, /https:\/\/starlight-sudoku\.tycheworks\.com\//);
   assert.match(html, /href="privacy\/" data-privacy-link/);
   assert.match(html, /rel="icon" type="image\/png" href="\.\.\/\.\.\/assets\/Spark\/Starlight%20Sudoku\/Icon_Starlight_Sudoku_v4\.png"/);
   assert.match(script, /privacy\/\?lang=/);
@@ -82,6 +82,8 @@ test("별빛 스도쿠 랜딩은 상세 페이지와 언어 상태를 연결한�
   ]);
 
   assert.match(html, /href="https:\/\/spark\.tycheworks\.com\/starlight-sudoku\/"/);
+  assert.match(html, /rel="canonical" href="https:\/\/starlight-sudoku\.tycheworks\.com\/"/);
+  assert.match(html, /property="og:url" content="https:\/\/starlight-sudoku\.tycheworks\.com\/"/);
   assert.match(css, /village_night_light\.png/);
   assert.match(html, /ChatGPT%20Image%202026년%209월%202일/);
   assert.match(html, /rel="icon" type="image\/png" href="\.\.\/assets\/Spark\/Starlight%20Sudoku\/Icon_Starlight_Sudoku_v4\.png"/);

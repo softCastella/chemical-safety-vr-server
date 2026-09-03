@@ -22,6 +22,7 @@ export const serverStatusServiceTargets = Object.freeze([
   { name: "VR TRAINING", host: "immersa.tycheworks.com", path: "/chemical-safety-training" },
   { name: "VR LANDING", host: "chemical-safety-vr.tycheworks.com", path: "/" },
   { name: "SPARK", host: "spark.tycheworks.com", path: "/" },
+  { name: "STARLIGHT SUDOKU", host: "starlight-sudoku.tycheworks.com", path: "/" },
   { name: "LOOP", host: "loop.tycheworks.com", path: "/" },
 ]);
 

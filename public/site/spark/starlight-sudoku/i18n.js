@@ -161,7 +161,7 @@ function applyLocale(locale, updateUrl = true) {
   });
 
   if (landingLink) {
-    const landingBase = "https://tycheworks.com/starlight-sudoku-landing/";
+    const landingBase = "https://starlight-sudoku.tycheworks.com/";
     landingLink.href = resolvedLocale === "ko" ? landingBase : `${landingBase}?lang=${encodeURIComponent(resolvedLocale)}`;
   }
   if (privacyLink) privacyLink.href = resolvedLocale === "ko" ? "privacy/" : `privacy/?lang=${encodeURIComponent(resolvedLocale)}`;
