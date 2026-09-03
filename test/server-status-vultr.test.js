@@ -12,9 +12,17 @@ test("서비스 현황 점검 대상에 화학 안전 VR 전용 랜딩을 포함
   )));
 });
 
-test("서비스 현황 점검 대상에 별빛 스도쿠 전용 랜딩을 포함한다", () => {
+test("서비스 현황 점검 대상에 별빛 스도쿠 상세페이지를 포함한다", () => {
   assert.ok(serverStatusServiceTargets.some((target) => (
     target.name === "STARLIGHT SUDOKU"
+    && target.host === "spark.tycheworks.com"
+    && target.path === "/starlight-sudoku/"
+  )));
+});
+
+test("서비스 현황 점검 대상에 별빛 스도쿠 전용 랜딩을 포함한다", () => {
+  assert.ok(serverStatusServiceTargets.some((target) => (
+    target.name === "STARLIGHT SUDOKU LANDING"
     && target.host === "starlight-sudoku.tycheworks.com"
     && target.path === "/"
   )));
