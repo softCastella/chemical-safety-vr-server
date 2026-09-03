@@ -545,3 +545,57 @@ Nginx 변경 전 기존 설정을 백업했고 `nginx -t` 통과 후 다시 불�
 - 기존 `/starlight-sudoku-landing`과 `/starlight-sudoku-landing/` 요청은 `lang` 쿼리를 보존해 새 주소로 `301` 이동
 - 랜딩 canonical·Open Graph URL과 SPARK 상세페이지의 랜딩 링크가 새 주소를 사용
 - DB 마이그레이션, 운영 DB·환경 변수 변경은 수행하지 않았다.
+
+## 2026-09-03 SPARK·별빛 스도쿠 최종 운영 상태
+
+오늘 작업은 SPARK 게임 라인과 첫 프로젝트인 별빛 스도쿠의 공개 경로를 다음처럼 분리하는 것을
+최종 기준으로 삼았다.
+
+| 역할 | 운영 주소 | 서버 상태 화면 표기 |
+| --- | --- | --- |
+| SPARK 게임 라인 홈 | `https://spark.tycheworks.com/` | `SPARK` |
+| 별빛 스도쿠 상세페이지 | `https://spark.tycheworks.com/starlight-sudoku/` | `STARLIGHT SUDOKU` |
+| 별빛 스도쿠 랜딩페이지 | `https://starlight-sudoku.tycheworks.com/` | `STARLIGHT SUDOKU LANDING` |
+| LOOP 앱 라인 홈 | `https://loop.tycheworks.com/` | `LOOP` |
+
+### 최종 적용 내용
+
+- SPARK 홈은 IMMERSA 라인 홈과 같은 정보 구조를 따르되 SPARK의 게임 라인 색상과 콘텐츠를 사용한다.
+- 별빛 스도쿠 상세페이지는 한국어·영어·일본어·중국어 간체·중국어 번체를 지원하며 전환 순서는
+  `한 → EN → 日 → 中 → 繁`이다.
+- 랜딩과 상세페이지는 서로 연결되고 `lang` 쿼리를 유지한다.
+- 공급된 타이틀·마을·캐릭터 이미지는 원본 비율을 유지하며 `contain` 중심으로 표시한다.
+- 브랜드 공용, 화학 안전 VR 전용, 별빛 스도쿠 전용 개인정보처리방침을 각각 구분했다.
+- 화학 안전 VR과 별빛 스도쿠의 상세·랜딩 페이지는 각 프로젝트 전용 아이콘을 파비콘으로 사용한다.
+- 별빛 스도쿠 랜딩 상단 `TYCHE SPARK · PROJECT 01` 링크는 최종적으로 흰색을 사용하고 hover에서만
+  별빛 골드가 나타난다. 운영 CSS 캐시 기준은 `landing.css?v=20260903-4`다.
+- 서버 상태 화면은 SPARK 홈, 별빛 스도쿠 상세, 별빛 스도쿠 랜딩을 별도 점검하고 LOOP는 독립 앱
+  라인으로 유지한다.
+
+### DNS 장애 원인과 복구
+
+가비아 도메인의 네임서버 목록에 Vultr의 `ns1.vultr.com`, `ns2.vultr.com`과 가비아의
+`ns.gabia.net`이 함께 등록되면서, 조회된 권한 DNS에 따라 정상 응답과 `NXDOMAIN`이 교대로 발생했다.
+가비아 네임서버를 제거하고 아래 두 Vultr 네임서버만 남겨 복구했다.
+
+- `ns1.vultr.com`
+- `ns2.vultr.com`
+
+Google Search Console 소유권 확인 TXT는 Vultr DNS의 `tycheworks.com` 루트에 TTL 3600초로 추가했고,
+사용자 화면에서 인증 완료를 확인했다. 최종 점검에서는 Google Public DNS가 위 두 Vultr 네임서버를
+응답했으며 `spark.tycheworks.com`과 `starlight-sudoku.tycheworks.com`이 모두
+`158.247.238.180`으로 연결됐다.
+
+### 최종 배포와 검증
+
+- 메인 최종 콘텐츠 기준: `main@b8db1a1d84916cb61ce1f81498eae0811eb1ac7f`
+- 운영 최종 콘텐츠 기준:
+  `production/spark-starlight-20260903@c0e68206b64dd789fd1ce28401179436a53069f0`
+- 메인 브랜치 자동 테스트 73개 통과
+- 운영 브랜치와 운영 서버 자동 테스트 72개 통과
+- 운영 Nginx 설정 검사 통과
+- PM2 `tyche-safety-training-server` 상태 `online`, 불안정 재시작 0회
+- SPARK 홈, 별빛 스도쿠 상세, 별빛 스도쿠 랜딩 모두 HTTP `200`
+- 운영 랜딩 HTML이 `landing.css?v=20260903-4`를 참조하고 공개 CSS가 흰색 링크 규칙
+  `.project-label{color:#fff;text-shadow:none}`을 제공하는 것을 확인했다.
+- DB 마이그레이션, 운영 DB와 사용자 데이터 변경은 수행하지 않았다.
