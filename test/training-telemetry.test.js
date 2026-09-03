@@ -32,6 +32,14 @@ function event(sequence, overrides = {}) {
   };
 }
 
+function eventFor(targetSessionId, sequence, overrides = {}) {
+  return event(sequence, {
+    sessionId: targetSessionId,
+    eventId: `${targetSessionId}:${String(sequence).padStart(8, "0")}`,
+    ...overrides,
+  });
+}
+
 async function request(path, { method = "GET", body, token = uploadToken } = {}) {
   const response = await fetch(`${baseUrl}${path}`, {
     method,
@@ -158,6 +166,108 @@ test("세션과 행동 이벤트를 저장하고 원본을 다시 조회한다",
   assert.equal(detail.response.status, 200);
   assert.equal(detail.body.data.eventCount, 3);
   assert.deepEqual(detail.body.data.events.map((item) => item.sequence), [1, 2, 3]);
+});
+
+test("교육·훈련·테스트 모드의 실행 경계와 평가 원본을 저장한다", async () => {
+  const modeSession = "three-mode-session-0001";
+  const created = await request("/api/training-telemetry/sessions", {
+    method: "POST",
+    body: {
+      schemaVersion: 1,
+      sourceProject: "chemical-safety-vr-client",
+      clientInstanceId,
+      sessionId: modeSession,
+      startedAtUtc,
+      appVersion: "0.1.0",
+    },
+  });
+  assert.equal(created.response.status, 201);
+
+  const modes = [
+    { mode: "Education", id: "11111111111111111111111111111111", correct: 5, wrong: 0, elapsed: 72.5 },
+    { mode: "Training", id: "22222222222222222222222222222222", correct: 5, wrong: 0, elapsed: 81.25 },
+    { mode: "Test", id: "33333333333333333333333333333333", correct: 4, wrong: 2, elapsed: 91.75 },
+  ];
+  const events = modes.flatMap((item, index) => {
+    const firstSequence = index * 4 + 1;
+    return [
+      eventFor(modeSession, firstSequence, {
+        eventType: "mode_session_started",
+        mode: item.mode,
+        workPlan: "ConfinedSpace",
+        modeSessionId: item.id,
+      }),
+      eventFor(modeSession, firstSequence + 1, {
+        eventType: "ppe_choice_resolved",
+        mode: item.mode,
+        workPlan: "ConfinedSpace",
+        modeSessionId: item.id,
+        itemType: "GasMask",
+        choice: "Use",
+        result: "UseApproved",
+      }),
+      eventFor(modeSession, firstSequence + 2, {
+        eventType: "quiz_answer_resolved",
+        mode: item.mode,
+        workPlan: "ConfinedSpace",
+        modeSessionId: item.id,
+        quizTopic: "PpeSelection",
+        quizQuestionIndex: 1,
+        quizQuestionCount: 5,
+        quizSelectedOptionIndex: 2,
+        quizCorrect: item.mode !== "Test",
+      }),
+      eventFor(modeSession, firstSequence + 3, {
+        eventType: "mode_session_completed",
+        mode: item.mode,
+        workPlan: "ConfinedSpace",
+        modeSessionId: item.id,
+        result: "completed",
+        quizQuestionCount: 5,
+        quizCorrectCount: item.correct,
+        ppeWrongCount: item.wrong,
+        modeElapsedSec: item.elapsed,
+      }),
+    ];
+  });
+
+  const saved = await request(`/api/training-telemetry/sessions/${modeSession}/events`, {
+    method: "POST",
+    body: { events },
+  });
+  assert.equal(saved.response.status, 200);
+  assert.equal(saved.body.acceptedThroughSequence, 12);
+
+  const detail = await request(`/api/training-telemetry/sessions/${modeSession}`);
+  assert.equal(detail.response.status, 200);
+  const completed = detail.body.data.events.filter(
+    (item) => item.eventType === "mode_session_completed",
+  );
+  assert.deepEqual(completed.map((item) => item.mode), ["Education", "Training", "Test"]);
+  assert.deepEqual(completed.map((item) => item.modeSessionId), modes.map((item) => item.id));
+  assert.equal(completed[2].quizCorrectCount, 4);
+  assert.equal(completed[2].quizQuestionCount, 5);
+  assert.equal(completed[2].ppeWrongCount, 2);
+  assert.equal(completed[2].modeElapsedSec, 91.75);
+  const ppeChoices = detail.body.data.events.filter(
+    (item) => item.eventType === "ppe_choice_resolved",
+  );
+  assert.deepEqual(ppeChoices.map((item) => item.modeSessionId), modes.map((item) => item.id));
+
+  const invalid = await request(`/api/training-telemetry/sessions/${modeSession}/events`, {
+    method: "POST",
+    body: {
+      events: [eventFor(modeSession, 13, {
+        eventType: "mode_session_completed",
+        mode: "Unknown",
+        modeSessionId: "44444444444444444444444444444444",
+        quizQuestionCount: 5,
+        quizCorrectCount: 5,
+      })],
+    },
+  });
+  assert.equal(invalid.response.status, 400);
+  assert.match(invalid.body.error.message, /Education, Training, or Test/);
 });
 
 test("Meta 테스트 사용자와 ID 없는 사용자를 숫자 participantId로 구분한다", async () => {
