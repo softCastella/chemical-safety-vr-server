@@ -1,0 +1,11 @@
+--- tycheworks
++++ tycheworks
+@@ -21,6 +21,8 @@
+ 
+     location = /dashboard { return 404; }
+     location ^~ /dashboard/ { return 404; }
++    location = /starlight-sudoku-landing { return 301 https://starlight-sudoku.tycheworks.com/$is_args$args; }
++    location = /starlight-sudoku-landing/ { return 301 https://starlight-sudoku.tycheworks.com/$is_args$args; }
+     location = /brand { try_files /brand/index.html =404; }
+ 
+     location = /api/contact {
