@@ -521,3 +521,27 @@ Nginx 변경 전 기존 설정을 백업했고 `nginx -t` 통과 후 다시 불�
 별빛 스도쿠 앱은 입점 예정 상태이므로 현재 개인정보처리방침은 공개 랜딩·상세 페이지에서
 확인 가능한 처리 범위만 확정해서 기록했다. 출시 전 실제 앱 빌드의 권한, SDK, 광고·분석,
 계정, 저장·전송 항목을 재검증하고 앱 내부와 스토어 등록 정보에 같은 최신 정책을 연결한다.
+
+## 별빛 스도쿠 전용 랜딩 도메인 배포
+
+2026-09-03에 기존 브랜드 홈 하위 랜딩 주소를 별빛 스도쿠 전용 서브도메인으로 전환했다.
+
+- 정식 랜딩 주소: `https://starlight-sudoku.tycheworks.com/`
+- 메인 코드 기준: `main@be435c2d96f1d83e95cad44547cc5d41ab15d197`
+- 메인 Nginx 설정 기준: `main@45194411d2700eeb92046d449b848014abbbc3ef`
+- 운영 브랜치 기준: `production/spark-starlight-20260903@323033e6307e02a5b5f42fc3f97a9f4bc20931d2`
+- DNS: 기존 와일드카드 CNAME을 통해 `tycheworks.com` 운영 서버로 연결
+- TLS: 기존 `tycheworks.com` 인증서의 SAN에 전용 서브도메인을 추가했고 만료일은 2026-12-02이다.
+- Nginx 설정: `ops/nginx/tycheworks-starlight-sudoku.conf`
+- 이전 주소 리디렉션 패치: `ops/nginx/tycheworks-starlight-sudoku-redirect.patch`
+
+검증 결과는 다음과 같다.
+
+- 메인 브랜치 자동 테스트 72개 통과
+- 운영 브랜치와 운영 서버 자동 테스트 71개 통과
+- Nginx 설정 검사 통과, PM2 애플리케이션 `online`
+- 새 랜딩 루트와 프로젝트 아이콘 자산 HTTP `200`
+- HTTP 요청은 새 HTTPS 주소로 `301` 이동
+- 기존 `/starlight-sudoku-landing`과 `/starlight-sudoku-landing/` 요청은 `lang` 쿼리를 보존해 새 주소로 `301` 이동
+- 랜딩 canonical·Open Graph URL과 SPARK 상세페이지의 랜딩 링크가 새 주소를 사용
+- DB 마이그레이션, 운영 DB·환경 변수 변경은 수행하지 않았다.
