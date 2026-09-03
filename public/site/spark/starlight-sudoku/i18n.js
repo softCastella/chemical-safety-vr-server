@@ -69,7 +69,7 @@ const translations = {
     imageAlt: "《星光數獨》繁體中文標題圖"
   },
   ja: {
-    pageTitle: "星光数独 | TYCHE SPARK", pageDescription: "数独を解いて星の光を集め、時が止まった村に朝を取り戻す物語型モバイル数独ゲームです。",
+    pageTitle: "スターライト数独 | TYCHE SPARK", pageDescription: "数独を解いて星の光を集め、時が止まった村に朝を取り戻す物語型モバイル数独ゲームです。",
     navOverview: "概要", navGameplay: "遊び方", navWorld: "世界", navInfo: "情報",
     heroTitle: "パズルを解いて星の光を集め、<br>時が止まった村に朝を取り戻す数独。", heroBody: "クラシック数独の論理的な楽しさに、小さなファンタジー世界と村の復興という目標を加えた心温まるパズルゲームです。",
     storeStatus: "配信予定", storeBody: "リリース準備中です",
