@@ -2,6 +2,11 @@
   --starlight-night:#07152f;
   --starlight-panel:rgba(15,35,70,.72);
   --starlight-line:rgba(255,232,172,.2);
+  --starlight-ivory:#fffdf8;
+  --starlight-ivory-deep:#f5eddf;
+  --starlight-ink:#14213a;
+  --starlight-muted:#5d6879;
+  --starlight-gold-ink:#966812;
   min-height:100%;
   color:#f7f4ed;
   background-color:var(--starlight-night);
@@ -27,19 +32,11 @@
 .starlight-detail .world-section,
 .starlight-detail .restore-section,
 .starlight-detail .info-section,
-.starlight-detail .detail-final{position:relative;color:#f7f4ed;border:0}
-.starlight-detail .detail-hero{background:radial-gradient(circle at 18% 10%,rgba(72,115,187,.18),transparent 30%),rgba(4,16,37,.28)}
-.starlight-detail .overview-section{background:rgba(22,48,88,.74)}
-.starlight-detail .play-section{background:rgba(5,18,40,.58)}
-.starlight-detail .world-section{background:rgba(20,45,83,.78)}
-.starlight-detail .restore-section{background:rgba(7,24,51,.62)}
-.starlight-detail .info-section{background:rgba(24,51,91,.76)}
-.starlight-detail .detail-final{background:rgba(4,15,34,.62)}
+.starlight-detail .detail-final{position:relative;color:#f7f4ed;background:transparent;border:0}
+.starlight-detail .night-sky:before,
+.starlight-detail .night-sky:after{display:none}
 .starlight-detail .detail-hero-grid{padding-top:106px}
 .starlight-detail .detail-section{position:relative}
-.starlight-detail .detail-section:before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 12% 18%,rgba(96,143,218,.1),transparent 28%);opacity:.72}
-.starlight-detail .detail-section:after,
-.starlight-detail .detail-final:after{content:"";position:absolute;top:0;left:50%;width:72px;height:3px;border-radius:999px;background:linear-gradient(90deg,transparent,var(--gold),transparent);transform:translateX(-50%);box-shadow:0 0 18px rgba(242,206,121,.3)}
 .starlight-detail .detail-section>.shell{position:relative}
 .starlight-detail .eyebrow.orange,
 .starlight-detail .overview-grid small,
@@ -52,13 +49,18 @@
 .starlight-detail .overview-grid>div,
 .starlight-detail .play-grid article,
 .starlight-detail .world-compare figure,
-.starlight-detail .restore-card{border-color:var(--starlight-line);color:#f7f4ed;box-shadow:0 22px 60px rgba(0,0,0,.14);backdrop-filter:blur(8px)}
-.starlight-detail .overview-grid>div{background:rgba(35,64,108,.84)}
-.starlight-detail .play-grid article{background:rgba(15,37,75,.82)}
-.starlight-detail .world-compare figure{background:rgba(14,35,70,.88)}
-.starlight-detail .restore-card{background:rgba(27,53,94,.82)}
-.starlight-detail .restore-card img{background:rgba(255,255,255,.04)}
-.starlight-detail .world-compare figure{box-shadow:0 22px 60px rgba(0,0,0,.14)}
+.starlight-detail .restore-card{border-color:rgba(20,33,58,.13);color:var(--starlight-ink);background:var(--starlight-ivory);box-shadow:0 24px 64px rgba(0,0,0,.2)}
+.starlight-detail .overview-grid small,
+.starlight-detail .play-grid article>span,
+.starlight-detail .world-compare figcaption span{color:var(--starlight-gold-ink)}
+.starlight-detail .play-grid p,
+.starlight-detail .world-compare figcaption p,
+.starlight-detail .restore-card p{color:var(--starlight-muted)}
+.starlight-detail .sudoku-mini{border-color:rgba(20,33,58,.22)}
+.starlight-detail .sudoku-mini i{border-color:rgba(20,33,58,.1);color:var(--starlight-gold-ink)}
+.starlight-detail .star-orbit{border-color:rgba(20,33,58,.22);color:var(--starlight-gold-ink);box-shadow:0 0 48px rgba(150,104,18,.12)}
+.starlight-detail .star-orbit:after{background:#c9952e;box-shadow:0 0 15px rgba(201,149,46,.55)}
+.starlight-detail .restore-card img{background:var(--starlight-ivory-deep)}
 .starlight-detail .info-layout dl,
 .starlight-detail .info-layout dl>div{border-color:rgba(255,255,255,.14)}
 .starlight-detail .final-card{border:1px solid var(--starlight-line);background:radial-gradient(circle at 88% 0,rgba(242,206,121,.16),transparent 28%),rgba(12,31,63,.76);box-shadow:0 28px 70px rgba(0,0,0,.18)}
