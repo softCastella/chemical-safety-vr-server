@@ -672,3 +672,31 @@ Google Search Console 소유권 확인 TXT는 Vultr DNS의 `tycheworks.com` 루�
 - 공개 HTML과 JavaScript에서 한국어 `GOOGLE PLAY · 입점 준비 중`과 게임 초기화 함수를 확인
 - 정적 파일을 Nginx가 직접 제공하므로 PM2와 Nginx를 재시작하지 않았다. DB 마이그레이션,
   운영 DB·환경 변수와 사용자 데이터도 변경하지 않았다.
+
+## 2026-09-04 별빛 스도쿠 GitHub Pages 체험판 연결
+
+랜딩 내부에 구현했던 쉬움 스테이지 1 체험판은 보존 브랜치로 분리하고, 운영 랜딩의
+`지금 플레이해보세요` 버튼은 별빛 스도쿠 클라이언트 저장소가 배포하는 기존 GitHub Pages
+체험판을 실행하도록 전환했다.
+
+- 1판 플레이 랜딩 보존 기준:
+  `archive/1판플레이-랜딩-보존@757b3fa8d2c74181a019819132ab4f18e0d9eba0`
+- 운영 콘텐츠 기준:
+  `production/spark-starlight-20260903@a7b835efc99ee7b28194b6b522663ab23b3e0989`
+- 운영 랜딩: `https://starlight-sudoku.tycheworks.com/`
+- 웹 체험판: `https://softcastella.github.io/Starlight-Sudoku/`
+- 데스크톱에서는 웹 체험판을 가운데 정렬된 최대 `430×900` 팝업 창으로 열고, 화면이 작으면
+  사용 가능한 영역에 맞춰 줄인다. 모바일에서는 브라우저의 일반 새 탭으로 연다.
+- 랜딩 내부 게임 마크업과 게임 스크립트 참조는 제거했으며, 기존 산발형 고정 별과
+  금빛·아이보리 반짝임은 `landing-launch.js`에서 유지한다.
+
+완료 검증은 다음과 같다.
+
+- 로컬과 운영 서버 자동 테스트 각각 74개 통과, JavaScript 구문 검사와 `git diff --check` 통과
+- 운영 서버 fast-forward 반영 후 `nginx -t` 통과
+- 공개 랜딩과 `landing-launch.js?v=20260904-32`가 HTTP `200`으로 응답
+- 공개 랜딩 HTML에서 GitHub Pages 주소와 새 실행 스크립트 참조를 확인하고, 내부
+  `play-demo`와 `landing-game.js` 참조가 제거된 것을 확인
+- GitHub Pages 체험판이 HTTP `200`, `text/html`로 응답하는 것을 확인
+- PM2와 Nginx를 재시작하지 않았고 DB 마이그레이션, 운영 DB·환경 변수와 사용자 데이터도
+  변경하지 않았다.
