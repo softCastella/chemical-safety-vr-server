@@ -106,14 +106,15 @@ test("별빛 스도쿠 개인정보처리방침은 앱·웹 데이터 처리와 
   assert.match(css, /@keyframes star-twinkle/);
 });
 
-test("별빛 스도쿠 랜딩은 상세 페이지와 언어 상태를 연결한다", async () => {
-  const [html, css, script] = await Promise.all([
+test("별빛 스도쿠 랜딩은 모바일 크기 웹 체험판을 연결한다", async () => {
+  const [html, css, script, launchScript] = await Promise.all([
     readFile(new URL("starlight-sudoku-landing/index.html", siteRoot), "utf8"),
     readFile(new URL("starlight-sudoku-landing/landing.css", siteRoot), "utf8"),
     readFile(new URL("starlight-sudoku-landing/landing-i18n.js", siteRoot), "utf8"),
+    readFile(new URL("starlight-sudoku-landing/landing-launch.js", siteRoot), "utf8"),
   ]);
 
-  assert.match(html, /href="https:\/\/spark\.tycheworks\.com\/starlight-sudoku\/"/);
+  assert.doesNotMatch(html, /class="enter-button"|data-detail-link/);
   assert.match(html, /rel="canonical" href="https:\/\/starlight-sudoku\.tycheworks\.com\/"/);
   assert.match(html, /property="og:url" content="https:\/\/starlight-sudoku\.tycheworks\.com\/"/);
   assert.match(css, /village_night_light\.png/);
@@ -128,6 +129,43 @@ test("별빛 스도쿠 랜딩은 상세 페이지와 언어 상태를 연결한�
   assert.match(css, /Keep the project route crisp[\s\S]*\.project-label\{color:#fff;text-shadow:none\}/);
   assert.match(css, /\.project-label:hover\{color:var\(--gold\)/);
   assert.match(css, /\.project-label:focus-visible\{[^}]*outline:/);
+  assert.match(html, /class="play-scroll-button" href="https:\/\/softcastella\.github\.io\/Starlight-Sudoku\/" target="_blank" rel="noopener noreferrer" data-play-launch/);
+  assert.doesNotMatch(html, /id="play-demo"|data-start-game|landing-game\.js/);
+  assert.match(html, /landing-launch\.js\?v=20260904-32/);
+  assert.match(script, /playCta: "지금<br>플레이해보세요"/);
+  assert.match(html, /data-i18n="releaseState">GOOGLE PLAY · 입점 준비 중/);
+  assert.match(script, /releaseState: "GOOGLE PLAY · 입점 준비 중"/);
+  assert.match(launchScript, /const playUrl = "https:\/\/softcastella\.github\.io\/Starlight-Sudoku\/"/);
+  assert.match(launchScript, /window\.matchMedia\("\(max-width: 680px\)"\)/);
+  assert.match(launchScript, /Math\.min\(430, window\.screen\.availWidth - 32\)/);
+  assert.match(launchScript, /Math\.min\(900, window\.screen\.availHeight - 48\)/);
+  assert.match(launchScript, /window\.open\(playUrl, "starlightSudokuMobile", features\)/);
+  assert.match(launchScript, /gameWindow\.focus\(\)/);
+  assert.match(launchScript, /window\.location\.assign\(playUrl\)/);
+  assert.match(launchScript, /function createStarField\(container, count, seed\)/);
+  assert.match(launchScript, /state \* 1664525 \+ 1013904223/);
+  assert.match(launchScript, /lowerSky = random\(\) < 0\.64/);
+  assert.match(launchScript, /createStarField\(stars, 160, 20260904\)/);
+  assert.match(launchScript, /0\.8 \+ random\(\) \* 2\.4/);
+  assert.match(launchScript, /function createStaticStarField\(container, count, seed\)/);
+  assert.match(launchScript, /createStaticStarField\(stars, 240, 20260904\)/);
+  assert.match(launchScript, /lowerSky = random\(\) < 0\.68/);
+  assert.match(css, /\.stars,\.demo-stars\{opacity:1;background:none\}/);
+  assert.match(css, /\.star-dust\{[^}]*background:#ffe8a0/);
+  assert.match(css, /\.star-dot\{[^}]*background:#ffd86a/);
+  assert.match(launchScript, /index % 3 === 0 \? " is-white"/);
+  assert.match(css, /\.star-dot\.is-white\{[^}]*background:#fffaf0/);
+  assert.match(css, /@keyframes scattered-twinkle-a/);
+  assert.match(css, /@keyframes scattered-twinkle-b/);
+  assert.match(css, /\.play-scroll-button\{[^}]*width:148px;[^}]*aspect-ratio:1;[^}]*flex-direction:column/);
+  assert.match(html, /<small>PLAY<br>THE FIRST LIGHT<\/small><b data-i18n="playCta">지금<br>플레이해보세요<\/b>/);
+  assert.match(css, /\.play-scroll-button\{[^}]*left:calc\(50vw - 7vw\)/);
+  assert.doesNotMatch(css, /\.play-scroll-button:after\{/);
+  assert.match(css, /\.play-scroll-button:hover\{[^}]*border-color:rgba\(255,232,158,\.96\);[^}]*0 0 38px rgba\(255,178,45,\.34\)/);
+  assert.match(css, /@media\(min-width:681px\)\{\.splash-header\{padding-top:20px;padding-bottom:20px\}\.splash-content\{padding-top:clamp\(12px,2\.5vh,26px\);padding-bottom:clamp\(36px,5vh,56px\)\}\}/);
+  assert.match(css, /@media\(min-width:681px\)\{\.game-mark\{margin-bottom:46px\}\}/);
+  assert.match(css, /@keyframes launch-arrow/);
+  assert.doesNotMatch(css, /star-drift/);
 });
 
 test("별빛 스도쿠 페이지가 참조하는 핵심 자산이 존재한다", async () => {
@@ -144,6 +182,8 @@ test("별빛 스도쿠 페이지가 참조하는 핵심 자산이 존재한다",
     "icon_bakery.png",
     "icon_book.png",
     "icon_fontaine.png",
+    "GoogolePlayLogo.png",
+    "level_starfall_grid.ogg",
   ];
 
   await Promise.all(assets.map((asset) => access(new URL(asset, assetRoot))));
