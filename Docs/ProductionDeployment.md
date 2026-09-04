@@ -684,7 +684,7 @@ Google Search Console 소유권 확인 TXT는 Vultr DNS의 `tycheworks.com` 루�
   상세 페이지 버튼 없이 중앙 `지금 플레이해보세요` 버튼만 제공한다.
 - 플레이 버튼은 `https://softcastella.github.io/Starlight-Sudoku/`를 데스크톱에서 최대
   `430x900` 크기의 별도 창으로 열고, 모바일에서는 새 탭으로 연다.
-- 공개 게임 기준은 `softCastella/Starlight-Sudoku@f6eccabaf476fcc8fe97bfb529f8adbb62f7a310`이다.
+- 공개 게임 기준은 `softCastella/Starlight-Sudoku@253982fd4493006150ea12d8b8192640e67e06f0`이다.
   웹 브라우저의 자동재생 제한을 준수하도록 스플래시 뒤 `BGM ON` 입력에서 타이틀 음원을
   시작한다. Android 등 비웹 실행 흐름은 변경하지 않았다.
 - 공개 게임의 언어는 브라우저·기기 선호 언어를 기준으로 한국어·영어·일본어·중국어 간체·번체를
