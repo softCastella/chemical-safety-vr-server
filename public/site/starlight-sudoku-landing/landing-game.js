@@ -53,6 +53,32 @@
   let memoMode = false;
   let revealFrame = 0;
 
+  function createStarField(container, count, seed) {
+    let state = seed >>> 0;
+    const random = () => {
+      state = (state * 1664525 + 1013904223) >>> 0;
+      return state / 4294967296;
+    };
+
+    for (let index = 0; index < count; index += 1) {
+      const star = document.createElement("i");
+      star.className = `star-dot${index % 2 ? " is-alt" : ""}${index % 9 === 0 ? " is-cross" : ""}`;
+      const lowerSky = random() < 0.64;
+      const y = lowerSky ? 48 + random() * 50 : 2 + random() * 46;
+      star.style.setProperty("--star-x", `${(1 + random() * 98).toFixed(2)}%`);
+      star.style.setProperty("--star-y", `${y.toFixed(2)}%`);
+      star.style.setProperty("--star-size", `${(1.4 + random() * 2.8).toFixed(2)}px`);
+      star.style.setProperty("--star-duration", `${(2.8 + random() * 3.8).toFixed(2)}s`);
+      star.style.setProperty("--star-delay", `${(-random() * 6).toFixed(2)}s`);
+      star.setAttribute("aria-hidden", "true");
+      container.append(star);
+    }
+  }
+
+  document.querySelectorAll(".stars, .demo-stars").forEach((container, index) => {
+    createStarField(container, index === 0 ? 96 : 140, 20260904 + index * 7919);
+  });
+
   const cellElements = puzzle.flatMap((row, rowIndex) => row.map((value, colIndex) => {
     const cell = document.createElement("button");
     cell.type = "button";

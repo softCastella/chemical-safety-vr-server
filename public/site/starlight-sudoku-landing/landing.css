@@ -121,3 +121,20 @@ button{font:inherit}
 
 .scroll-reveal-shade{position:absolute;inset:0;z-index:20;opacity:calc(1 - var(--reveal-progress));background:linear-gradient(180deg,rgba(3,10,24,.28) 0%,rgba(3,10,24,.62) 48%,rgba(3,10,24,.9) 100%);pointer-events:none;will-change:opacity}
 @media(prefers-reduced-motion:reduce){.scroll-reveal-shade{display:none}}
+
+/* Scattered golden stars and a centered square play CTA */
+.stars,.demo-stars{opacity:1;background:none}
+.stars:before,.demo-stars:before,.stars:after,.demo-stars:after{content:none}
+.star-dot{position:absolute;left:var(--star-x);top:var(--star-y);width:var(--star-size);height:var(--star-size);border-radius:50%;opacity:.2;background:#ffd86a;box-shadow:0 0 calc(var(--star-size) * 2) #ffc94c,0 0 calc(var(--star-size) * 4) rgba(255,201,76,.48);transform:translate(-50%,-50%) scale(.68);will-change:opacity,filter,transform}
+.star-dot.is-cross:before,.star-dot.is-cross:after{content:"";position:absolute;left:50%;top:50%;border-radius:999px;background:#ffe28a;box-shadow:0 0 8px rgba(255,210,91,.78);transform:translate(-50%,-50%)}
+.star-dot.is-cross:before{width:1px;height:calc(var(--star-size) * 4.5)}
+.star-dot.is-cross:after{width:calc(var(--star-size) * 4.5);height:1px}
+.hero-actions{align-items:flex-end}
+.play-scroll-button{width:148px;min-width:148px;aspect-ratio:1;flex-direction:column;justify-content:center;gap:14px;padding:17px;text-align:center}
+.play-scroll-button span{align-items:center}
+.play-scroll-button i{line-height:1}
+@media(prefers-reduced-motion:no-preference){.star-dot{animation:scattered-twinkle-a var(--star-duration) var(--star-delay) ease-in-out infinite}.star-dot.is-alt{animation-name:scattered-twinkle-b}}
+@keyframes scattered-twinkle-a{0%,100%{opacity:.16;filter:brightness(.8);transform:translate(-50%,-50%) scale(.62)}38%{opacity:.96;filter:brightness(1.8);transform:translate(-50%,-50%) scale(1.18)}68%{opacity:.28;filter:brightness(1);transform:translate(-50%,-50%) scale(.76)}}
+@keyframes scattered-twinkle-b{0%,100%{opacity:.82;filter:brightness(1.55);transform:translate(-50%,-50%) scale(1.08)}42%{opacity:.18;filter:brightness(.8);transform:translate(-50%,-50%) scale(.64)}76%{opacity:.48;filter:brightness(1.2);transform:translate(-50%,-50%) scale(.88)}}
+@media(max-width:680px){.play-scroll-button{width:148px!important;min-width:148px;align-self:center}}
+@media(prefers-reduced-motion:reduce){.star-dot{animation:none}}
