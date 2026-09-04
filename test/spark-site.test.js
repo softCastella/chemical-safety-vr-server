@@ -107,10 +107,11 @@ test("별빛 스도쿠 개인정보처리방침은 앱·웹 데이터 처리와 
 });
 
 test("별빛 스도쿠 랜딩은 상세 페이지와 언어 상태를 연결한다", async () => {
-  const [html, css, script] = await Promise.all([
+  const [html, css, script, gameScript] = await Promise.all([
     readFile(new URL("starlight-sudoku-landing/index.html", siteRoot), "utf8"),
     readFile(new URL("starlight-sudoku-landing/landing.css", siteRoot), "utf8"),
     readFile(new URL("starlight-sudoku-landing/landing-i18n.js", siteRoot), "utf8"),
+    readFile(new URL("starlight-sudoku-landing/landing-game.js", siteRoot), "utf8"),
   ]);
 
   assert.match(html, /href="https:\/\/spark\.tycheworks\.com\/starlight-sudoku\/"/);
@@ -128,6 +129,17 @@ test("별빛 스도쿠 랜딩은 상세 페이지와 언어 상태를 연결한�
   assert.match(css, /Keep the project route crisp[\s\S]*\.project-label\{color:#fff;text-shadow:none\}/);
   assert.match(css, /\.project-label:hover\{color:var\(--gold\)/);
   assert.match(css, /\.project-label:focus-visible\{[^}]*outline:/);
+  assert.match(html, /class="play-scroll-button" href="#play-demo"/);
+  assert.match(html, /id="play-demo" class="play-demo"/);
+  assert.match(html, /data-start-game/);
+  assert.match(html, /landing-game\.js\?v=20260904-1/);
+  assert.match(script, /playCta: "지금 플레이해보세요"/);
+  assert.match(gameScript, /\[0, 0, 8, 5, 0, 6, 3, 0, 4\]/);
+  assert.match(gameScript, /\[2, 7, 8, 5, 9, 6, 3, 1, 4\]/);
+  assert.match(gameScript, /function isComplete\(\)/);
+  assert.doesNotMatch(gameScript, /localStorage|sessionStorage|fetch\(|XMLHttpRequest/);
+  assert.match(css, /\.sudoku-board\{[^}]*grid-template-columns:repeat\(9,1fr\)/);
+  assert.match(css, /@keyframes arrow-down/);
 });
 
 test("별빛 스도쿠 페이지가 참조하는 핵심 자산이 존재한다", async () => {
