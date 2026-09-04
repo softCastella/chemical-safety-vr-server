@@ -645,3 +645,30 @@ Google Search Console 소유권 확인 TXT는 Vultr DNS의 `tycheworks.com` 루�
 - IMMERSA·SPARK·LOOP 운영 홈은 공용 개인정보처리방침 링크를 각각 한 번 제공하고,
   공용 정책 URL은 HTTP `200`으로 응답한다.
 - DB 마이그레이션, 운영 DB와 사용자 데이터 변경은 수행하지 않았다.
+
+## 2026-09-04 별빛 스도쿠 웹 체험판 운영 배포
+
+별빛 스도쿠 전용 랜딩에 설치 없이 실행하는 쉬움 스테이지 1 체험판과 Google Play 전환 영역을
+추가했다.
+
+- 기능 브랜치 기준: `feature/starlight-web-demo@ea9497f5a37b6db08ab088fa20c45c8192d0f7e6`
+- 운영 콘텐츠 기준: `production/spark-starlight-20260903@0679898d7150331c515284eeb1c2e790dabab4b6`
+- 공개 주소: `https://starlight-sudoku.tycheworks.com/`
+- 적용 내용: 쉬움 스테이지 1 스도쿠, 메모·지우기·재시작, BGM 재생 고지와 토글, 선택 셀
+  노란색 강조, 완료 모달과 게임 초기 화면 복귀를 제공한다.
+- 전환 요소: 상단 입점 준비 상태와 게임 조작 패널 하단·완료 모달의 Google Play 배지를
+  제공한다. 입점 준비 상태와 게임 문구는 한국어·영어·일본어·중국어 간체·번체를 지원한다.
+- 시각 연출: 산발적으로 배치한 고정 별과 금빛·아이보리 반짝임, 스크롤 진입 시 암부 해제,
+  플레이 유도 버튼과 완료 배지 글로우를 적용했다. 모션 감소 설정에서는 반복 애니메이션을
+  비활성화한다.
+
+완료 검증은 다음과 같다.
+
+- 기능 브랜치와 운영 브랜치 자동 테스트 각각 74개 통과, `git diff --check` 통과
+- 운영 서버 fast-forward 반영 후 자동 테스트 74개와 `nginx -t` 통과
+- 공개 랜딩 HTML과 `landing.css?v=20260904-31`, `landing-game.js?v=20260904-29`,
+  `landing-i18n.js?v=20260904-30`이 HTTP `200`으로 응답
+- BGM `level_starfall_grid.ogg`가 `audio/ogg`, 1,765,842바이트와 HTTP `200`으로 응답
+- 공개 HTML과 JavaScript에서 한국어 `GOOGLE PLAY · 입점 준비 중`과 게임 초기화 함수를 확인
+- 정적 파일을 Nginx가 직접 제공하므로 PM2와 Nginx를 재시작하지 않았다. DB 마이그레이션,
+  운영 DB·환경 변수와 사용자 데이터도 변경하지 않았다.
