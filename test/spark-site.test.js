@@ -132,7 +132,7 @@ test("별빛 스도쿠 랜딩은 상세 페이지와 언어 상태를 연결한�
   assert.match(html, /class="play-scroll-button" href="#play-demo"/);
   assert.match(html, /id="play-demo" class="play-demo"/);
   assert.match(html, /data-start-game/);
-  assert.match(html, /landing-game\.js\?v=20260904-4/);
+  assert.match(html, /landing-game\.js\?v=20260904-6/);
   assert.match(script, /playCta: "지금 플레이해보세요"/);
   assert.match(gameScript, /\[0, 0, 8, 5, 0, 6, 3, 0, 4\]/);
   assert.match(gameScript, /\[2, 7, 8, 5, 9, 6, 3, 1, 4\]/);
@@ -148,6 +148,9 @@ test("별빛 스도쿠 랜딩은 상세 페이지와 언어 상태를 연결한�
   assert.match(script, /audioNotice: "플레이 버튼을 누르면 BGM이 재생됩니다\."/);
   assert.match(gameScript, /let notes = Array\.from/);
   assert.match(gameScript, /function toggleMemoMode\(\)/);
+  assert.match(html, /class="scroll-reveal-shade"/);
+  assert.match(gameScript, /function updateScrollReveal\(\)/);
+  assert.match(gameScript, /--reveal-progress/);
   assert.match(script, /const demoTitleImages =/);
   assert.match(css, /\.sudoku-board\{[^}]*grid-template-columns:repeat\(9,1fr\)/);
   assert.match(css, /@keyframes arrow-down/);
@@ -156,7 +159,8 @@ test("별빛 스도쿠 랜딩은 상세 페이지와 언어 상태를 연결한�
   assert.match(css, /\.sudoku-cell\.selected\{[^}]*background:#ffe3a0;[^}]*#c9902e/);
   assert.doesNotMatch(css, /star-drift/);
   assert.match(css, /\.store-card\{/);
-  assert.match(css, /\.demo-title-art\{[^}]*object-position:center 34%/);
+  assert.match(css, /\.demo-title-art\{[^}]*object-position:center 29%/);
+  assert.match(css, /\.scroll-reveal-shade\{[^}]*opacity:calc\(1 - var\(--reveal-progress\)\)/);
 });
 
 test("별빛 스도쿠 페이지가 참조하는 핵심 자산이 존재한다", async () => {
