@@ -72,20 +72,38 @@ test("별빛 스도쿠 상세 페이지는 5개 언어와 언어별 타이틀 �
   assert.doesNotMatch(detailCss, /\.starlight-detail \.final-card\{[^}]*var\(--starlight-ivory\)/);
 });
 
-test("별빛 스도쿠 개인정보처리방침은 5개 언어와 상세 복귀 경로를 제공한다", async () => {
-  const [html, script] = await Promise.all([
+test("별빛 스도쿠 개인정보처리방침은 앱·웹 데이터 처리와 5개 언어를 안내한다", async () => {
+  const [html, script, css] = await Promise.all([
     readFile(new URL("spark/starlight-sudoku/privacy/index.html", siteRoot), "utf8"),
     readFile(new URL("spark/starlight-sudoku/privacy/privacy-i18n.js", siteRoot), "utf8"),
+    readFile(new URL("spark/starlight-sudoku/privacy/privacy.css", siteRoot), "utf8"),
   ]);
 
   assert.match(html, /data-detail-link/);
   assert.match(html, /starlight-sudoku-locale/);
+  assert.match(html, /privacy\.css\?v=20260904-1/);
+  assert.match(html, /privacy-i18n\.js\?v=20260904-1/);
   for (const locale of ["ko", "en", "ja", "zh-CN", "zh-TW"]) {
     assert.match(html, new RegExp(`data-locale="${locale}"`));
     assert.match(script, new RegExp(`(?:^|[\\s"'])${locale.replace("-", "\\-")}(?:[":])`, "m"));
   }
   assert.match(script, /최대 14일/);
-  assert.match(script, /production app build/);
+  assert.match(script, /com\.tychespark\.starlightsudoku/);
+  assert.match(script, /Firebase Analytics와 AdMob도 사용하지 않습니다/);
+  assert.match(script, /SS- 형식의 익명 사용자 ID/);
+  assert.match(script, /Google Play 인앱 리뷰 흐름을 요청/);
+  assert.match(script, /전송 시 암호화/);
+  assert.match(script, /연령에 따라 이용을 제한하지 않는 퍼즐 게임/);
+  assert.match(script, /만 14세 미만 아동을 주요 대상으로 기획하거나 홍보하는 서비스는 아니며/);
+  assert.match(script, /생년월일이나 연령 정보를 수집하지 않습니다/);
+  assert.match(html, /support\.google\.com\/googleplay\/android-developer\/answer\/10144311/);
+  assert.match(html, /support\.google\.com\/googleplay\/android-developer\/answer\/10787469/);
+  assert.match(html, /developer\.android\.com\/guide\/playcore\/in-app-review/);
+  assert.match(css, /--ivory: #fffaf0/);
+  assert.match(css, /\.locale-switcher \{[\s\S]*?background: var\(--ivory\)/);
+  assert.match(css, /\.policy-shell \{[\s\S]*?var\(--ivory\)/);
+  assert.match(css, /body::before,[\s\S]*body::after/);
+  assert.match(css, /@keyframes star-twinkle/);
 });
 
 test("별빛 스도쿠 랜딩은 상세 페이지와 언어 상태를 연결한다", async () => {
