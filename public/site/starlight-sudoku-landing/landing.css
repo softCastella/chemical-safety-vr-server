@@ -119,7 +119,7 @@ button{font:inherit}
 @media(max-width:800px){.game-controls{display:grid;grid-template-columns:1fr 1fr;align-items:start}.control-guide,.number-pad,.tool-row,.privacy-note{grid-column:1}.store-card{grid-column:2;grid-row:1 / span 4;align-self:stretch;justify-content:center}.game-topbar-tools{align-items:stretch}}
 @media(max-width:680px){.game-topbar{flex-direction:column}.game-topbar-tools{width:100%;justify-content:space-between}.bgm-toggle{min-height:43px}.game-controls{display:flex}.store-card{width:100%}.game-start-layer{padding:24px 24px 34px}.game-start-layer .demo-title-art{width:100%;max-height:none;object-position:center 29%}}
 
-.scroll-reveal-shade{position:absolute;inset:0;z-index:20;opacity:calc(1 - var(--reveal-progress));background:linear-gradient(180deg,rgba(1,5,15,.58) 0%,rgba(1,5,15,.84) 48%,rgba(1,5,15,.98) 100%);pointer-events:none;will-change:opacity}
+.scroll-reveal-shade{position:absolute;inset:0;z-index:20;opacity:calc(1 - var(--reveal-progress));background:linear-gradient(180deg,rgba(0,3,11,.82) 0%,rgba(0,3,11,.95) 48%,rgba(0,2,8,1) 100%);pointer-events:none;will-change:opacity}
 @media(prefers-reduced-motion:reduce){.scroll-reveal-shade{display:none}}
 
 /* Scattered golden stars and a centered square play CTA */
@@ -130,8 +130,10 @@ button{font:inherit}
 .star-dot.is-cross:before{width:1px;height:calc(var(--star-size) * 4.5)}
 .star-dot.is-cross:after{width:calc(var(--star-size) * 4.5);height:1px}
 .hero-actions{position:relative;min-height:148px;align-items:center}
-.play-scroll-button{position:absolute;left:calc(50vw - 7vw);width:148px;min-width:148px;aspect-ratio:1;flex-direction:column;justify-content:center;gap:14px;padding:17px;text-align:center;transform:translateX(-50%);border-color:rgba(255,216,106,.82);box-shadow:0 0 0 1px rgba(255,227,160,.12),0 0 16px rgba(255,201,76,.36),0 0 34px rgba(255,178,45,.2),0 16px 38px rgba(0,0,0,.28)}
-.play-scroll-button:hover{transform:translate(-50%,-3px);box-shadow:0 0 0 1px rgba(255,239,184,.35),0 0 22px rgba(255,216,106,.62),0 0 48px rgba(255,178,45,.32),0 20px 42px rgba(0,0,0,.32)}
+.play-scroll-button{position:absolute;left:calc(50vw - 7vw);width:148px;min-width:148px;aspect-ratio:1;flex-direction:column;justify-content:center;gap:14px;padding:17px;text-align:center;transform:translateX(-50%);border-color:rgba(255,216,106,.82);box-shadow:0 16px 38px rgba(0,0,0,.28)}
+.play-scroll-button:after{content:"";position:absolute;inset:-7px;border:1px solid rgba(255,216,106,.3);border-radius:22px;opacity:.35;box-shadow:0 0 11px rgba(255,216,106,.26),0 0 24px rgba(255,178,45,.14);pointer-events:none;transition:opacity .22s ease,border-color .22s ease,box-shadow .22s ease}
+.play-scroll-button:hover{transform:translate(-50%,-3px);box-shadow:0 20px 42px rgba(0,0,0,.32)}
+.play-scroll-button:hover:after{opacity:1;border-color:rgba(255,232,158,.9);box-shadow:0 0 15px rgba(255,216,106,.78),0 0 34px rgba(255,178,45,.42)}
 .play-scroll-button span{align-items:center}
 .play-scroll-button small{line-height:1.3}
 .play-scroll-button b{line-height:1.3;white-space:nowrap}
@@ -141,4 +143,5 @@ button{font:inherit}
 @keyframes scattered-twinkle-b{0%,100%{opacity:.82;filter:brightness(1.55);transform:translate(-50%,-50%) scale(1.08)}42%{opacity:.18;filter:brightness(.8);transform:translate(-50%,-50%) scale(.64)}76%{opacity:.48;filter:brightness(1.2);transform:translate(-50%,-50%) scale(.88)}}
 @media(max-width:900px) and (min-width:681px){.play-scroll-button{left:calc(50vw - 5vw)}}
 @media(max-width:680px){.hero-actions{min-height:0}.play-scroll-button{position:static;width:148px!important;min-width:148px;align-self:center;transform:none}.play-scroll-button:hover{transform:translateY(-3px)}}
-@media(prefers-reduced-motion:reduce){.star-dot{animation:none}}
+@media(prefers-reduced-motion:reduce){.star-dot{animation:none}.play-scroll-button:after{transition:none}}
+@media(min-width:681px){.splash-header{padding-top:20px;padding-bottom:20px}.splash-content{padding-top:clamp(12px,2.5vh,26px);padding-bottom:clamp(36px,5vh,56px)}}
