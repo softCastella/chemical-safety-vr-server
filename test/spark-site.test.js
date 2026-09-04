@@ -106,7 +106,7 @@ test("별빛 스도쿠 개인정보처리방침은 앱·웹 데이터 처리와 
   assert.match(css, /@keyframes star-twinkle/);
 });
 
-test("별빛 스도쿠 랜딩은 상세 페이지와 모바일 크기 웹 체험판을 연결한다", async () => {
+test("별빛 스도쿠 랜딩은 모바일 크기 웹 체험판을 연결한다", async () => {
   const [html, css, script, launchScript] = await Promise.all([
     readFile(new URL("starlight-sudoku-landing/index.html", siteRoot), "utf8"),
     readFile(new URL("starlight-sudoku-landing/landing.css", siteRoot), "utf8"),
@@ -114,7 +114,7 @@ test("별빛 스도쿠 랜딩은 상세 페이지와 모바일 크기 웹 체험
     readFile(new URL("starlight-sudoku-landing/landing-launch.js", siteRoot), "utf8"),
   ]);
 
-  assert.match(html, /href="https:\/\/spark\.tycheworks\.com\/starlight-sudoku\/"/);
+  assert.doesNotMatch(html, /class="enter-button"|data-detail-link/);
   assert.match(html, /rel="canonical" href="https:\/\/starlight-sudoku\.tycheworks\.com\/"/);
   assert.match(html, /property="og:url" content="https:\/\/starlight-sudoku\.tycheworks\.com\/"/);
   assert.match(css, /village_night_light\.png/);
