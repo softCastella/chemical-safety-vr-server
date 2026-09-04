@@ -673,6 +673,26 @@ Google Search Console 소유권 확인 TXT는 Vultr DNS의 `tycheworks.com` 루�
 - 정적 파일을 Nginx가 직접 제공하므로 PM2와 Nginx를 재시작하지 않았다. DB 마이그레이션,
   운영 DB·환경 변수와 사용자 데이터도 변경하지 않았다.
 
+### 후속 랜딩·GitHub Pages 전환
+
+- 내부 1판 플레이 랜딩은
+  `archive/1판플레이-랜딩-보존@757b3fa8d2c74181a019819132ab4f18e0d9eba0`에 보존했다.
+- 상세 페이지 버튼과 GitHub Pages 팝업을 함께 제공한 랜딩은
+  `archive/깃페이지스-팝업-랜딩-보존@9ab91a0cc287a72adc95ab1438a77a9e9753e0c2`에 보존했다.
+- 운영 랜딩 기준은
+  `production/spark-starlight-20260903@37804c1483975f59d88f91f8793ddd48b27a5a1e`이며,
+  상세 페이지 버튼 없이 중앙 `지금 플레이해보세요` 버튼만 제공한다.
+- 플레이 버튼은 `https://softcastella.github.io/Starlight-Sudoku/`를 데스크톱에서 최대
+  `430x900` 크기의 별도 창으로 열고, 모바일에서는 새 탭으로 연다.
+- 공개 게임 기준은 `softCastella/Starlight-Sudoku@f6eccabaf476fcc8fe97bfb529f8adbb62f7a310`이다.
+  웹 브라우저의 자동재생 제한을 준수하도록 스플래시 뒤 `BGM ON` 입력에서 타이틀 음원을
+  시작한다. Android 등 비웹 실행 흐름은 변경하지 않았다.
+- 공개 게임의 언어는 브라우저·기기 선호 언어를 기준으로 한국어·영어·일본어·중국어 간체·번체를
+  선택하며 지원하지 않는 언어는 한국어를 사용한다.
+- 서버 자동 테스트 74개, Flutter 테스트 60개 통과와 1개 조건부 스킵, Flutter Pages release
+  빌드, GitHub Pages 배포 작업, 운영 Nginx 설정 검사를 확인했다. 공개 랜딩·Pages·타이틀 BGM은
+  모두 HTTP `200`으로 응답했다.
+
 ## 2026-09-04 별빛 스도쿠 GitHub Pages 체험판 연결
 
 랜딩 내부에 구현했던 쉬움 스테이지 1 체험판은 보존 브랜치로 분리하고, 운영 랜딩의
