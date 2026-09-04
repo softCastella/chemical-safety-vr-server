@@ -62,7 +62,7 @@
 
     for (let index = 0; index < count; index += 1) {
       const star = document.createElement("i");
-      star.className = `star-dot${index % 2 ? " is-alt" : ""}${index % 9 === 0 ? " is-cross" : ""}`;
+      star.className = `star-dot${index % 2 ? " is-alt" : ""}${index % 3 === 0 ? " is-white" : ""}${index % 9 === 0 ? " is-cross" : ""}`;
       const lowerSky = random() < 0.64;
       const y = lowerSky ? 48 + random() * 50 : 2 + random() * 46;
       star.style.setProperty("--star-x", `${(1 + random() * 98).toFixed(2)}%`);
