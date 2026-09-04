@@ -106,12 +106,12 @@ test("별빛 스도쿠 개인정보처리방침은 앱·웹 데이터 처리와 
   assert.match(css, /@keyframes star-twinkle/);
 });
 
-test("별빛 스도쿠 랜딩은 상세 페이지와 언어 상태를 연결한다", async () => {
-  const [html, css, script, gameScript] = await Promise.all([
+test("별빛 스도쿠 랜딩은 상세 페이지와 모바일 크기 웹 체험판을 연결한다", async () => {
+  const [html, css, script, launchScript] = await Promise.all([
     readFile(new URL("starlight-sudoku-landing/index.html", siteRoot), "utf8"),
     readFile(new URL("starlight-sudoku-landing/landing.css", siteRoot), "utf8"),
     readFile(new URL("starlight-sudoku-landing/landing-i18n.js", siteRoot), "utf8"),
-    readFile(new URL("starlight-sudoku-landing/landing-game.js", siteRoot), "utf8"),
+    readFile(new URL("starlight-sudoku-landing/landing-launch.js", siteRoot), "utf8"),
   ]);
 
   assert.match(html, /href="https:\/\/spark\.tycheworks\.com\/starlight-sudoku\/"/);
@@ -129,45 +129,31 @@ test("별빛 스도쿠 랜딩은 상세 페이지와 언어 상태를 연결한�
   assert.match(css, /Keep the project route crisp[\s\S]*\.project-label\{color:#fff;text-shadow:none\}/);
   assert.match(css, /\.project-label:hover\{color:var\(--gold\)/);
   assert.match(css, /\.project-label:focus-visible\{[^}]*outline:/);
-  assert.match(html, /class="play-scroll-button" href="#play-demo"/);
-  assert.match(html, /id="play-demo" class="play-demo"/);
-  assert.match(html, /data-start-game/);
-  assert.match(html, /landing-game\.js\?v=20260904-29/);
+  assert.match(html, /class="play-scroll-button" href="https:\/\/softcastella\.github\.io\/Starlight-Sudoku\/" target="_blank" rel="noopener noreferrer" data-play-launch/);
+  assert.doesNotMatch(html, /id="play-demo"|data-start-game|landing-game\.js/);
+  assert.match(html, /landing-launch\.js\?v=20260904-32/);
   assert.match(script, /playCta: "지금<br>플레이해보세요"/);
   assert.match(html, /data-i18n="releaseState">GOOGLE PLAY · 입점 준비 중/);
   assert.match(script, /releaseState: "GOOGLE PLAY · 입점 준비 중"/);
-  assert.match(gameScript, /\[0, 0, 8, 5, 0, 6, 3, 0, 4\]/);
-  assert.match(gameScript, /\[2, 7, 8, 5, 9, 6, 3, 1, 4\]/);
-  assert.match(gameScript, /function isComplete\(\)/);
-  assert.doesNotMatch(gameScript, /localStorage|sessionStorage|fetch\(|XMLHttpRequest/);
-  assert.match(html, /data-game-bgm[^>]+level_starfall_grid\.ogg/);
-  assert.match(html, /data-demo-title-art/);
-  assert.match(html, /play\.google\.com\/store\/apps\/details\?id=com\.tychespark\.starlightsudoku/);
-  assert.match(html, /GoogolePlayLogo\.png/);
-  assert.match(gameScript, /await bgm\.play\(\)/);
-  assert.match(html, /data-memo aria-pressed="false" disabled/);
-  assert.match(html, /class="audio-notice"/);
-  assert.match(script, /audioNotice: "플레이 버튼을 누르면 BGM이 재생됩니다\."/);
-  assert.match(gameScript, /let notes = Array\.from/);
-  assert.match(gameScript, /function toggleMemoMode\(\)/);
-  assert.match(html, /class="scroll-reveal-shade"/);
-  assert.match(gameScript, /function updateScrollReveal\(\)/);
-  assert.match(gameScript, /--reveal-progress/);
-  assert.match(script, /const demoTitleImages =/);
-  assert.match(css, /\.sudoku-board\{[^}]*grid-template-columns:repeat\(9,1fr\)/);
-  assert.match(css, /@keyframes arrow-down/);
-  assert.match(gameScript, /function createStarField\(container, count, seed\)/);
-  assert.match(gameScript, /state \* 1664525 \+ 1013904223/);
-  assert.match(gameScript, /lowerSky = random\(\) < 0\.64/);
-  assert.match(gameScript, /index === 0 \? 160 : 230/);
-  assert.match(gameScript, /0\.8 \+ random\(\) \* 2\.4/);
-  assert.match(gameScript, /function createStaticStarField\(container, count, seed\)/);
-  assert.match(gameScript, /index === 0 \? 240 : 340/);
-  assert.match(gameScript, /lowerSky = random\(\) < 0\.68/);
+  assert.match(launchScript, /const playUrl = "https:\/\/softcastella\.github\.io\/Starlight-Sudoku\/"/);
+  assert.match(launchScript, /window\.matchMedia\("\(max-width: 680px\)"\)/);
+  assert.match(launchScript, /Math\.min\(430, window\.screen\.availWidth - 32\)/);
+  assert.match(launchScript, /Math\.min\(900, window\.screen\.availHeight - 48\)/);
+  assert.match(launchScript, /window\.open\(playUrl, "starlightSudokuMobile", features\)/);
+  assert.match(launchScript, /gameWindow\.focus\(\)/);
+  assert.match(launchScript, /window\.location\.assign\(playUrl\)/);
+  assert.match(launchScript, /function createStarField\(container, count, seed\)/);
+  assert.match(launchScript, /state \* 1664525 \+ 1013904223/);
+  assert.match(launchScript, /lowerSky = random\(\) < 0\.64/);
+  assert.match(launchScript, /createStarField\(stars, 160, 20260904\)/);
+  assert.match(launchScript, /0\.8 \+ random\(\) \* 2\.4/);
+  assert.match(launchScript, /function createStaticStarField\(container, count, seed\)/);
+  assert.match(launchScript, /createStaticStarField\(stars, 240, 20260904\)/);
+  assert.match(launchScript, /lowerSky = random\(\) < 0\.68/);
   assert.match(css, /\.stars,\.demo-stars\{opacity:1;background:none\}/);
   assert.match(css, /\.star-dust\{[^}]*background:#ffe8a0/);
   assert.match(css, /\.star-dot\{[^}]*background:#ffd86a/);
-  assert.match(gameScript, /index % 3 === 0 \? " is-white"/);
+  assert.match(launchScript, /index % 3 === 0 \? " is-white"/);
   assert.match(css, /\.star-dot\.is-white\{[^}]*background:#fffaf0/);
   assert.match(css, /@keyframes scattered-twinkle-a/);
   assert.match(css, /@keyframes scattered-twinkle-b/);
@@ -178,28 +164,8 @@ test("별빛 스도쿠 랜딩은 상세 페이지와 언어 상태를 연결한�
   assert.match(css, /\.play-scroll-button:hover\{[^}]*border-color:rgba\(255,232,158,\.96\);[^}]*0 0 38px rgba\(255,178,45,\.34\)/);
   assert.match(css, /@media\(min-width:681px\)\{\.splash-header\{padding-top:20px;padding-bottom:20px\}\.splash-content\{padding-top:clamp\(12px,2\.5vh,26px\);padding-bottom:clamp\(36px,5vh,56px\)\}\}/);
   assert.match(css, /@media\(min-width:681px\)\{\.game-mark\{margin-bottom:46px\}\}/);
-  assert.match(css, /\.cell-note\{/);
-  assert.match(css, /\.sudoku-cell\.selected\{[^}]*background:#ffe3a0;[^}]*#c9902e/);
+  assert.match(css, /@keyframes launch-arrow/);
   assert.doesNotMatch(css, /star-drift/);
-  assert.match(css, /\.store-card\{/);
-  assert.match(css, /\.store-card\{[^}]*width:220px;[^}]*grid-template-columns:1fr;[^}]*justify-items:end/);
-  assert.match(html, /class="privacy-note"[^>]*>.*?<\/p>\s*<a class="store-card"[\s\S]*?<\/a>\s*<\/aside>/);
-  assert.match(css, /\.google-play-badge\{[^}]*justify-self:end/);
-  assert.match(css, /@media\(max-width:440px\)\{\.store-card\{width:100%;gap:13px/);
-  assert.match(css, /@media\(min-width:801px\)\{\.game-controls\{align-self:stretch\}\.store-card\{margin-top:auto\}\}/);
-  assert.match(html, /class="completion-store-link"[^>]*play\.google\.com\/store\/apps\/details\?id=com\.tychespark\.starlightsudoku/);
-  assert.match(css, /\.completion-store-link img\{[^}]*animation:completion-store-bounce 1\.05s/);
-  assert.match(css, /@keyframes completion-store-bounce/);
-  assert.match(css, /@keyframes completion-store-bounce\{0%,100%\{transform:translateY\(0\)\}50%\{transform:translateY\(-8px\)\}\}/);
-  assert.match(css, /\.completion-store-link\{[^}]*margin:26px auto 0/);
-  assert.match(css, /\.completion-store-link img\{[^}]*drop-shadow\(0 0 7px rgba\(255,255,255,\.72\)\)/);
-  assert.match(gameScript, /if \(event\.target === completionLayer\) returnToGameStart\(\)/);
-  assert.match(gameScript, /startLayer\.classList\.remove\("is-hidden"\)/);
-  assert.doesNotMatch(gameScript, /window\.scrollTo\(\{/);
-  assert.match(css, /\.demo-title-art\{[^}]*object-position:center 29%/);
-  assert.match(css, /\.scroll-reveal-shade\{[^}]*opacity:calc\(1 - var\(--reveal-progress\)\)/);
-  assert.match(css, /rgba\(0,3,11,\.82\) 0%/);
-  assert.match(css, /rgba\(0,2,8,1\) 100%/);
 });
 
 test("별빛 스도쿠 페이지가 참조하는 핵심 자산이 존재한다", async () => {

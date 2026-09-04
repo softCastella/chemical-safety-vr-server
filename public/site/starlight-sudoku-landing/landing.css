@@ -152,3 +152,7 @@ button{font:inherit}
 @media(prefers-reduced-motion:reduce){.star-dot{animation:none}}
 @media(min-width:681px){.splash-header{padding-top:20px;padding-bottom:20px}.splash-content{padding-top:clamp(12px,2.5vh,26px);padding-bottom:clamp(36px,5vh,56px)}}
 @media(min-width:681px){.game-mark{margin-bottom:46px}}
+
+/* The external web build opens as a phone-sized desktop window. */
+@media(prefers-reduced-motion:no-preference){.play-scroll-button i{animation-name:launch-arrow}}
+@keyframes launch-arrow{50%{transform:translate(2px,-2px)}}
