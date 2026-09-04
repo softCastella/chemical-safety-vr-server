@@ -244,7 +244,7 @@
     if (!demoSection) return;
     const top = demoSection.getBoundingClientRect().top;
     const start = window.innerHeight * 0.96;
-    const end = window.innerHeight * 0.28;
+    const end = window.innerHeight * 0.14;
     const progress = Math.max(0, Math.min(1, (start - top) / (start - end)));
     demoSection.style.setProperty("--reveal-progress", progress.toFixed(3));
   }

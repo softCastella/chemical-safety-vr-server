@@ -132,7 +132,7 @@ test("별빛 스도쿠 랜딩은 상세 페이지와 언어 상태를 연결한�
   assert.match(html, /class="play-scroll-button" href="#play-demo"/);
   assert.match(html, /id="play-demo" class="play-demo"/);
   assert.match(html, /data-start-game/);
-  assert.match(html, /landing-game\.js\?v=20260904-6/);
+  assert.match(html, /landing-game\.js\?v=20260904-7/);
   assert.match(script, /playCta: "지금 플레이해보세요"/);
   assert.match(gameScript, /\[0, 0, 8, 5, 0, 6, 3, 0, 4\]/);
   assert.match(gameScript, /\[2, 7, 8, 5, 9, 6, 3, 1, 4\]/);
@@ -155,12 +155,16 @@ test("별빛 스도쿠 랜딩은 상세 페이지와 언어 상태를 연결한�
   assert.match(css, /\.sudoku-board\{[^}]*grid-template-columns:repeat\(9,1fr\)/);
   assert.match(css, /@keyframes arrow-down/);
   assert.match(css, /@keyframes star-twinkle/);
+  assert.match(css, /\.stars:before,\.demo-stars:before/);
+  assert.match(css, /filter:brightness\(1\.9\)/);
+  assert.match(css, /@keyframes star-twinkle-alt\{[\s\S]*?25%\{opacity:\.12;[\s\S]*?75%\{opacity:\.9/);
   assert.match(css, /\.cell-note\{/);
   assert.match(css, /\.sudoku-cell\.selected\{[^}]*background:#ffe3a0;[^}]*#c9902e/);
   assert.doesNotMatch(css, /star-drift/);
   assert.match(css, /\.store-card\{/);
   assert.match(css, /\.demo-title-art\{[^}]*object-position:center 29%/);
   assert.match(css, /\.scroll-reveal-shade\{[^}]*opacity:calc\(1 - var\(--reveal-progress\)\)/);
+  assert.match(css, /rgba\(3,10,24,\.9\) 100%/);
 });
 
 test("별빛 스도쿠 페이지가 참조하는 핵심 자산이 존재한다", async () => {
