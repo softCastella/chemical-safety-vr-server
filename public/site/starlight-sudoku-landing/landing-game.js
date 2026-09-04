@@ -33,6 +33,11 @@
   const mistakesElement = document.querySelector("[data-game-mistakes]");
   const completionLayer = document.querySelector("[data-completion-layer]");
   const replayButton = document.querySelector("[data-replay]");
+  const bgm = document.querySelector("[data-game-bgm]");
+  const bgmToggle = document.querySelector("[data-bgm-toggle]");
+  const bgmIcon = document.querySelector("[data-bgm-icon]");
+  const bgmState = bgmToggle?.querySelector("small");
+  const playScrollButton = document.querySelector(".play-scroll-button");
 
   if (!boardElement || !startButton || !numberPad) return;
 
@@ -42,6 +47,7 @@
   let started = false;
   let startedAt = 0;
   let timerId = 0;
+  let bgmEnabled = false;
 
   const cellElements = puzzle.flatMap((row, rowIndex) => row.map((value, colIndex) => {
     const cell = document.createElement("button");
@@ -129,6 +135,36 @@
     resetButton.disabled = !enabled;
   }
 
+  function localeCopy() {
+    const locale = document.documentElement.lang;
+    return copy[locale] || copy.ko;
+  }
+
+  function updateBgmUi() {
+    if (!bgmToggle) return;
+    bgmToggle.setAttribute("aria-pressed", String(bgmEnabled));
+    if (bgmIcon) bgmIcon.textContent = bgmEnabled ? "♫" : "♪";
+    if (bgmState) bgmState.textContent = bgmEnabled ? localeCopy().soundOn : localeCopy().soundOff;
+  }
+
+  async function startBgm() {
+    if (!bgm) return;
+    bgm.volume = 0.28;
+    try {
+      await bgm.play();
+      bgmEnabled = true;
+    } catch {
+      bgmEnabled = false;
+    }
+    updateBgmUi();
+  }
+
+  function pauseBgm() {
+    bgm?.pause();
+    bgmEnabled = false;
+    updateBgmUi();
+  }
+
   function startGame() {
     started = true;
     startedAt = Date.now();
@@ -136,6 +172,7 @@
     setControlsEnabled(true);
     clearInterval(timerId);
     timerId = window.setInterval(updateTimer, 1000);
+    startBgm();
     const firstEmpty = cellElements.find((_, index) => puzzle[Math.floor(index / 9)][index % 9] === 0);
     firstEmpty?.focus();
   }
@@ -172,6 +209,12 @@
     resetGame();
     startGame();
   });
+  bgmToggle?.addEventListener("click", () => {
+    if (bgmEnabled) pauseBgm(); else startBgm();
+  });
+  playScrollButton?.addEventListener("click", startBgm);
+  document.addEventListener("starlight:locale", updateBgmUi);
+  updateBgmUi();
 
   document.addEventListener("keydown", (event) => {
     if (!started) return;
