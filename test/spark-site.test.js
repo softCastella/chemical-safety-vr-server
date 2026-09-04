@@ -167,14 +167,17 @@ test("별빛 스도쿠 랜딩은 상세 페이지와 언어 상태를 연결한�
   assert.match(css, /\.play-scroll-button\{[^}]*width:148px;[^}]*aspect-ratio:1;[^}]*flex-direction:column/);
   assert.match(html, /<small>PLAY<br>THE FIRST LIGHT<\/small><b data-i18n="playCta">지금<br>플레이해보세요<\/b>/);
   assert.match(css, /\.play-scroll-button\{[^}]*left:calc\(50vw - 7vw\)/);
-  assert.match(css, /\.play-scroll-button\{[^}]*border-color:rgba\(255,216,106,\.82\);[^}]*0 0 34px rgba\(255,178,45,\.2\)/);
+  assert.match(css, /\.play-scroll-button:after\{[^}]*inset:-7px;[^}]*border:1px solid rgba\(255,216,106,\.3\)/);
+  assert.match(css, /\.play-scroll-button:hover:after\{[^}]*border-color:rgba\(255,232,158,\.9\);[^}]*0 0 34px rgba\(255,178,45,\.42\)/);
+  assert.match(css, /@media\(min-width:681px\)\{\.splash-header\{padding-top:20px;padding-bottom:20px\}\.splash-content\{padding-top:clamp\(12px,2\.5vh,26px\);padding-bottom:clamp\(36px,5vh,56px\)\}\}/);
   assert.match(css, /\.cell-note\{/);
   assert.match(css, /\.sudoku-cell\.selected\{[^}]*background:#ffe3a0;[^}]*#c9902e/);
   assert.doesNotMatch(css, /star-drift/);
   assert.match(css, /\.store-card\{/);
   assert.match(css, /\.demo-title-art\{[^}]*object-position:center 29%/);
   assert.match(css, /\.scroll-reveal-shade\{[^}]*opacity:calc\(1 - var\(--reveal-progress\)\)/);
-  assert.match(css, /rgba\(1,5,15,\.98\) 100%/);
+  assert.match(css, /rgba\(0,3,11,\.82\) 0%/);
+  assert.match(css, /rgba\(0,2,8,1\) 100%/);
 });
 
 test("별빛 스도쿠 페이지가 참조하는 핵심 자산이 존재한다", async () => {
