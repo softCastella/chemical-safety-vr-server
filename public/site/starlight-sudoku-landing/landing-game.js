@@ -67,7 +67,7 @@
       const y = lowerSky ? 48 + random() * 50 : 2 + random() * 46;
       star.style.setProperty("--star-x", `${(1 + random() * 98).toFixed(2)}%`);
       star.style.setProperty("--star-y", `${y.toFixed(2)}%`);
-      star.style.setProperty("--star-size", `${(1.4 + random() * 2.8).toFixed(2)}px`);
+      star.style.setProperty("--star-size", `${(0.8 + random() * 2.4).toFixed(2)}px`);
       star.style.setProperty("--star-duration", `${(2.8 + random() * 3.8).toFixed(2)}s`);
       star.style.setProperty("--star-delay", `${(-random() * 6).toFixed(2)}s`);
       star.setAttribute("aria-hidden", "true");
@@ -76,7 +76,7 @@
   }
 
   document.querySelectorAll(".stars, .demo-stars").forEach((container, index) => {
-    createStarField(container, index === 0 ? 96 : 140, 20260904 + index * 7919);
+    createStarField(container, index === 0 ? 160 : 230, 20260904 + index * 7919);
   });
 
   const cellElements = puzzle.flatMap((row, rowIndex) => row.map((value, colIndex) => {

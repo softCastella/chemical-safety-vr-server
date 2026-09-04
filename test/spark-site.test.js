@@ -132,8 +132,8 @@ test("별빛 스도쿠 랜딩은 상세 페이지와 언어 상태를 연결한�
   assert.match(html, /class="play-scroll-button" href="#play-demo"/);
   assert.match(html, /id="play-demo" class="play-demo"/);
   assert.match(html, /data-start-game/);
-  assert.match(html, /landing-game\.js\?v=20260904-8/);
-  assert.match(script, /playCta: "지금 플레이해보세요"/);
+  assert.match(html, /landing-game\.js\?v=20260904-10/);
+  assert.match(script, /playCta: "지금<br>플레이해보세요"/);
   assert.match(gameScript, /\[0, 0, 8, 5, 0, 6, 3, 0, 4\]/);
   assert.match(gameScript, /\[2, 7, 8, 5, 9, 6, 3, 1, 4\]/);
   assert.match(gameScript, /function isComplete\(\)/);
@@ -157,19 +157,24 @@ test("별빛 스도쿠 랜딩은 상세 페이지와 언어 상태를 연결한�
   assert.match(gameScript, /function createStarField\(container, count, seed\)/);
   assert.match(gameScript, /state \* 1664525 \+ 1013904223/);
   assert.match(gameScript, /lowerSky = random\(\) < 0\.64/);
-  assert.match(gameScript, /index === 0 \? 96 : 140/);
-  assert.match(css, /\.stars,\.demo-stars\{opacity:1;background:none\}/);
+  assert.match(gameScript, /index === 0 \? 160 : 230/);
+  assert.match(gameScript, /0\.8 \+ random\(\) \* 2\.4/);
+  assert.match(css, /\.stars,\.demo-stars\{opacity:1;[^}]*background-image:radial-gradient/);
+  assert.match(css, /background-size:59px 71px,89px 103px,127px 149px,173px 199px/);
   assert.match(css, /\.star-dot\{[^}]*background:#ffd86a/);
   assert.match(css, /@keyframes scattered-twinkle-a/);
   assert.match(css, /@keyframes scattered-twinkle-b/);
   assert.match(css, /\.play-scroll-button\{[^}]*width:148px;[^}]*aspect-ratio:1;[^}]*flex-direction:column/);
+  assert.match(html, /<small>PLAY<br>THE FIRST LIGHT<\/small><b data-i18n="playCta">지금<br>플레이해보세요<\/b>/);
+  assert.match(css, /\.play-scroll-button\{[^}]*left:calc\(50vw - 7vw\)/);
+  assert.match(css, /\.play-scroll-button\{[^}]*border-color:rgba\(255,216,106,\.82\);[^}]*0 0 34px rgba\(255,178,45,\.2\)/);
   assert.match(css, /\.cell-note\{/);
   assert.match(css, /\.sudoku-cell\.selected\{[^}]*background:#ffe3a0;[^}]*#c9902e/);
   assert.doesNotMatch(css, /star-drift/);
   assert.match(css, /\.store-card\{/);
   assert.match(css, /\.demo-title-art\{[^}]*object-position:center 29%/);
   assert.match(css, /\.scroll-reveal-shade\{[^}]*opacity:calc\(1 - var\(--reveal-progress\)\)/);
-  assert.match(css, /rgba\(3,10,24,\.9\) 100%/);
+  assert.match(css, /rgba\(1,5,15,\.98\) 100%/);
 });
 
 test("별빛 스도쿠 페이지가 참조하는 핵심 자산이 존재한다", async () => {
