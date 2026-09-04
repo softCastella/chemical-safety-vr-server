@@ -69,6 +69,36 @@ npm test
 
 정적 테스트 통과를 운영 DB, 실제 Unity 전송 또는 배포 성공으로 확대 해석하지 않습니다. 최종 문서와 보고자료에는 서버와 클라이언트 저장소의 기준 커밋, 실제 원본 이벤트와 완료한 검증 범위를 함께 기록합니다.
 
+## Codex 이전 세션 복구
+
+업데이트나 창 종료로 Codex 작업이 중단되면 저장소 루트에서 다음 하네스를 실행합니다.
+
+```bash
+npm run codex:session:find
+```
+
+하네스는 `$CODEX_HOME/sessions` 또는 기본 경로 `~/.codex/sessions`에서 현재 저장소와 작업 경로가 같은 세션만 찾습니다. Codex 안에서 실행할 때는 `CODEX_SESSION_ID`와 `CODEX_THREAD_ID`의 현재 세션을 자동 제외하며, 개인 대화 원문이나 세션 ID를 저장소에 복사하지 않습니다.
+
+찾은 최신 이전 세션을 현재 터미널에서 이어가려면 다음 명령을 사용합니다.
+
+```bash
+npm run codex:session:resume
+```
+
+Windows에서 새 PowerShell 창으로 바로 열려면 다음 명령을 사용합니다.
+
+```bash
+npm run codex:session:open
+```
+
+다른 저장소의 동시 작업 세션은 작업 경로 비교에서 제외됩니다. 후보를 더 확인해야 하면 `npm run codex:session:find -- --limit 5`를 사용합니다.
+
+선택 규칙 자체는 다음 명령으로 개인 세션을 읽지 않고 검증할 수 있습니다.
+
+```bash
+node Tools/CodexSessionRecoveryHarness.mjs --self-test
+```
+
 ## 훈련 텔레메트리 DB 적재 확인
 
 훈련 텔레메트리 수집 API는 기본적으로 비활성화되어 있다. 별도 테스트 DB에 `009`~`012` 훈련 텔레메트리 migration을 적용하고 다음 설정을 명시한 경우에만 API와 개발 확인 화면이 열린다.
