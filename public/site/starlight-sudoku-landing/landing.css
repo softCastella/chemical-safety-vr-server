@@ -156,3 +156,38 @@ button{font:inherit}
 /* The external web build opens as a phone-sized desktop window. */
 @media(prefers-reduced-motion:no-preference){.play-scroll-button i{animation-name:launch-arrow}}
 @keyframes launch-arrow{50%{transform:translate(2px,-2px)}}
+
+/* Keep the hero intact and turn only the launch CTA into the first starlight. */
+@media(min-width:681px){html,body{height:100%;overflow:hidden}.splash{height:100svh;min-height:0}.play-scroll-button{top:-164px;left:calc(50vw - 7vw + 199px)}.hero-actions::after{content:"";position:absolute;left:calc(50vw - 7vw + 199px);top:56px;width:420px;height:48px;transform:translateX(-50%);border:1px solid rgba(255,255,255,.12);border-radius:50%;background:radial-gradient(ellipse at center,rgba(255,255,255,.22) 0%,rgba(0,0,0,.18) 42%,rgba(0,0,0,0) 74%);filter:blur(6px);pointer-events:none}}
+html[lang="en"] .splash-content h1{font-size:clamp(40px,4.6vw,64px);line-height:.98}
+.play-scroll-button{isolation:isolate;overflow:visible;width:254.4px;min-width:254.4px;aspect-ratio:1;padding:61.2px 54px 50.4px;gap:3.6px;border:0;border-radius:0;background:transparent;box-shadow:none;perspective:900px;transform-style:preserve-3d;filter:drop-shadow(0 0 14px rgba(255,224,139,.46)) drop-shadow(0 18px 26px rgba(0,0,0,.3));transition:transform .24s ease,filter .24s ease}
+.play-scroll-button::before,.play-scroll-button::after{content:"";position:absolute;pointer-events:none;-webkit-mask:url("cta-star-mask.svg") center/contain no-repeat;mask:url("cta-star-mask.svg") center/contain no-repeat}
+.play-scroll-button::before{z-index:1;inset:-2px;background:linear-gradient(180deg,#fffdf0 0%,#ffeab0 36%,#d6a95e 72%,#8d6636 100%);transform-origin:center;backface-visibility:visible}
+.play-scroll-button::after{z-index:2;inset:7px 7px 14px;background:linear-gradient(148deg,rgba(255,255,236,.82) 0%,rgba(255,239,184,.38) 20%,rgba(179,190,196,.2) 38%,rgba(24,51,96,.96) 67%,rgba(7,21,47,.99) 100%);filter:drop-shadow(0 8px 0 rgba(5,15,35,.72));transform-origin:center;backface-visibility:visible}
+.play-scroll-button span,.play-scroll-button i{position:relative;z-index:4;transform-style:preserve-3d;backface-visibility:hidden}
+.play-scroll-button .cta-label-back{position:absolute;z-index:4;display:flex;flex-direction:column;align-items:center;text-align:center;backface-visibility:hidden;transform:rotateY(180deg)}
+.play-scroll-button .cta-label-back i{font-size:24px;font-style:normal;color:var(--gold)}
+.cta-sparkles{position:absolute;z-index:2;inset:-28px;pointer-events:none;font-style:normal}
+.cta-sparkles::before,.cta-sparkles::after{position:absolute;color:#fff5c9;pointer-events:none}
+.cta-sparkles::before{content:"✦";left:8px;top:66px;font-size:12px;text-shadow:292px -26px 0 rgba(255,238,177,.86),270px 180px 0 rgba(255,216,106,.72),28px 210px 0 rgba(255,255,255,.58)}
+.cta-sparkles::after{content:"✧";left:154px;top:4px;font-size:14px;text-shadow:150px 125px 0 rgba(255,225,137,.7)}
+.cta-orbit{position:absolute;z-index:-3;left:50%;top:50%;width:340px;height:118px;transform:translate(-50%,-50%) rotate(-12deg);border:1px solid rgba(255,255,255,.22);border-radius:50%;box-shadow:0 0 12px rgba(255,255,255,.07);pointer-events:none;text-decoration:none}
+.cta-orbit-front{position:absolute;z-index:3;left:50%;top:50%;width:340px;height:118px;transform:translate(-50%,-50%) rotate(-12deg);border:1px solid rgba(255,255,255,.3);border-radius:50%;clip-path:inset(50% -10px -10px -10px);box-shadow:0 0 10px rgba(255,255,255,.08);pointer-events:none;text-decoration:none}
+.cta-orbit-dot{position:absolute;z-index:4;left:50%;top:50%;width:340px;height:118px;transform:translate(-50%,-50%) rotate(-12deg);pointer-events:none;text-decoration:none}
+.cta-orbit-dot::before{content:"";position:absolute;left:0;top:0;width:7px;height:7px;border-radius:50%;background:#fff;box-shadow:0 0 7px rgba(255,255,255,.92),0 0 15px rgba(255,227,154,.58);offset-path:ellipse(169px 58px at 170px 59px);offset-anchor:50% 50%;offset-rotate:0deg;offset-distance:12%;pointer-events:none}
+.play-scroll-button small{font-size:9px;line-height:1.2;text-shadow:0 1px 5px rgba(0,0,0,.74)}
+.play-scroll-button b{font-size:18px;line-height:1.24;text-shadow:0 1px 7px rgba(0,0,0,.78)}
+.play-scroll-button i{font-size:24px;text-shadow:0 0 9px rgba(255,216,106,.8)}
+.play-scroll-button:hover{transform:translate(-50%,-4px) scale(1.045);border-color:transparent;background:transparent;box-shadow:none;filter:drop-shadow(0 0 20px rgba(255,235,174,.9)) drop-shadow(0 0 38px rgba(255,207,102,.42)) drop-shadow(0 18px 28px rgba(0,0,0,.32))}
+.play-scroll-button:active{transform:translate(-50%,1px) scale(.97)}
+@media(max-width:680px){.play-scroll-button{top:auto;width:254.4px!important;min-width:254.4px}.play-scroll-button:hover{transform:translateY(-4px) scale(1.045)}.play-scroll-button:active{transform:translateY(1px) scale(.97)}}
+@media(prefers-reduced-motion:no-preference){.play-scroll-button::before{animation:cta-star-bloom 3.4s ease-in-out infinite,cta-star-flip 3s cubic-bezier(.55,.02,.15,1) infinite}.play-scroll-button::after{animation:cta-star-softlight 3.4s ease-in-out infinite,cta-star-flip 3s cubic-bezier(.55,.02,.15,1) infinite}.play-scroll-button span,.play-scroll-button i{animation:cta-star-flip 3s cubic-bezier(.55,.02,.15,1) infinite}.play-scroll-button .cta-label-back{animation:cta-star-flip-back 3s cubic-bezier(.55,.02,.15,1) infinite}.cta-sparkles::before{animation:cta-sparkle-drift-a 3.6s ease-in-out infinite}.cta-sparkles::after{animation:cta-sparkle-drift-b 4.2s ease-in-out infinite}.cta-orbit-front,.cta-orbit-dot{animation:none}.cta-orbit-dot::before{animation:cta-orbit-travel 8s linear infinite}}
+@keyframes cta-star-bloom{0%,100%{opacity:.9;filter:brightness(.98) drop-shadow(0 9px 0 rgba(75,52,24,.72)) drop-shadow(0 0 7px rgba(255,225,143,.46))}50%{opacity:1;filter:brightness(1.06) drop-shadow(0 9px 0 rgba(75,52,24,.72)) drop-shadow(0 0 16px rgba(255,229,150,.76))}}
+@keyframes cta-star-softlight{0%,100%{opacity:.82}50%{opacity:1}}
+@keyframes cta-sparkle-drift-a{0%,100%{opacity:.32;transform:translateY(3px) scale(.82) rotate(0)}48%{opacity:1;transform:translateY(-5px) scale(1.12) rotate(8deg)}}
+@keyframes cta-sparkle-drift-b{0%,100%{opacity:.24;transform:translate(-2px,2px) scale(.78)}52%{opacity:.9;transform:translate(4px,-4px) scale(1.08)}}
+@keyframes cta-orbit-travel{to{offset-distance:112%}}
+@keyframes cta-orbit-depth{0%,12%{opacity:1}28%,72%{opacity:0}88%,100%{opacity:1}}
+@keyframes cta-star-flip{0%{transform:rotateY(0deg)}33%{transform:rotateY(-360deg)}100%{transform:rotateY(-360deg)}}
+@keyframes cta-star-flip-back{0%,8%{transform:rotateY(180deg)}17%,25%{transform:rotateY(0deg)}34%,100%{transform:rotateY(180deg)}}
+@media(prefers-reduced-motion:reduce){.play-scroll-button,.play-scroll-button::before,.play-scroll-button::after,.cta-sparkles::before,.cta-sparkles::after,.cta-orbit-dot::before,.play-scroll-button i{animation:none}}

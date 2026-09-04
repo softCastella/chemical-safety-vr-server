@@ -131,7 +131,11 @@ test("별빛 스도쿠 랜딩은 모바일 크기 웹 체험판을 연결한다"
   assert.match(css, /\.project-label:focus-visible\{[^}]*outline:/);
   assert.match(html, /class="play-scroll-button" href="https:\/\/softcastella\.github\.io\/Starlight-Sudoku\/" target="_blank" rel="noopener noreferrer" data-play-launch/);
   assert.doesNotMatch(html, /id="play-demo"|data-start-game|landing-game\.js/);
+  assert.match(html, /landing\.css\?v=20260904-72/);
+  assert.match(html, /landing-i18n\.js\?v=20260904-32/);
   assert.match(html, /landing-launch\.js\?v=20260904-32/);
+  assert.match(html, /data-i18n="title">퍼즐을 풀어 별빛을 모으고,<br><strong>멈춰버린 밤에 아침을<br>불러오세요\.<\/strong>/);
+  assert.match(script, /title: "퍼즐을 풀어 별빛을 모으고,<br><strong>멈춰버린 밤에 아침을<br>불러오세요\.<\/strong>"/);
   assert.match(script, /playCta: "지금<br>플레이해보세요"/);
   assert.match(html, /data-i18n="releaseState">GOOGLE PLAY · 입점 준비 중/);
   assert.match(script, /releaseState: "GOOGLE PLAY · 입점 준비 중"/);
@@ -160,7 +164,40 @@ test("별빛 스도쿠 랜딩은 모바일 크기 웹 체험판을 연결한다"
   assert.match(css, /\.play-scroll-button\{[^}]*width:148px;[^}]*aspect-ratio:1;[^}]*flex-direction:column/);
   assert.match(html, /<small>PLAY<br>THE FIRST LIGHT<\/small><b data-i18n="playCta">지금<br>플레이해보세요<\/b>/);
   assert.match(css, /\.play-scroll-button\{[^}]*left:calc\(50vw - 7vw\)/);
-  assert.doesNotMatch(css, /\.play-scroll-button:after\{/);
+  assert.match(css, /@media\(min-width:681px\)\{html,body\{height:100%;overflow:hidden\}\.splash\{height:100svh;min-height:0\}\.play-scroll-button\{top:-164px;left:calc\(50vw - 7vw \+ 199px\)\}/);
+  assert.match(css, /\.hero-actions::after\{[^}]*left:calc\(50vw - 7vw \+ 199px\);[^}]*top:56px;[^}]*width:420px;[^}]*height:48px;[^}]*border:1px solid rgba\(255,255,255,\.12\);[^}]*radial-gradient\(ellipse at center,rgba\(255,255,255,\.22\)/);
+  assert.match(css, /html\[lang="en"\] \.splash-content h1\{font-size:clamp\(40px,4\.6vw,64px\);line-height:\.98\}/);
+  assert.match(css, /\.play-scroll-button\{[^}]*width:254\.4px;[^}]*background:transparent;[^}]*drop-shadow/);
+  assert.match(css, /\.play-scroll-button::before,\.play-scroll-button::after\{[^}]*mask:url\("cta-star-mask\.svg"\)/);
+  assert.match(css, /\.play-scroll-button::before\{[^}]*linear-gradient/);
+  assert.match(css, /\.play-scroll-button::after\{[^}]*linear-gradient/);
+  assert.match(css, /\.play-scroll-button span,\.play-scroll-button i\{position:relative;z-index:4;transform-style:preserve-3d;backface-visibility:hidden/);
+  assert.match(html, /<em class="cta-sparkles" aria-hidden="true"><\/em>/);
+  assert.match(html, /<em class="cta-orbit" aria-hidden="true"><\/em>/);
+  assert.match(html, /<em class="cta-orbit-front" aria-hidden="true"><\/em>/);
+  assert.match(html, /<em class="cta-orbit-dot" aria-hidden="true"><\/em>/);
+  assert.match(css, /\.cta-sparkles\{[^}]*inset:-28px/);
+  assert.match(css, /\.cta-sparkles::before\{[^}]*content:"✦"/);
+  assert.match(css, /\.cta-orbit\{[^}]*width:340px;[^}]*height:118px;[^}]*rotate\(-12deg\);[^}]*border:1px solid rgba\(255,255,255,\.22\)/);
+  assert.match(css, /\.cta-orbit-dot\{[^}]*z-index:4;[^}]*width:340px;[^}]*height:118px/);
+  assert.match(css, /\.cta-orbit-dot::before\{[^}]*width:7px;[^}]*offset-path:ellipse\(169px 58px at 170px 59px\);[^}]*offset-anchor:50% 50%;[^}]*offset-rotate:0deg;[^}]*offset-distance:12%/);
+  assert.match(css, /\.cta-orbit-front\{[^}]*z-index:3;[^}]*width:340px;[^}]*height:118px;[^}]*clip-path:inset\(50% -10px -10px -10px\)/);
+  assert.match(css, /\.cta-orbit-front,\.cta-orbit-dot\{animation:none\}/);
+  assert.match(css, /@keyframes cta-star-bloom/);
+  assert.match(css, /@keyframes cta-star-softlight/);
+  assert.doesNotMatch(css, /cta-star-shimmer/);
+  assert.match(css, /@keyframes cta-sparkle-drift-a/);
+  assert.match(css, /@keyframes cta-sparkle-drift-b/);
+  assert.match(css, /@keyframes cta-orbit-travel\{to\{offset-distance:112%\}\}/);
+  assert.match(css, /\.play-scroll-button::before\{animation:cta-star-bloom 3\.4s ease-in-out infinite,cta-star-flip 3s cubic-bezier\(\.55,\.02,\.15,1\) infinite/);
+  assert.match(css, /\.play-scroll-button::after\{animation:cta-star-softlight 3\.4s ease-in-out infinite,cta-star-flip 3s cubic-bezier\(\.55,\.02,\.15,1\) infinite/);
+  assert.match(css, /\.play-scroll-button span,\.play-scroll-button i\{animation:cta-star-flip 3s cubic-bezier\(\.55,\.02,\.15,1\) infinite\}/);
+  assert.match(css, /\.play-scroll-button \.cta-label-back\{animation:cta-star-flip-back 3s cubic-bezier\(\.55,\.02,\.15,1\) infinite\}/);
+  assert.match(css, /@keyframes cta-star-flip-back\{0%,8%\{transform:rotateY\(180deg\)\}17%,25%\{transform:rotateY\(0deg\)\}34%,100%\{transform:rotateY\(180deg\)\}\}/);
+  assert.match(css, /\.play-scroll-button\{[^}]*perspective:900px;[^}]*transform-style:preserve-3d/);
+  assert.match(css, /@keyframes cta-star-flip\{0%\{transform:rotateY\(0deg\)\}33%\{transform:rotateY\(-360deg\)\}100%\{transform:rotateY\(-360deg\)\}\}/);
+  assert.match(html, /cta-label-back/);
+  assert.match(css, /@media\(prefers-reduced-motion:reduce\)\{\.play-scroll-button,\.play-scroll-button::before,\.play-scroll-button::after,\.cta-sparkles::before,\.cta-sparkles::after,\.cta-orbit-dot::before,\.play-scroll-button i\{animation:none\}\}/);
   assert.match(css, /\.play-scroll-button:hover\{[^}]*border-color:rgba\(255,232,158,\.96\);[^}]*0 0 38px rgba\(255,178,45,\.34\)/);
   assert.match(css, /@media\(min-width:681px\)\{\.splash-header\{padding-top:20px;padding-bottom:20px\}\.splash-content\{padding-top:clamp\(12px,2\.5vh,26px\);padding-bottom:clamp\(36px,5vh,56px\)\}\}/);
   assert.match(css, /@media\(min-width:681px\)\{\.game-mark\{margin-bottom:46px\}\}/);
@@ -184,6 +221,7 @@ test("별빛 스도쿠 페이지가 참조하는 핵심 자산이 존재한다",
     "icon_fontaine.png",
     "GoogolePlayLogo.png",
     "level_starfall_grid.ogg",
+    "../../../starlight-sudoku-landing/cta-star-mask.svg",
   ];
 
   await Promise.all(assets.map((asset) => access(new URL(asset, assetRoot))));
