@@ -75,7 +75,29 @@
     }
   }
 
+  function createStaticStarField(container, count, seed) {
+    let state = seed >>> 0;
+    const random = () => {
+      state = (state * 1664525 + 1013904223) >>> 0;
+      return state / 4294967296;
+    };
+
+    for (let index = 0; index < count; index += 1) {
+      const star = document.createElement("i");
+      const lowerSky = random() < 0.68;
+      const y = lowerSky ? 42 + random() * 56 : 2 + random() * 40;
+      star.className = "star-dust";
+      star.style.setProperty("--dust-x", `${(1 + random() * 98).toFixed(2)}%`);
+      star.style.setProperty("--dust-y", `${y.toFixed(2)}%`);
+      star.style.setProperty("--dust-size", `${(1 + random() * 1.8).toFixed(2)}px`);
+      star.style.setProperty("--dust-opacity", `${(0.34 + random() * 0.54).toFixed(2)}`);
+      star.setAttribute("aria-hidden", "true");
+      container.append(star);
+    }
+  }
+
   document.querySelectorAll(".stars, .demo-stars").forEach((container, index) => {
+    createStaticStarField(container, index === 0 ? 240 : 340, 20260904 + index * 3571);
     createStarField(container, index === 0 ? 160 : 230, 20260904 + index * 7919);
   });
 

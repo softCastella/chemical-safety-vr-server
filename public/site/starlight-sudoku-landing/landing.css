@@ -123,8 +123,9 @@ button{font:inherit}
 @media(prefers-reduced-motion:reduce){.scroll-reveal-shade{display:none}}
 
 /* Scattered golden stars and a centered square play CTA */
-.stars,.demo-stars{opacity:1;background-color:transparent;background-image:radial-gradient(circle,rgba(255,238,179,.5) 0 .55px,transparent .9px),radial-gradient(circle,rgba(255,216,106,.42) 0 .7px,transparent 1.05px),radial-gradient(circle,rgba(255,247,218,.34) 0 .5px,transparent .85px),radial-gradient(circle,rgba(255,202,76,.3) 0 .65px,transparent 1px);background-position:7px 19px,41px 67px,83px 29px,131px 113px;background-size:59px 71px,89px 103px,127px 149px,173px 199px}
+.stars,.demo-stars{opacity:1;background:none}
 .stars:before,.demo-stars:before,.stars:after,.demo-stars:after{content:none}
+.star-dust{position:absolute;left:var(--dust-x);top:var(--dust-y);width:var(--dust-size);height:var(--dust-size);border-radius:50%;opacity:var(--dust-opacity);background:#ffe8a0;box-shadow:0 0 calc(var(--dust-size) * 2.2) rgba(255,210,91,.54);transform:translate(-50%,-50%)}
 .star-dot{position:absolute;left:var(--star-x);top:var(--star-y);width:var(--star-size);height:var(--star-size);border-radius:50%;opacity:.2;background:#ffd86a;box-shadow:0 0 calc(var(--star-size) * 2) #ffc94c,0 0 calc(var(--star-size) * 4) rgba(255,201,76,.48);transform:translate(-50%,-50%) scale(.68);will-change:opacity,filter,transform}
 .star-dot.is-cross:before,.star-dot.is-cross:after{content:"";position:absolute;left:50%;top:50%;border-radius:999px;background:#ffe28a;box-shadow:0 0 8px rgba(255,210,91,.78);transform:translate(-50%,-50%)}
 .star-dot.is-cross:before{width:1px;height:calc(var(--star-size) * 4.5)}
