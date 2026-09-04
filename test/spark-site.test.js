@@ -156,6 +156,7 @@ test("별빛 스도쿠 랜딩은 상세 페이지와 언어 상태를 연결한�
   assert.match(css, /\.sudoku-cell\.selected\{[^}]*background:#ffe3a0;[^}]*#c9902e/);
   assert.doesNotMatch(css, /star-drift/);
   assert.match(css, /\.store-card\{/);
+  assert.match(css, /\.demo-title-art\{[^}]*object-position:center 34%/);
 });
 
 test("별빛 스도쿠 페이지가 참조하는 핵심 자산이 존재한다", async () => {
