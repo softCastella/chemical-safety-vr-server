@@ -341,6 +341,15 @@
     replayButton.focus();
   }
 
+  function returnToGameStart() {
+    started = false;
+    clearInterval(timerId);
+    pauseBgm();
+    resetGame();
+    setControlsEnabled(false);
+    startLayer.classList.remove("is-hidden");
+  }
+
   startButton.addEventListener("click", startGame);
   eraseButton.addEventListener("click", () => enterNumber(0));
   memoButton?.addEventListener("click", toggleMemoMode);
@@ -348,6 +357,9 @@
   replayButton.addEventListener("click", () => {
     resetGame();
     startGame();
+  });
+  completionLayer?.addEventListener("click", (event) => {
+    if (event.target === completionLayer) returnToGameStart();
   });
   bgmToggle?.addEventListener("click", () => {
     if (bgmEnabled) pauseBgm(); else startBgm();

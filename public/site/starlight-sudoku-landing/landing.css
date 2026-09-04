@@ -20,7 +20,7 @@ button{font:inherit}
 .hero-actions>a{text-decoration:none}
 .play-scroll-button{display:inline-flex;align-items:center;justify-content:space-between;min-width:275px;gap:34px;padding:14px 18px;border:1px solid rgba(255,250,240,.46);border-radius:17px;color:#fffaf0;background:rgba(7,21,47,.48);box-shadow:0 16px 38px rgba(0,0,0,.2);backdrop-filter:blur(10px);transition:transform .2s ease,border-color .2s ease,background .2s ease}
 .play-scroll-button:hover{transform:translateY(-3px);border-color:var(--gold);background:rgba(255,227,160,.12)}
-.play-scroll-button:focus-visible,.enter-button:focus-visible,.start-game-button:focus-visible,.game-controls button:focus-visible,.sudoku-cell:focus-visible,.completion-card button:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.play-scroll-button:focus-visible,.enter-button:focus-visible,.start-game-button:focus-visible,.game-controls button:focus-visible,.sudoku-cell:focus-visible,.completion-card button:focus-visible,.completion-store-link:focus-visible{outline:3px solid #fff;outline-offset:3px}
 .play-scroll-button span{display:flex;flex-direction:column}
 .play-scroll-button small{font-size:8px;font-weight:900;letter-spacing:.14em;color:var(--gold)}
 .play-scroll-button b{font-size:15px}
@@ -85,10 +85,13 @@ button{font:inherit}
 .completion-card>p:not(.eyebrow){margin:0;color:rgba(255,250,240,.7);line-height:1.65}
 .completion-card button{display:inline-flex;align-items:center;gap:14px;margin-top:25px;padding:13px 20px;border:0;border-radius:12px;color:#172118;background:var(--gold);font-weight:900;cursor:pointer}
 .completion-card button i{font-style:normal}
+.completion-store-link{display:block;width:170px;margin:26px auto 0;padding:5px;border-radius:14px;text-decoration:none}
+.completion-store-link img{display:block;width:100%;height:auto;filter:drop-shadow(0 0 7px rgba(255,255,255,.72)) drop-shadow(0 0 16px rgba(238,246,255,.38)) drop-shadow(0 8px 14px rgba(0,0,0,.28))}
 @keyframes cell-shake{0%,100%{transform:translateX(0)}35%{transform:translateX(-3px)}70%{transform:translateX(3px)}}
 @keyframes star-pulse{50%{transform:scale(1.08);filter:drop-shadow(0 0 30px #ffc94c)}}
 @keyframes arrow-down{50%{transform:translateY(5px)}}
 @media(prefers-reduced-motion:no-preference){.play-scroll-button i{animation:arrow-down 1.4s ease-in-out infinite}.stars:before,.demo-stars:before{animation:star-twinkle 3.8s ease-in-out infinite}.stars:after,.demo-stars:after{animation:star-twinkle-alt 3.8s ease-in-out infinite}}@keyframes star-twinkle{0%,100%{opacity:.22;filter:brightness(.9)}25%{opacity:.94;filter:brightness(1.9)}50%{opacity:.32;filter:brightness(1.1)}75%{opacity:.12;filter:brightness(.75)}}@keyframes star-twinkle-alt{0%,100%{opacity:.3;filter:brightness(1.05)}25%{opacity:.12;filter:brightness(.75)}50%{opacity:.3;filter:brightness(1.05)}75%{opacity:.9;filter:brightness(1.8)}}
+@media(prefers-reduced-motion:no-preference){.completion-store-link img{animation:completion-store-bounce 1.05s ease-in-out infinite}}@keyframes completion-store-bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 @media(max-width:800px){.game-layout{grid-template-columns:1fr}.game-controls{max-width:560px;width:100%;margin:0 auto}.number-pad{grid-template-columns:repeat(9,1fr);gap:5px}.number-pad button{aspect-ratio:1;font-size:18px}.game-topbar{padding:19px 20px}.play-demo{padding-left:16px;padding-right:16px}.game-window{border-radius:22px}}
 @media(max-width:680px){.hero-actions{flex-direction:column;align-items:stretch}.hero-actions>a{width:100%;min-width:0}.play-demo{padding-top:82px;padding-bottom:84px}.demo-heading{margin-bottom:30px}.demo-heading>p:last-child{font-size:14px}.game-layout{padding:18px;gap:23px}.board-shell{border-width:5px;border-radius:15px}.sudoku-cell{font-size:clamp(15px,5vw,22px)}.game-topbar{align-items:flex-start}.game-status>span{min-width:58px;padding:8px}.number-pad{grid-template-columns:repeat(5,1fr)}.number-pad button{aspect-ratio:1.3}.completion-card{padding:36px 22px}.completion-card h3{font-size:25px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.sudoku-cell,.play-scroll-button,.start-game-button{transition:none}.completion-star,.stars:before,.demo-stars:before,.stars:after,.demo-stars:after{animation:none}}
@@ -106,18 +109,20 @@ button{font:inherit}
 .game-start-layer p{margin:0 0 16px;color:#fff;text-shadow:0 2px 12px rgba(0,0,0,.78)}
 .audio-notice{display:inline-flex;align-items:center;gap:6px;margin-top:12px;padding:6px 10px;border-radius:999px;color:rgba(255,255,255,.82);background:rgba(5,17,38,.62);font-size:10px;font-weight:750;line-height:1.35;backdrop-filter:blur(5px)}
 .audio-notice>span:first-child{color:var(--gold);font-size:13px}
-.store-card{display:flex;flex-direction:column;gap:15px;padding:15px;border:1px solid rgba(255,227,160,.28);border-radius:17px;color:var(--demo-ivory);background:linear-gradient(135deg,rgba(255,227,160,.1),rgba(255,255,255,.035));text-decoration:none;transition:transform .18s ease,border-color .18s ease,background .18s ease}
-.store-card:hover{transform:translateY(-3px);border-color:rgba(255,227,160,.68);background:linear-gradient(135deg,rgba(255,227,160,.16),rgba(255,255,255,.06))}
+.store-card{display:grid;width:220px;max-width:100%;grid-template-columns:1fr;justify-items:end;gap:10px;margin-left:auto;padding:2px 0 0;color:var(--demo-ivory);text-decoration:none}
+.store-card:hover .google-play-badge{transform:translateY(-3px) scale(1.025);filter:drop-shadow(0 8px 14px rgba(255,216,106,.18))}
 .store-card:focus-visible{outline:3px solid #fff;outline-offset:3px}
 .store-card-product{display:flex;align-items:center;gap:12px}
-.store-card-product>img{width:52px;height:52px;flex:0 0 auto;border-radius:13px;box-shadow:0 9px 20px rgba(0,0,0,.28)}
+.store-card-product>img{width:46px;height:46px;flex:0 0 auto;border-radius:12px;box-shadow:0 9px 20px rgba(0,0,0,.28)}
 .store-card-product>span{display:flex;min-width:0;flex-direction:column;gap:2px}
 .store-card-product small{color:var(--gold);font-size:8px;font-weight:900;letter-spacing:.08em}
 .store-card-product b{overflow:hidden;font-size:14px;text-overflow:ellipsis;white-space:nowrap}
 .store-card-product em{color:rgba(255,250,240,.56);font-size:10px;font-style:normal;line-height:1.45}
-.google-play-badge{width:150px;height:auto;align-self:flex-start}
-@media(max-width:800px){.game-controls{display:grid;grid-template-columns:1fr 1fr;align-items:start}.control-guide,.number-pad,.tool-row,.privacy-note{grid-column:1}.store-card{grid-column:2;grid-row:1 / span 4;align-self:stretch;justify-content:center}.game-topbar-tools{align-items:stretch}}
+.google-play-badge{width:150px;height:auto;justify-self:end;transition:transform .18s ease,filter .18s ease}
+@media(max-width:800px){.game-controls{display:grid;grid-template-columns:1fr 1fr;align-items:start}.control-guide,.number-pad,.tool-row,.privacy-note{grid-column:1}.store-card{grid-column:1 / -1}.game-topbar-tools{align-items:stretch}}
 @media(max-width:680px){.game-topbar{flex-direction:column}.game-topbar-tools{width:100%;justify-content:space-between}.bgm-toggle{min-height:43px}.game-controls{display:flex}.store-card{width:100%}.game-start-layer{padding:24px 24px 34px}.game-start-layer .demo-title-art{width:100%;max-height:none;object-position:center 29%}}
+@media(max-width:440px){.store-card{width:100%;gap:13px}.google-play-badge{justify-self:center}}
+@media(min-width:801px){.game-controls{align-self:stretch}.store-card{margin-top:auto}}
 
 .scroll-reveal-shade{position:absolute;inset:0;z-index:20;opacity:calc(1 - var(--reveal-progress));background:linear-gradient(180deg,rgba(0,3,11,.82) 0%,rgba(0,3,11,.95) 48%,rgba(0,2,8,1) 100%);pointer-events:none;will-change:opacity}
 @media(prefers-reduced-motion:reduce){.scroll-reveal-shade{display:none}}
@@ -146,3 +151,4 @@ button{font:inherit}
 @media(max-width:680px){.hero-actions{min-height:0}.play-scroll-button{position:static;width:148px!important;min-width:148px;align-self:center;transform:none}.play-scroll-button:hover{transform:translateY(-3px)}}
 @media(prefers-reduced-motion:reduce){.star-dot{animation:none}}
 @media(min-width:681px){.splash-header{padding-top:20px;padding-bottom:20px}.splash-content{padding-top:clamp(12px,2.5vh,26px);padding-bottom:clamp(36px,5vh,56px)}}
+@media(min-width:681px){.game-mark{margin-bottom:46px}}
