@@ -132,7 +132,7 @@ test("별빛 스도쿠 랜딩은 상세 페이지와 언어 상태를 연결한�
   assert.match(html, /class="play-scroll-button" href="#play-demo"/);
   assert.match(html, /id="play-demo" class="play-demo"/);
   assert.match(html, /data-start-game/);
-  assert.match(html, /landing-game\.js\?v=20260904-10/);
+  assert.match(html, /landing-game\.js\?v=20260904-13/);
   assert.match(script, /playCta: "지금<br>플레이해보세요"/);
   assert.match(gameScript, /\[0, 0, 8, 5, 0, 6, 3, 0, 4\]/);
   assert.match(gameScript, /\[2, 7, 8, 5, 9, 6, 3, 1, 4\]/);
@@ -159,8 +159,11 @@ test("별빛 스도쿠 랜딩은 상세 페이지와 언어 상태를 연결한�
   assert.match(gameScript, /lowerSky = random\(\) < 0\.64/);
   assert.match(gameScript, /index === 0 \? 160 : 230/);
   assert.match(gameScript, /0\.8 \+ random\(\) \* 2\.4/);
-  assert.match(css, /\.stars,\.demo-stars\{opacity:1;[^}]*background-image:radial-gradient/);
-  assert.match(css, /background-size:59px 71px,89px 103px,127px 149px,173px 199px/);
+  assert.match(gameScript, /function createStaticStarField\(container, count, seed\)/);
+  assert.match(gameScript, /index === 0 \? 240 : 340/);
+  assert.match(gameScript, /lowerSky = random\(\) < 0\.68/);
+  assert.match(css, /\.stars,\.demo-stars\{opacity:1;background:none\}/);
+  assert.match(css, /\.star-dust\{[^}]*background:#ffe8a0/);
   assert.match(css, /\.star-dot\{[^}]*background:#ffd86a/);
   assert.match(css, /@keyframes scattered-twinkle-a/);
   assert.match(css, /@keyframes scattered-twinkle-b/);
