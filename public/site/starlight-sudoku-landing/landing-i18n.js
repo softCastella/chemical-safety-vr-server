@@ -1,6 +1,6 @@
 const copy = {
   ko: {
-    title: "퍼즐을 풀어 별빛을 모으고,<br><strong>멈춰버린 밤에 아침을 불러오세요.</strong>", body: "숫자 속에 흩어진 별빛을 모아 잠든 마을의 장소들을 하나씩 밝혀 나가는 감성 스도쿠 게임입니다.", cta: "상세 페이지 보기", playCta: "지금<br>플레이해보세요", releaseState: "GOOGLE PLAY · 입점 준비 중", skip: "본문으로 이동", pageTitle: "별빛 스도쿠 | Starlight Sudoku",
+    title: "퍼즐을 풀어 별빛을 모으고,<br><strong>멈춰버린 밤에 아침을<br>불러오세요.</strong>", body: "숫자 속에 흩어진 별빛을 모아 잠든 마을의 장소들을 하나씩 밝혀 나가는 감성 스도쿠 게임입니다.", cta: "상세 페이지 보기", playCta: "지금<br>플레이해보세요", releaseState: "GOOGLE PLAY · 입점 준비 중", skip: "본문으로 이동", pageTitle: "별빛 스도쿠 | Starlight Sudoku",
     demoTitle: "첫 번째 별빛을 직접 밝혀보세요.", demoLead: "설치 없이 쉬움 스테이지 1을 한 판 체험할 수 있어요.", trialBadge: "무료 체험", stageTitle: "쉬움 · STAGE 01", timeLabel: "시간", mistakeLabel: "실수", soundOff: "꺼짐", soundOn: "켜짐", readyCopy: "숫자 사이에 숨은 첫 번째 별빛을 찾아보세요.", startButton: "플레이", audioNotice: "플레이 버튼을 누르면 BGM이 재생됩니다.", controlGuide: "빈칸을 선택하고 숫자를 입력하세요.", eraseButton: "지우기", memoButton: "메모", resetButton: "다시 시작", privacyNote: "플레이 기록은 저장하거나 전송하지 않습니다.", storeEyebrow: "GOOGLE PLAY · 출시 예정", storeTitle: "별빛 스도쿠 정식 버전", storeBody: "마을의 다음 별빛을 만나보세요", demoTitleAlt: "별빛 스도쿠 한국어 타이틀", completeTitle: "첫 번째 창문에 불이 켜졌어요!", completeCopy: "별빛 +10을 획득했습니다. 정식 버전에서 마을의 다음 이야기를 만나보세요.", replayButton: "한 번 더 플레이"
   },
   "zh-CN": {
