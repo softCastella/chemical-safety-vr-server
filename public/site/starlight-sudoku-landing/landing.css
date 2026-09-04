@@ -86,3 +86,27 @@ button{font:inherit}
 @media(max-width:800px){.game-layout{grid-template-columns:1fr}.game-controls{max-width:560px;width:100%;margin:0 auto}.number-pad{grid-template-columns:repeat(9,1fr);gap:5px}.number-pad button{aspect-ratio:1;font-size:18px}.game-topbar{padding:19px 20px}.play-demo{padding-left:16px;padding-right:16px}.game-window{border-radius:22px}}
 @media(max-width:680px){.hero-actions{flex-direction:column;align-items:stretch}.hero-actions>a{width:100%;min-width:0}.play-demo{padding-top:82px;padding-bottom:84px}.demo-heading{margin-bottom:30px}.demo-heading>p:last-child{font-size:14px}.game-layout{padding:18px;gap:23px}.board-shell{border-width:5px;border-radius:15px}.sudoku-cell{font-size:clamp(15px,5vw,22px)}.game-topbar{align-items:flex-start}.game-status>span{min-width:58px;padding:8px}.number-pad{grid-template-columns:repeat(5,1fr)}.number-pad button{aspect-ratio:1.3}.completion-card{padding:36px 22px}.completion-card h3{font-size:25px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.sudoku-cell,.play-scroll-button,.start-game-button{transition:none}.completion-star{animation:none}}
+
+/* Title, audio and store conversion layer */
+.game-topbar-tools{display:flex;align-items:center;gap:10px}
+.bgm-toggle{display:inline-flex;align-items:center;gap:7px;min-height:47px;padding:8px 12px;border:1px solid rgba(255,227,160,.24);border-radius:12px;color:rgba(255,250,240,.68);background:rgba(255,255,255,.035);cursor:pointer;transition:border-color .18s ease,color .18s ease,background .18s ease}
+.bgm-toggle:hover,.bgm-toggle[aria-pressed="true"]{border-color:rgba(255,227,160,.58);color:var(--gold);background:rgba(255,227,160,.09)}
+.bgm-toggle span{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;color:#0d2139;background:var(--gold);font-size:15px}
+.bgm-toggle b{font-size:11px;letter-spacing:.08em}
+.bgm-toggle small{font-size:9px;font-weight:800}
+.game-start-layer{isolation:isolate;justify-content:flex-end;overflow:hidden;padding-bottom:46px;background:#081a2d;backdrop-filter:none}
+.game-start-layer:after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(5,17,38,.04) 22%,rgba(5,17,38,.24) 57%,rgba(5,17,38,.94) 100%)}
+.game-start-layer .demo-title-art{position:absolute;inset:0;z-index:-2;width:100%;height:100%;max-height:none;border-radius:0;object-fit:cover;object-position:center 39%;filter:none;box-shadow:none}
+.game-start-layer p{margin:0 0 16px;color:#fff;text-shadow:0 2px 12px rgba(0,0,0,.78)}
+.store-card{display:flex;flex-direction:column;gap:15px;padding:15px;border:1px solid rgba(255,227,160,.28);border-radius:17px;color:var(--demo-ivory);background:linear-gradient(135deg,rgba(255,227,160,.1),rgba(255,255,255,.035));text-decoration:none;transition:transform .18s ease,border-color .18s ease,background .18s ease}
+.store-card:hover{transform:translateY(-3px);border-color:rgba(255,227,160,.68);background:linear-gradient(135deg,rgba(255,227,160,.16),rgba(255,255,255,.06))}
+.store-card:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.store-card-product{display:flex;align-items:center;gap:12px}
+.store-card-product>img{width:52px;height:52px;flex:0 0 auto;border-radius:13px;box-shadow:0 9px 20px rgba(0,0,0,.28)}
+.store-card-product>span{display:flex;min-width:0;flex-direction:column;gap:2px}
+.store-card-product small{color:var(--gold);font-size:8px;font-weight:900;letter-spacing:.08em}
+.store-card-product b{overflow:hidden;font-size:14px;text-overflow:ellipsis;white-space:nowrap}
+.store-card-product em{color:rgba(255,250,240,.56);font-size:10px;font-style:normal;line-height:1.45}
+.google-play-badge{width:150px;height:auto;align-self:flex-start}
+@media(max-width:800px){.game-controls{display:grid;grid-template-columns:1fr 1fr;align-items:start}.control-guide,.number-pad,.tool-row,.privacy-note{grid-column:1}.store-card{grid-column:2;grid-row:1 / span 4;align-self:stretch;justify-content:center}.game-topbar-tools{align-items:stretch}}
+@media(max-width:680px){.game-topbar{flex-direction:column}.game-topbar-tools{width:100%;justify-content:space-between}.bgm-toggle{min-height:43px}.game-controls{display:flex}.store-card{width:100%}.game-start-layer{padding:24px 24px 34px}.game-start-layer .demo-title-art{width:100%;max-height:none;object-position:center 39%}}

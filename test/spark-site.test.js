@@ -132,14 +132,21 @@ test("별빛 스도쿠 랜딩은 상세 페이지와 언어 상태를 연결한�
   assert.match(html, /class="play-scroll-button" href="#play-demo"/);
   assert.match(html, /id="play-demo" class="play-demo"/);
   assert.match(html, /data-start-game/);
-  assert.match(html, /landing-game\.js\?v=20260904-1/);
+  assert.match(html, /landing-game\.js\?v=20260904-2/);
   assert.match(script, /playCta: "지금 플레이해보세요"/);
   assert.match(gameScript, /\[0, 0, 8, 5, 0, 6, 3, 0, 4\]/);
   assert.match(gameScript, /\[2, 7, 8, 5, 9, 6, 3, 1, 4\]/);
   assert.match(gameScript, /function isComplete\(\)/);
   assert.doesNotMatch(gameScript, /localStorage|sessionStorage|fetch\(|XMLHttpRequest/);
+  assert.match(html, /data-game-bgm[^>]+level_starfall_grid\.ogg/);
+  assert.match(html, /data-demo-title-art/);
+  assert.match(html, /play\.google\.com\/store\/apps\/details\?id=com\.tychespark\.starlightsudoku/);
+  assert.match(html, /GoogolePlayLogo\.png/);
+  assert.match(gameScript, /await bgm\.play\(\)/);
+  assert.match(script, /const demoTitleImages =/);
   assert.match(css, /\.sudoku-board\{[^}]*grid-template-columns:repeat\(9,1fr\)/);
   assert.match(css, /@keyframes arrow-down/);
+  assert.match(css, /\.store-card\{/);
 });
 
 test("별빛 스도쿠 페이지가 참조하는 핵심 자산이 존재한다", async () => {
@@ -156,6 +163,8 @@ test("별빛 스도쿠 페이지가 참조하는 핵심 자산이 존재한다",
     "icon_bakery.png",
     "icon_book.png",
     "icon_fontaine.png",
+    "GoogolePlayLogo.png",
+    "level_starfall_grid.ogg",
   ];
 
   await Promise.all(assets.map((asset) => access(new URL(asset, assetRoot))));
