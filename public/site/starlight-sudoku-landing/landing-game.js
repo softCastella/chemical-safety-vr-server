@@ -38,7 +38,7 @@
   const bgmToggle = document.querySelector("[data-bgm-toggle]");
   const bgmIcon = document.querySelector("[data-bgm-icon]");
   const bgmState = bgmToggle?.querySelector("small");
-  const playScrollButton = document.querySelector(".play-scroll-button");
+  const demoSection = document.querySelector(".play-demo");
 
   if (!boardElement || !startButton || !numberPad) return;
 
@@ -51,6 +51,7 @@
   let timerId = 0;
   let bgmEnabled = false;
   let memoMode = false;
+  let revealFrame = 0;
 
   const cellElements = puzzle.flatMap((row, rowIndex) => row.map((value, colIndex) => {
     const cell = document.createElement("button");
@@ -238,6 +239,21 @@
     updateBgmUi();
   }
 
+  function updateScrollReveal() {
+    revealFrame = 0;
+    if (!demoSection) return;
+    const top = demoSection.getBoundingClientRect().top;
+    const start = window.innerHeight * 0.96;
+    const end = window.innerHeight * 0.28;
+    const progress = Math.max(0, Math.min(1, (start - top) / (start - end)));
+    demoSection.style.setProperty("--reveal-progress", progress.toFixed(3));
+  }
+
+  function queueScrollReveal() {
+    if (revealFrame) return;
+    revealFrame = window.requestAnimationFrame(updateScrollReveal);
+  }
+
   function startGame() {
     started = true;
     startedAt = Date.now();
@@ -288,9 +304,11 @@
   bgmToggle?.addEventListener("click", () => {
     if (bgmEnabled) pauseBgm(); else startBgm();
   });
-  playScrollButton?.addEventListener("click", startBgm);
   document.addEventListener("starlight:locale", updateBgmUi);
+  window.addEventListener("scroll", queueScrollReveal, { passive: true });
+  window.addEventListener("resize", queueScrollReveal);
   updateBgmUi();
+  updateScrollReveal();
 
   document.addEventListener("keydown", (event) => {
     if (!started) return;
