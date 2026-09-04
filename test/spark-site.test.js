@@ -132,7 +132,7 @@ test("별빛 스도쿠 랜딩은 상세 페이지와 언어 상태를 연결한�
   assert.match(html, /class="play-scroll-button" href="#play-demo"/);
   assert.match(html, /id="play-demo" class="play-demo"/);
   assert.match(html, /data-start-game/);
-  assert.match(html, /landing-game\.js\?v=20260904-2/);
+  assert.match(html, /landing-game\.js\?v=20260904-3/);
   assert.match(script, /playCta: "지금 플레이해보세요"/);
   assert.match(gameScript, /\[0, 0, 8, 5, 0, 6, 3, 0, 4\]/);
   assert.match(gameScript, /\[2, 7, 8, 5, 9, 6, 3, 1, 4\]/);
@@ -143,9 +143,15 @@ test("별빛 스도쿠 랜딩은 상세 페이지와 언어 상태를 연결한�
   assert.match(html, /play\.google\.com\/store\/apps\/details\?id=com\.tychespark\.starlightsudoku/);
   assert.match(html, /GoogolePlayLogo\.png/);
   assert.match(gameScript, /await bgm\.play\(\)/);
+  assert.match(html, /data-memo aria-pressed="false" disabled/);
+  assert.match(gameScript, /let notes = Array\.from/);
+  assert.match(gameScript, /function toggleMemoMode\(\)/);
   assert.match(script, /const demoTitleImages =/);
   assert.match(css, /\.sudoku-board\{[^}]*grid-template-columns:repeat\(9,1fr\)/);
   assert.match(css, /@keyframes arrow-down/);
+  assert.match(css, /@keyframes star-twinkle/);
+  assert.match(css, /\.cell-note\{/);
+  assert.doesNotMatch(css, /star-drift/);
   assert.match(css, /\.store-card\{/);
 });
 

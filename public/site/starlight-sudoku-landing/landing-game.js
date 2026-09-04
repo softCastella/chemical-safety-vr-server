@@ -28,6 +28,7 @@
   const startButton = document.querySelector("[data-start-game]");
   const numberPad = document.querySelector("[data-number-pad]");
   const eraseButton = document.querySelector("[data-erase]");
+  const memoButton = document.querySelector("[data-memo]");
   const resetButton = document.querySelector("[data-reset]");
   const timeElement = document.querySelector("[data-game-time]");
   const mistakesElement = document.querySelector("[data-game-mistakes]");
@@ -42,12 +43,14 @@
   if (!boardElement || !startButton || !numberPad) return;
 
   let board = puzzle.map((row) => [...row]);
+  let notes = Array.from({ length: 9 }, () => Array.from({ length: 9 }, () => new Set()));
   let selectedCell = null;
   let mistakes = 0;
   let started = false;
   let startedAt = 0;
   let timerId = 0;
   let bgmEnabled = false;
+  let memoMode = false;
 
   const cellElements = puzzle.flatMap((row, rowIndex) => row.map((value, colIndex) => {
     const cell = document.createElement("button");
@@ -93,21 +96,81 @@
     });
   }
 
+  function renderCell(row, col) {
+    const cell = cellElements[row * 9 + col];
+    const value = board[row][col];
+    const cellNotes = notes[row][col];
+    cell.replaceChildren();
+    cell.classList.toggle("has-notes", value === 0 && cellNotes.size > 0);
+
+    if (value !== 0) {
+      cell.textContent = String(value);
+      cell.setAttribute("aria-label", `${row + 1}행 ${col + 1}열, ${value}`);
+      return;
+    }
+
+    if (cellNotes.size > 0) {
+      for (let number = 1; number <= 9; number += 1) {
+        const note = document.createElement("span");
+        note.className = "cell-note";
+        note.textContent = cellNotes.has(number) ? String(number) : "";
+        cell.append(note);
+      }
+      cell.setAttribute("aria-label", `${row + 1}행 ${col + 1}열, 메모 ${[...cellNotes].sort().join(", ")}`);
+    } else {
+      cell.setAttribute("aria-label", `${row + 1}행 ${col + 1}열, 빈칸`);
+    }
+  }
+
+  function removePeerNotes(row, col, number) {
+    for (let index = 0; index < 9; index += 1) {
+      const peers = [[row, index], [index, col]];
+      peers.forEach(([peerRow, peerCol]) => {
+        if (notes[peerRow][peerCol].delete(number)) renderCell(peerRow, peerCol);
+      });
+    }
+    const blockRow = Math.floor(row / 3) * 3;
+    const blockCol = Math.floor(col / 3) * 3;
+    for (let peerRow = blockRow; peerRow < blockRow + 3; peerRow += 1) {
+      for (let peerCol = blockCol; peerCol < blockCol + 3; peerCol += 1) {
+        if (notes[peerRow][peerCol].delete(number)) renderCell(peerRow, peerCol);
+      }
+    }
+  }
+
   function enterNumber(number) {
     if (!started || !selectedCell) return;
     const { row, col } = selectedCell;
     if (puzzle[row][col] !== 0) return;
 
-    board[row][col] = number;
     const cell = cellElements[row * 9 + col];
-    cell.textContent = number || "";
-    cell.setAttribute("aria-label", `${row + 1}행 ${col + 1}열${number ? `, ${number}` : ", 빈칸"}`);
+
+    if (memoMode) {
+      if (board[row][col] !== 0) return;
+      cell.classList.remove("invalid");
+      if (number === 0) {
+        notes[row][col].clear();
+      } else if (notes[row][col].has(number)) {
+        notes[row][col].delete(number);
+      } else {
+        notes[row][col].add(number);
+      }
+      renderCell(row, col);
+      paintSelection();
+      return;
+    }
+
     cell.classList.remove("invalid");
+    board[row][col] = number;
+    notes[row][col].clear();
+    renderCell(row, col);
 
     if (number !== 0 && number !== solution[row][col]) {
       mistakes += 1;
       mistakesElement.textContent = String(mistakes);
       requestAnimationFrame(() => cell.classList.add("invalid"));
+    } else if (number !== 0) {
+      removePeerNotes(row, col, number);
     }
 
     paintSelection();
@@ -132,7 +195,17 @@
   function setControlsEnabled(enabled) {
     numberPad.querySelectorAll("button").forEach((button) => { button.disabled = !enabled; });
     eraseButton.disabled = !enabled;
+    memoButton.disabled = !enabled;
     resetButton.disabled = !enabled;
+  }
+
+  function updateMemoUi() {
+    memoButton?.setAttribute("aria-pressed", String(memoMode));
+  }
+
+  function toggleMemoMode() {
+    memoMode = !memoMode;
+    updateMemoUi();
   }
 
   function localeCopy() {
@@ -179,18 +252,20 @@
 
   function resetGame() {
     board = puzzle.map((row) => [...row]);
+    notes = Array.from({ length: 9 }, () => Array.from({ length: 9 }, () => new Set()));
     selectedCell = null;
     mistakes = 0;
+    memoMode = false;
     startedAt = Date.now();
     timeElement.textContent = "00:00";
     mistakesElement.textContent = "0";
     cellElements.forEach((cell, index) => {
       const row = Math.floor(index / 9);
       const col = index % 9;
-      const value = puzzle[row][col];
-      cell.textContent = value || "";
       cell.classList.remove("invalid", "related", "same-number", "selected");
+      renderCell(row, col);
     });
+    updateMemoUi();
     completionLayer.hidden = true;
   }
 
@@ -204,6 +279,7 @@
 
   startButton.addEventListener("click", startGame);
   eraseButton.addEventListener("click", () => enterNumber(0));
+  memoButton?.addEventListener("click", toggleMemoMode);
   resetButton.addEventListener("click", resetGame);
   replayButton.addEventListener("click", () => {
     resetGame();
@@ -224,6 +300,9 @@
     } else if (event.key === "Backspace" || event.key === "Delete" || event.key === "0") {
       event.preventDefault();
       enterNumber(0);
+    } else if (event.key.toLowerCase() === "m") {
+      event.preventDefault();
+      toggleMemoMode();
     }
   });
 })();
