@@ -53,30 +53,44 @@
   playLink.href = playUrl;
 
   const burstLayer = playLink.querySelector(".cta-burst-layer");
+  const twinkles = [...playLink.querySelectorAll(".cta-twinkle")];
   let lastBurstAt = 0;
+  let launchTimer = 0;
 
   function createCtaBurst() {
     if (!burstLayer || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const now = performance.now();
     if (now - lastBurstAt < 240) return;
     lastBurstAt = now;
+    const buttonRect = playLink.getBoundingClientRect();
+    const renderedScale = buttonRect.width / playLink.offsetWidth || 1;
+    const particleStarts = twinkles.map((twinkle, index) => {
+      const rect = twinkle.getBoundingClientRect();
+      const x = (rect.left + rect.width / 2 - (buttonRect.left + buttonRect.width / 2)) / renderedScale;
+      const y = (rect.top + rect.height / 2 - (buttonRect.top + buttonRect.height / 2)) / renderedScale;
+      const length = Math.hypot(x, y) || 1;
+      const distance = 42 + (index % 4) * 9;
+      return {
+        x,
+        y,
+        endX: x + (x / length) * distance,
+        endY: y + (y / length) * distance - 8,
+      };
+    });
     burstLayer.replaceChildren();
     playLink.classList.remove("is-bursting");
     void playLink.offsetWidth;
     playLink.classList.add("is-bursting");
 
-    for (let index = 0; index < 18; index += 1) {
+    for (const [index, start] of particleStarts.entries()) {
       const particle = document.createElement("i");
-      const angle = ((index * 360) / 18 + (index % 2 ? 7 : -5)) * (Math.PI / 180);
-      const startRadius = 86 + (index % 4) * 8;
-      const endRadius = 132 + (index % 5) * 11;
       particle.className = "cta-burst-particle";
-      particle.style.setProperty("--burst-start-x", `${(Math.cos(angle) * startRadius).toFixed(1)}px`);
-      particle.style.setProperty("--burst-start-y", `${(Math.sin(angle) * startRadius * 0.88).toFixed(1)}px`);
-      particle.style.setProperty("--burst-end-x", `${(Math.cos(angle) * endRadius).toFixed(1)}px`);
-      particle.style.setProperty("--burst-end-y", `${(Math.sin(angle) * endRadius * 0.92 - 12).toFixed(1)}px`);
-      particle.style.setProperty("--burst-size", `${2 + (index % 3)}px`);
-      particle.style.setProperty("--burst-delay", `${(index % 6) * 0.025}s`);
+      particle.style.setProperty("--burst-start-x", `${start.x.toFixed(1)}px`);
+      particle.style.setProperty("--burst-start-y", `${start.y.toFixed(1)}px`);
+      particle.style.setProperty("--burst-end-x", `${start.endX.toFixed(1)}px`);
+      particle.style.setProperty("--burst-end-y", `${start.endY.toFixed(1)}px`);
+      particle.style.setProperty("--burst-size", `${3 + (index % 2)}px`);
+      particle.style.setProperty("--burst-delay", `${(index % 4) * 0.018}s`);
       particle.style.setProperty("--burst-color", index % 3 === 0 ? "#fffaf0" : "#ffd86a");
       burstLayer.append(particle);
     }
@@ -90,22 +104,32 @@
   playLink.addEventListener("pointerdown", createCtaBurst);
 
   playLink.addEventListener("click", (event) => {
-    createCtaBurst();
-    if (window.matchMedia("(max-width: 680px)").matches) return;
-
     event.preventDefault();
-    const width = Math.max(360, Math.min(430, window.screen.availWidth - 32));
-    const height = Math.max(480, Math.min(900, window.screen.availHeight - 48));
-    const left = Math.max(0, Math.round((window.screen.availWidth - width) / 2));
-    const top = Math.max(0, Math.round((window.screen.availHeight - height) / 2));
-    const features = `popup=yes,width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`;
-    const gameWindow = window.open(playUrl, "starlightSudokuMobile", features);
+    createCtaBurst();
+    if (launchTimer) return;
 
-    if (gameWindow) {
-      gameWindow.opener = null;
-      gameWindow.focus();
-    } else {
-      window.location.assign(playUrl);
-    }
+    launchTimer = window.setTimeout(() => {
+      launchTimer = 0;
+      if (window.matchMedia("(max-width: 680px)").matches) {
+        const mobileWindow = window.open(playUrl, "_blank");
+        if (mobileWindow) mobileWindow.opener = null;
+        else window.location.assign(playUrl);
+        return;
+      }
+
+      const width = Math.max(360, Math.min(430, window.screen.availWidth - 32));
+      const height = Math.max(480, Math.min(900, window.screen.availHeight - 48));
+      const left = Math.max(0, Math.round((window.screen.availWidth - width) / 2));
+      const top = Math.max(0, Math.round((window.screen.availHeight - height) / 2));
+      const features = `popup=yes,width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`;
+      const gameWindow = window.open(playUrl, "starlightSudokuMobile", features);
+
+      if (gameWindow) {
+        gameWindow.opener = null;
+        gameWindow.focus();
+      } else {
+        window.location.assign(playUrl);
+      }
+    }, 420);
   });
 })();
