@@ -82,6 +82,135 @@ Resend API 키와 실제 발신·수신 주소는 저장소 밖 운영 `.env`에
 상세페이지 공유 모달의 `이메일`은 문의 폼과 별개다. 사용자의 기본 메일 프로그램을 여는 `mailto:`
 링크이며 Resend나 서버 API를 호출하지 않는다.
 
+## 브랜드 사이트 보안·SEO 감사 (2026-09-07)
+
+이 절은 브랜드 홈과 프로젝트 랜딩의 운영 응답, `public/site` 전체 정적 소스, 사이트가 호출하는 공개 API와
+운영 의존성을 함께 점검한 재현 가능한 감사 기록이다. 기준 코드는 `main@55eeb017beeda4e4e4c8c78aa5b881e75ae13749`이며,
+이 결과가 위의 초기 `npm audit` 및 공개 URL 검증 기록보다 최신이다. 이번 감사에서는 운영 배포, Nginx 다시
+불러오기와 운영 데이터 변경을 수행하지 않았다.
+
+### 확인된 정상 항목
+
+- 여섯 공개 호스트는 HTTP 요청을 HTTPS로 `301` 전환하고 HTTPS 본문을 `200`으로 제공했다.
+- 운영 응답에는 `Content-Security-Policy`, `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`,
+  `Referrer-Policy: strict-origin-when-cross-origin`, 카메라·마이크·위치·결제를 차단하는
+  `Permissions-Policy`가 적용돼 있다.
+- 공개 `tycheworks.com/dashboard`와 `tycheworks.com/api/local-telemetry`는 각각 `404`였다.
+- 문의 API는 허용 필드, 자료형, 길이, 이메일 형식과 문의 종류를 검사한다. 숨김 필드 허니팟과 IP별 시간당
+  제한도 적용한다. 메일 제목·본문에 들어가는 사용자 값은 HTML 이스케이프하고 개인정보를 오류 로그에
+  기록하지 않는다.
+- 정적 사이트에서 URL·해시·로컬 저장소 값을 `eval`, `document.write` 또는 동적 스크립트로 실행하는 경로는
+  발견하지 않았다. 별빛 스도쿠의 두 `innerHTML` 사용처는 허용 목록으로 정규화한 언어 키와 코드에 고정된
+  번역 사전만 사용한다. 현재 외부 입력으로 HTML을 주입할 수 있는 경로는 확인되지 않았지만, 번역 사전에
+  HTML을 추가할 때 실행 태그가 섞이지 않도록 계속 제한해야 한다.
+- 새 창 링크에는 `noopener noreferrer`가 있고, 카카오 SDK는 고정 버전·SRI 무결성 값·`crossorigin`을 사용한다.
+- DB 런타임 쿼리는 사용자 값을 `mysql2.execute` 매개변수로 전달한다. 고정 허용 목록에서 조합하는 컬럼 외에
+  사용자 입력을 SQL 문자열에 직접 붙이는 경로는 발견하지 않았다.
+- 추적 파일에서 운영 키나 개인키 패턴은 발견되지 않았고 실제 `.env`와 `node_modules`는 Git에서 제외돼 있다.
+- 현재 기준 `npm test`는 77개가 통과했고 실패는 0개였다.
+
+### 보안과 봇 처리에서 보완할 항목
+
+1. 여섯 공개 호스트의 HTTPS 응답에 `Strict-Transport-Security`가 없다. HTTP 전환은 정상이나, 브라우저가
+   한 번 HTTPS 정책을 기억한 뒤 다운그레이드를 거부하게 하는 HSTS 보호가 빠져 있다. 모든 실제 서브도메인의
+   TLS 상태를 확인한 다음 짧은 `max-age`로 시작해 단계적으로 늘리고, `includeSubDomains`와 `preload`는 전체
+   서브도메인 준비가 끝난 뒤 별도로 결정한다.
+2. 운영 의존성 검사에서 Express 5.2.1의 전이 의존성 `qs@6.15.3`에 서비스 거부 관련 보통 심각도 취약점
+   2건이 보고됐다. 현재 앱은 URL 인코딩 본문 파서를 등록하지 않고 JSON 본문만 사용하므로 브랜드 문의
+   경로에서 해당 파서가 직접 노출된 사실은 확인되지 않았다. `npm audit fix --omit=dev --dry-run`은 다른
+   패키지 변경 없이 `qs@6.16.0`으로 갱신하는 수정안을 제시했다.
+3. 대부분 호스트의 CSP `script-src`에 `'unsafe-inline'`이 남아 있다. 공개 HTML에는 인라인 스크립트와 이벤트
+   속성이 없어서 현재 소스 기준으로는 제거 가능성이 높다. IMMERSA에 필요한 인라인 스타일과 카카오 허용
+   출처를 분리한 뒤 Report-Only 확인을 거쳐 스크립트 정책만 강화한다.
+4. 운영 응답은 `Server: nginx/1.28.3 (Ubuntu)`로 정확한 버전을 노출한다. 공격 경로 자체는 아니지만
+   `server_tokens off`로 불필요한 버전 정보를 줄일 수 있다.
+5. `robots.txt`는 일반 검색 크롤러를 허용하고 GPTBot·ClaudeBot·CCBot 등 학습·수집 봇을 차단한다.
+   `OAI-SearchBot`, `Claude-SearchBot`, `Claude-User`, `PerplexityBot`은 일반 허용 규칙을 적용받으므로 AI 검색
+   노출은 막지 않는다. 반면 Apple의 학습 제어 토큰 `Applebot-Extended`가 없어 현재 문서에 적은 “AI 학습
+   거부” 정책을 완전히 구현하지 못한다. `Google-Extended` 차단은 Google 검색 순위에는 영향을 주지 않지만
+   Gemini 학습뿐 아니라 Gemini 검색 기반 그라운딩에도 적용되므로, AI 답변 노출을 원하면 정책 선택이 필요하다.
+6. Nginx 사이트 전체 속도 제한은 운영 문서에만 있고, 실제 주 설정 `/etc/nginx/sites-available/tycheworks`는
+   저장소에 없다. 저장소에서 재현 가능한 설정은 별빛 스도쿠 전용 호스트 파일 하나뿐이어서 다른 호스트의
+   보안 헤더·속도 제한·리다이렉트 변경 이력을 코드 리뷰로 검증할 수 없다.
+
+### SEO와 검색 노출에서 보완할 항목
+
+1. 여섯 호스트 모두 `/sitemap.xml`이 `404`이고 공용 `robots.txt`에도 `Sitemap:` 항목이 없다. 호스트별로
+   검색에 노출할 정식 URL만 담은 사이트맵을 만들고 각 호스트의 `robots.txt` 또는 Search Console에서 제출해야 한다.
+2. 운영 공개 페이지 13개 중 별빛 스도쿠 전용 랜딩 한 곳만 `rel="canonical"`을 제공한다. 나머지 12개는
+   self-canonical이 없다. `/index.html`, 디렉터리 슬래시 유무처럼 같은 문서를 제공하는 URL도 다수 `200`으로
+   열려 있어 검색 신호가 나뉠 수 있다. Nginx 영구 리다이렉트와 HTML canonical을 같은 정식 URL로 맞춘다.
+3. 운영에서 다음 이전 경로가 모두 `200`이고 `noindex`도 없다.
+   - `/app/`, `/game/`, `/vr/`: HTML meta refresh 방식의 이전 이동 페이지
+   - `/brand-v2/`, `/immersa/chemical-safety-training-promo/`: 내비게이션에 연결하지 않은 검토용 시안
+   - `/chemical-safety-vr-landing/`: 전용 서브도메인과 같은 랜딩 파일을 노출하는 이전 경로
+
+   이동이 확정된 세 경로와 이전 랜딩은 Nginx `301`로 정식 URL에 합치고, 검토용 시안은 공개 루트에서
+   제거하거나 인증을 적용한다. 검색 제외만 필요하면 크롤링을 허용한 상태에서 `noindex` 응답을 제공한다.
+   `robots.txt` 차단만으로는 이미 알려진 URL의 검색 제외를 보장하지 않는다.
+4. 브랜드 홈, BRAND, IMMERSA 홈, LOOP와 개인정보처리방침은 Open Graph·Twitter 미리보기 메타데이터가 없고,
+   일부 프로젝트 페이지도 `og:url`, 이미지 크기 또는 Twitter 제목·설명이 빠져 있다. LOOP는 일반 검색용
+   meta description도 없다. 공유 대상 페이지부터 제목·설명·대표 이미지를 정식 URL과 함께 통일한다.
+5. 조직·브랜드·게임 또는 소프트웨어를 설명하는 JSON-LD 구조화 데이터가 전체 페이지에 없다. 이는 필수
+   색인 조건은 아니며, 실제 공개 정보와 일치하는 `Organization`, `WebSite`, `SoftwareApplication` 범위만
+   선별해 추가한다.
+6. 별빛 스도쿠의 다섯 언어는 `?lang=`와 클라이언트 JavaScript로 전환한다. `hreflang`이 없고 전용 랜딩은
+   언어를 바꿔도 description·Open Graph·Twitter 메타가 한국어로 남는다. 언어별 검색 노출이 목표라면 고정
+   언어 URL과 서버가 반환하는 번역 메타데이터가 필요하다. 한 URL의 사용자 편의용 언어 전환만 목표라면
+   현재 root canonical을 유지하고 그 한계를 문서화한다.
+
+### 전송 성능과 검색 경험
+
+운영 정적 응답은 HTTP/1.1로 제공되며 CSS·JavaScript·이미지에 명시적 `Cache-Control` 또는 `Expires`가 없다.
+텍스트 정적 파일도 gzip 또는 Brotli 압축 응답을 하지 않았다. 페이지는 화면 크기보다 훨씬 큰 1~6MB PNG를
+다수 내려받으며, Lighthouse가 추정한 이미지 절감 가능 용량은 브랜드 홈 약 1.8MB, 별빛 전용 랜딩 약 6.4MB,
+IMMERSA 상세 약 16.3MB, SPARK 상세 약 6.0MB였다.
+
+| 직렬 모바일 Lighthouse 대상 | Performance | SEO | LCP |
+| --- | ---: | ---: | ---: |
+| `https://tycheworks.com/` | 73 | 100 | 11.8초 |
+| `https://starlight-sudoku.tycheworks.com/` | 59 | 100 | 40.2초 |
+| `https://immersa.tycheworks.com/chemical-safety-training` | 49 | 100 | 41.8초 |
+| `https://spark.tycheworks.com/starlight-sudoku/` | 70 | 100 | 12.2초 |
+
+위 값은 단일 개발 PC에서 측정한 실험실 결과이며 실제 사용자 현장 지표가 아니다. 별빛 측정에는 느린 CPU
+경고도 있었다. 다만 모든 측정에서 대형 이미지와 캐시 부재가 반복됐으므로 원인 자체는 재현됐다. Lighthouse의
+SEO 기본 점수는 canonical, 사이트맵과 공유 메타 완전성을 검사하지 않으므로 100점이 위 SEO 누락을 반박하지 않는다.
+대표 이미지를 AVIF/WebP와 화면별 `srcset`으로 제공하고, 실제 렌더 크기에 맞춘 파일을 사용한다. 버전이 붙은
+정적 자산에는 장기 immutable 캐시를, HTML에는 재검증 정책을 적용하고 HTTP/2를 활성화한 뒤 같은 조건으로 다시 측정한다.
+
+### 권장 적용 순서와 남은 운영 검증
+
+1. `qs`를 6.16.0으로 갱신하고 전체 테스트와 `npm audit`를 다시 실행한다.
+2. 실제 주 Nginx 설정을 자격 증명 없이 저장소에 미러링한 뒤 HSTS, HTTP/2, 정적 캐시·압축,
+   `server_tokens off`, CSP 강화를 검토 가능하게 만든다.
+3. 이전 경로의 `301`·비공개·`noindex` 정책을 확정하고, 공개 페이지의 canonical 및 내부 링크를 같은 URL로 맞춘다.
+4. 호스트별 사이트맵과 공유 메타를 추가한다. 화학물질 VR의 `/`, `/light/`, `/campaign/`을 각각 검색 노출할지
+   하나로 합칠지 먼저 정한다.
+5. `Applebot-Extended`를 현재 학습 거부 정책에 추가하고, `Google-Extended`는 Gemini 노출 정책을 정한 뒤 유지
+   또는 변경한다.
+6. 대형 이미지를 변환하고 캐시·HTTP/2 적용 후 Lighthouse를 재실행한다. Search Console에서는 각 호스트
+   소유권, 사이트맵 처리, URL 검사, 페이지 색인과 보안 문제 보고서를 별도로 확인한다.
+
+핵심 결과는 다음 명령으로 다시 확인할 수 있다. 다른 공개 호스트와 경로에도 같은 검사를 반복한다.
+
+```powershell
+curl.exe -sS -I https://tycheworks.com/
+curl.exe -sS -I https://tycheworks.com/index.html
+curl.exe -sS -I https://tycheworks.com/sitemap.xml
+npm audit --omit=dev
+npx --yes lighthouse https://tycheworks.com/ --quiet --chrome-flags="--headless --no-sandbox --disable-gpu" --only-categories=performance,seo,best-practices
+```
+
+공식 기준은 Google Search Central의
+[사이트맵 지침](https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap),
+[canonical 지침](https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls),
+[robots와 noindex 구분](https://developers.google.com/search/docs/crawling-indexing/robots/intro),
+OWASP의 [HTTP 보안 헤더 지침](https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Headers_Cheat_Sheet.html),
+OpenAI의 [크롤러 구분](https://developers.openai.com/api/docs/bots), Anthropic의
+[Claude 크롤러 구분](https://support.anthropic.com/en/articles/8896518-does-anthropic-crawl-data-from-the-web-and-how-can-site-owners-block-the-crawler),
+Apple의 [Applebot-Extended 설명](https://support.apple.com/119829)을 대조했다.
+
 ## 완료한 검증
 
 - 여섯 개 공개 HTTPS URL: 모두 HTTP `200`
