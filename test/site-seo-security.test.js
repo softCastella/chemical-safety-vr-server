@@ -77,11 +77,13 @@ test("Nginx 배포 초안은 공개 호스트 보안과 이전 경로 정책을 
   assert.match(hardening, /http2 on;/);
   assert.match(hardening, /Strict-Transport-Security "max-age=86400" always;/);
   assert.match(hardening, /gzip on;/);
+  assert.match(hardening, /location ~\* \\\.\(\?:css\|js\|png\|jpe\?g\|webp\|avif\|svg\|woff2\?\|mp3\|wav\)\$/);
+  assert.match(hardening, /expires 30d;/);
   assert.match(legacyRoutes, /location \^~ \/app\/ \{ return 301 https:\/\/loop\.tycheworks\.com\//);
   assert.match(legacyRoutes, /location \^~ \/brand-v2\/ \{ return 404; \}/);
   assert.match(starlight, /include .*tycheworks-public-hardening\.conf;/);
-  assert.match(starlight, /location = \/index\.html \{ return 301 https:\/\/\$host\//);
-  assert.match(starlight, /expires 30d;/);
+  assert.doesNotMatch(starlight, /location = \/index\.html/);
+  assert.doesNotMatch(starlight, /location ~\* \\\.\(\?:css\|js\|png/);
 });
 
 test("비공개 시안과 개인정보 문서는 검색 색인에서 제외한다", async () => {
