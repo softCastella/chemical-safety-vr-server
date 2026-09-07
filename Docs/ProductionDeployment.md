@@ -214,10 +214,12 @@ SEO 기본 점수는 canonical, 사이트맵과 공유 메타 완전성을 검�
 1. `tycheworks.com`(및 `www`), `immersa`, `spark`, `loop`, `chemical-safety-vr`의 다섯 HTTPS 서버 블록에
    `ops/nginx/tycheworks-public-hardening.conf` include를 추가했다. 기존 별빛 스도쿠 호스트까지 포함해 여섯 공개
    호스트가 같은 `server_tokens off`, HTTP/2, `Strict-Transport-Security: max-age=86400`, gzip 정책을 사용한다.
-2. 30일 캐시 규칙을 공용 include로 옮겼고, 공용 정규식보다 우선하는 SPARK·LOOP의 `line-coming.css`에도
-   `expires 30d`를 명시했다. HTML과 API 응답은 이 규칙의 대상이 아니다.
+2. 정적 자산은 `expires -1`로 로컬 캐시를 보관하면서 ETag 재검증을 강제한다. 따라서 같은 URL의 이미지·CSS·JS를
+   교체해도 다음 요청에서 변경된 파일만 자동으로 다시 받는다. 공용 정규식보다 우선하는 SPARK·LOOP의
+   `line-coming.css`와 IMMERSA·SPARK·LOOP의 공용 이미지 `alias /assets/`도 같은 정책을 사용하며,
+   후자는 `location ^~ /assets/`로 정규식에 가로채이지 않게 한다. HTML과 API 응답은 이 규칙의 대상이 아니다.
 3. 적용 전 `/etc/nginx/sites-available/`의 세 사이트 설정을 백업했고, `nginx -t` 통과 후 reload했다. 여섯 호스트의
-   HTTPS 응답에서 HSTS와 `Server: nginx`(버전 미노출), 대표 정적 자산에서 `Cache-Control: max-age=2592000`을 확인했다.
+   HTTPS 응답에서 HSTS와 `Server: nginx`(버전 미노출), 대표 정적 자산에서 `Cache-Control: no-cache`와 ETag를 확인했다.
    HSTS에는 아직 `includeSubDomains` 또는 `preload`를 사용하지 않는다.
 
 ### 권장 적용 순서와 남은 운영 검증

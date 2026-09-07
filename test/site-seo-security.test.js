@@ -79,7 +79,7 @@ test("Nginx 배포 초안은 공개 호스트 보안과 이전 경로 정책을 
   assert.match(hardening, /Strict-Transport-Security "max-age=86400" always;/);
   assert.match(hardening, /gzip on;/);
   assert.match(hardening, /location ~\* \\\.\(\?:css\|js\|png\|jpe\?g\|webp\|avif\|svg\|woff2\?\|mp3\|wav\)\$/);
-  assert.match(hardening, /expires 30d;/);
+  assert.match(hardening, /expires -1;/);
   assert.match(legacyRoutes, /location \^~ \/app\/ \{ return 301 https:\/\/loop\.tycheworks\.com\//);
   assert.match(legacyRoutes, /location \^~ \/brand-v2\/ \{ return 404; \}/);
   assert.match(starlight, /include .*tycheworks-public-hardening\.conf;/);
