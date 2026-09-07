@@ -131,9 +131,9 @@ test("별빛 스도쿠 랜딩은 모바일 크기 웹 체험판을 연결한다"
   assert.match(css, /\.project-label:focus-visible\{[^}]*outline:/);
   assert.match(html, /class="play-scroll-button" href="https:\/\/softcastella\.github\.io\/Starlight-Sudoku\/" target="_blank" rel="noopener noreferrer" data-play-launch/);
   assert.doesNotMatch(html, /id="play-demo"|data-start-game|landing-game\.js/);
-  assert.match(html, /landing\.css\?v=20260907-100/);
+  assert.match(html, /landing\.css\?v=20260907-101/);
   assert.match(html, /landing-i18n\.js\?v=20260907-34/);
-  assert.match(html, /landing-launch\.js\?v=20260907-34/);
+  assert.match(html, /landing-launch\.js\?v=20260907-35/);
   assert.match(html, /data-i18n="title">퍼즐을 풀어<br>별빛을 모으고,<br><strong>멈춰버린 밤에<br>아침을 불러오세요\.<\/strong>/);
   assert.match(script, /title: "퍼즐을 풀어<br>별빛을 모으고,<br><strong>멈춰버린 밤에<br>아침을 불러오세요\.<\/strong>"/);
   assert.match(html, /data-i18n="body">숫자 속에 흩어진 별빛을 모아 잠든 마을의 장소들을 하나씩 밝혀 나가는 감성 스도쿠 게임<\/p>/);
@@ -178,7 +178,7 @@ test("별빛 스도쿠 랜딩은 모바일 크기 웹 체험판을 연결한다"
   assert.match(css, /\.cta-star-art\{[^}]*width:294px;[^}]*object-fit:contain;[^}]*drop-shadow\(0 0 var\(--cta-glow-core-idle\)/);
   assert.match(css, /\.cta-accessible-label\{[^}]*clip:rect\(0,0,0,0\)/);
   assert.match(html, /<em class="cta-sparkles" aria-hidden="true">[\s\S]*class="cta-twinkle"[\s\S]*<\/em>/);
-  assert.equal((html.match(/class="cta-twinkle"/g) || []).length, 16);
+  assert.equal((html.match(/class="cta-twinkle"/g) || []).length, 24);
   assert.match(html, /<em class="cta-burst-layer" aria-hidden="true"><\/em>/);
   assert.doesNotMatch(html, /cta-star-halo|cta-label-back/);
   assert.match(html, /<em class="cta-orbit" aria-hidden="true"><\/em>/);
@@ -204,11 +204,13 @@ test("별빛 스도쿠 랜딩은 모바일 크기 웹 체험판을 연결한다"
   assert.match(css, /\.play-scroll-button:hover\{[^}]*transform:translateX\(-50%\) scale\(1\.025\);[^}]*filter:none/);
   assert.doesNotMatch(css, /cta-art-hover-pulse|cta-art-bloom|cta-star-sparkle-art/);
   assert.match(css, /\.play-scroll-button:hover \.cta-twinkle\{animation:cta-twinkle-out 1\.45s/);
+  assert.match(css, /\.cta-twinkle\{[^}]*color:#fff;[^}]*rgba\(255,255,255,\.78\)/);
   assert.match(css, /@keyframes cta-twinkle-out/);
   assert.match(css, /\.play-scroll-button\.is-bursting \.cta-twinkle\{font-size:0!important;color:transparent;opacity:0!important;animation:none!important\}/);
   assert.match(css, /@keyframes cta-carbonation/);
   assert.match(launchScript, /function createCtaBurst\(\)/);
   assert.match(launchScript, /const twinkles = \[\.\.\.playLink\.querySelectorAll\("\.cta-twinkle"\)\]/);
+  assert.match(launchScript, /particle\.style\.setProperty\("--burst-color", "#ffffff"\)/);
   assert.match(launchScript, /for \(const \[index, start\] of particleStarts\.entries\(\)\)/);
   assert.match(launchScript, /playLink\.addEventListener\("pointerdown", createCtaBurst\)/);
   assert.match(launchScript, /\}, 420\);/);

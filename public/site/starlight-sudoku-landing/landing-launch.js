@@ -91,7 +91,7 @@
       particle.style.setProperty("--burst-end-y", `${start.endY.toFixed(1)}px`);
       particle.style.setProperty("--burst-size", `${3 + (index % 2)}px`);
       particle.style.setProperty("--burst-delay", `${(index % 4) * 0.018}s`);
-      particle.style.setProperty("--burst-color", index % 3 === 0 ? "#fffaf0" : "#ffd86a");
+      particle.style.setProperty("--burst-color", "#ffffff");
       burstLayer.append(particle);
     }
 
