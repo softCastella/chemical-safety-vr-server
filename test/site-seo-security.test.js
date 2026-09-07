@@ -16,8 +16,8 @@ const canonicalPages = new Map([
   ["starlight-sudoku-landing/index.html", "https://starlight-sudoku.tycheworks.com/"],
   ["loop/index.html", "https://loop.tycheworks.com/"],
   ["chemical-safety-vr-landing/index.html", "https://chemical-safety-vr.tycheworks.com/"],
-  ["chemical-safety-vr-landing/light/index.html", "https://chemical-safety-vr.tycheworks.com/light/"],
-  ["chemical-safety-vr-landing/campaign/index.html", "https://chemical-safety-vr.tycheworks.com/campaign/"],
+  ["chemical-safety-vr-landing/light/index.html", "https://chemical-safety-vr.tycheworks.com/"],
+  ["chemical-safety-vr-landing/campaign/index.html", "https://chemical-safety-vr.tycheworks.com/"],
 ]);
 
 test("공개 브랜드 페이지는 정식 URL을 선언한다", async () => {
@@ -39,7 +39,7 @@ test("호스트별 사이트맵에는 색인 가능한 정식 URL만 포함한�
     ["spark/sitemap.xml", ["https://spark.tycheworks.com/", "https://spark.tycheworks.com/starlight-sudoku/"]],
     ["starlight-sudoku-landing/sitemap.xml", ["https://starlight-sudoku.tycheworks.com/"]],
     ["loop/sitemap.xml", ["https://loop.tycheworks.com/"]],
-    ["chemical-safety-vr-landing/sitemap.xml", ["https://chemical-safety-vr.tycheworks.com/", "https://chemical-safety-vr.tycheworks.com/light/", "https://chemical-safety-vr.tycheworks.com/campaign/"]],
+    ["chemical-safety-vr-landing/sitemap.xml", ["https://chemical-safety-vr.tycheworks.com/"]],
   ]);
 
   for (const [path, expectedUrls] of sitemaps) {
@@ -96,5 +96,36 @@ test("비공개 시안과 개인정보 문서는 검색 색인에서 제외한�
   for (const path of ["privacy/index.html", "spark/starlight-sudoku/privacy/index.html"]) {
     const html = await readFile(new URL(path, siteRoot), "utf8");
     assert.match(html, /<meta name="robots" content="noindex,follow">/, path);
+  }
+
+  for (const path of [
+    "chemical-safety-vr-landing/light/index.html",
+    "chemical-safety-vr-landing/campaign/index.html",
+  ]) {
+    const html = await readFile(new URL(path, siteRoot), "utf8");
+    assert.match(html, /<meta name="robots" content="noindex,follow">/, path);
+    assert.match(html, /<link rel="canonical" href="https:\/\/chemical-safety-vr\.tycheworks\.com\/">/, path);
+  }
+});
+
+test("색인 대상 페이지는 파싱 가능한 구조화 데이터를 제공한다", async () => {
+  for (const path of [
+    "index.html",
+    "brand/index.html",
+    "immersa/index.html",
+    "immersa/chemical-safety-training/index.html",
+    "spark/index.html",
+    "spark/starlight-sudoku/index.html",
+    "starlight-sudoku-landing/index.html",
+    "loop/index.html",
+    "chemical-safety-vr-landing/index.html",
+  ]) {
+    const html = await readFile(new URL(path, siteRoot), "utf8");
+    const blocks = [...html.matchAll(/<script(?:\s+id="[^"]+")?\s+type="application\/ld\+json">([\s\S]*?)<\/script>/g)];
+    assert.ok(blocks.length > 0, `${path}: JSON-LD가 필요하다`);
+    for (const [, source] of blocks) {
+      const data = JSON.parse(source);
+      assert.equal(data["@context"], "https://schema.org", path);
+    }
   }
 });

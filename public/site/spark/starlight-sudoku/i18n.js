@@ -122,12 +122,55 @@ const titleImages = {
   en: "Starlight%20Sdoku%20Title%20EN.png"
 };
 
+const seoLocales = {
+  ko: { name: "별빛 스도쿠", imageAlt: "별빛 스도쿠 대표 이미지", ogLocale: "ko_KR", schemaLanguage: "ko" },
+  en: { name: "Starlight Sudoku", imageAlt: "Starlight Sudoku key art", ogLocale: "en_US", schemaLanguage: "en" },
+  ja: { name: "星明かりの数独", imageAlt: "星明かりの数独のメインビジュアル", ogLocale: "ja_JP", schemaLanguage: "ja" },
+  "zh-CN": { name: "星光数独", imageAlt: "星光数独主视觉", ogLocale: "zh_CN", schemaLanguage: "zh-Hans" },
+  "zh-TW": { name: "星光數獨", imageAlt: "星光數獨主視覺", ogLocale: "zh_TW", schemaLanguage: "zh-Hant" },
+};
+
 const supportedLocales = Object.keys(translations);
 const localeButtons = document.querySelectorAll("[data-locale]");
 const titleImage = document.querySelector("[data-localized-title]");
 const descriptionMeta = document.querySelector('meta[name="description"]');
 const landingLink = document.querySelector("[data-landing-link]");
 const privacyLink = document.querySelector("[data-privacy-link]");
+
+function localizedPageUrl(locale) {
+  const url = new URL("https://spark.tycheworks.com/starlight-sudoku/");
+  if (locale !== "ko") url.searchParams.set("lang", locale);
+  return url.toString();
+}
+
+function setMetaContent(selector, value) {
+  const element = document.querySelector(selector);
+  if (element) element.content = value;
+}
+
+function applySeo(locale, copy) {
+  const seo = seoLocales[locale];
+  const pageUrl = localizedPageUrl(locale);
+  const imageUrl = `https://spark.tycheworks.com/assets/Spark/Starlight%20Sudoku/${titleImages[locale]}`;
+  setMetaContent('meta[property="og:title"]', copy.pageTitle);
+  setMetaContent('meta[property="og:description"]', copy.pageDescription);
+  setMetaContent('meta[property="og:url"]', pageUrl);
+  setMetaContent('meta[property="og:image"]', imageUrl);
+  setMetaContent('meta[property="og:image:alt"]', seo.imageAlt);
+  setMetaContent('meta[property="og:locale"]', seo.ogLocale);
+  setMetaContent('meta[name="twitter:title"]', copy.pageTitle);
+  setMetaContent('meta[name="twitter:description"]', copy.pageDescription);
+  setMetaContent('meta[name="twitter:image"]', imageUrl);
+  setMetaContent('meta[name="twitter:image:alt"]', seo.imageAlt);
+  const canonical = document.querySelector('link[rel="canonical"]');
+  if (canonical) canonical.href = pageUrl;
+  const structuredData = document.querySelector("#starlight-detail-structured-data");
+  if (structuredData) {
+    const data = JSON.parse(structuredData.textContent);
+    Object.assign(data, { name: seo.name, description: copy.pageDescription, url: pageUrl, image: imageUrl, inLanguage: seo.schemaLanguage });
+    structuredData.textContent = JSON.stringify(data);
+  }
+}
 
 function normalizeLocale(value) {
   const candidate = String(value || "").toLowerCase();
@@ -145,6 +188,7 @@ function applyLocale(locale, updateUrl = true) {
   document.documentElement.lang = resolvedLocale;
   document.title = copy.pageTitle;
   if (descriptionMeta) descriptionMeta.content = copy.pageDescription;
+  applySeo(resolvedLocale, copy);
 
   document.querySelectorAll("[data-i18n]").forEach((element) => {
     const value = copy[element.dataset.i18n];

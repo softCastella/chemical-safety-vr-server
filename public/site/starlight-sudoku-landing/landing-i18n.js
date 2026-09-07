@@ -37,6 +37,50 @@ const ctaImages = {
   en: "Starlight%20Sdoku%20landing%20CTA_EN.png",
 };
 
+const seoLocales = {
+  ko: { name: "별빛 스도쿠", description: "퍼즐을 풀어 별빛을 모으고 멈춰버린 밤의 마을에 다시 아침을 불러오세요.", shareDescription: "별빛을 모아 잠든 마을의 아침을 되찾는 감성 스도쿠 게임입니다.", imageAlt: "별빛 스도쿠 대표 이미지", ogLocale: "ko_KR", schemaLanguage: "ko" },
+  en: { name: "Starlight Sudoku", description: "Solve Sudoku, gather starlight, and bring morning back to a village frozen in time.", shareDescription: "A gentle story-driven Sudoku game about restoring morning to a sleeping village.", imageAlt: "Starlight Sudoku key art", ogLocale: "en_US", schemaLanguage: "en" },
+  ja: { name: "星明かりの数独", description: "数独を解いて星の光を集め、時が止まった村に朝を取り戻す物語型パズルゲームです。", shareDescription: "星の光を集め、眠る村に朝を取り戻す心温まる数独ゲームです。", imageAlt: "星明かりの数独のメインビジュアル", ogLocale: "ja_JP", schemaLanguage: "ja" },
+  "zh-CN": { name: "星光数独", description: "完成数独，收集星光，让清晨重回停驻在长夜中的小镇。", shareDescription: "一款收集星光、唤醒沉睡小镇的治愈系剧情数独游戏。", imageAlt: "星光数独主视觉", ogLocale: "zh_CN", schemaLanguage: "zh-Hans" },
+  "zh-TW": { name: "星光數獨", description: "解開數獨、收集星光，讓清晨重回停駐在長夜中的小鎮。", shareDescription: "一款收集星光、喚醒沉睡小鎮的療癒系劇情數獨遊戲。", imageAlt: "星光數獨主視覺", ogLocale: "zh_TW", schemaLanguage: "zh-Hant" },
+};
+
+function localizedPageUrl(locale) {
+  const url = new URL("https://starlight-sudoku.tycheworks.com/");
+  if (locale !== "ko") url.searchParams.set("lang", locale);
+  return url.toString();
+}
+
+function setMetaContent(selector, value) {
+  const element = document.querySelector(selector);
+  if (element) element.content = value;
+}
+
+function applySeo(locale) {
+  const seo = seoLocales[locale];
+  const pageUrl = localizedPageUrl(locale);
+  const imageUrl = `https://starlight-sudoku.tycheworks.com/assets/Spark/Starlight%20Sudoku/${demoTitleImages[locale]}`;
+  setMetaContent('meta[name="description"]', seo.description);
+  setMetaContent('meta[property="og:title"]', copy[locale].pageTitle);
+  setMetaContent('meta[property="og:description"]', seo.shareDescription);
+  setMetaContent('meta[property="og:url"]', pageUrl);
+  setMetaContent('meta[property="og:image"]', imageUrl);
+  setMetaContent('meta[property="og:image:alt"]', seo.imageAlt);
+  setMetaContent('meta[property="og:locale"]', seo.ogLocale);
+  setMetaContent('meta[name="twitter:title"]', copy[locale].pageTitle);
+  setMetaContent('meta[name="twitter:description"]', seo.shareDescription);
+  setMetaContent('meta[name="twitter:image"]', imageUrl);
+  setMetaContent('meta[name="twitter:image:alt"]', seo.imageAlt);
+  const canonical = document.querySelector('link[rel="canonical"]');
+  if (canonical) canonical.href = pageUrl;
+  const structuredData = document.querySelector("#starlight-structured-data");
+  if (structuredData) {
+    const data = JSON.parse(structuredData.textContent);
+    Object.assign(data, { name: seo.name, description: seo.description, url: pageUrl, image: imageUrl, inLanguage: seo.schemaLanguage });
+    structuredData.textContent = JSON.stringify(data);
+  }
+}
+
 function normalizeLocale(value) {
   const locale = String(value || "").toLowerCase();
   if (locale.startsWith("zh-tw") || locale.startsWith("zh-hk") || locale === "tw") return "zh-TW";
@@ -50,6 +94,7 @@ function applyLocale(locale, updateUrl = true) {
   const resolved = copy[locale] ? locale : "ko";
   document.documentElement.lang = resolved;
   document.title = copy[resolved].pageTitle;
+  applySeo(resolved);
   document.querySelectorAll("[data-i18n]").forEach((element) => {
     const value = copy[resolved][element.dataset.i18n];
     if (value) element.innerHTML = value;

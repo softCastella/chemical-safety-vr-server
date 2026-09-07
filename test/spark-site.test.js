@@ -54,7 +54,13 @@ test("별빛 스도쿠 상세 페이지는 5개 언어와 언어별 타이틀 �
   assert.match(css, /\.detail-identity img\{[^}]*width:92px;[^}]*height:92px;[^}]*object-fit:contain/);
   assert.match(css, /\.title-poster img\{[^}]*width:100%;[^}]*height:auto;[^}]*object-fit:contain/);
   assert.match(html, /href="detail\.css\?v=20260903-4"/);
-  assert.match(html, /src="i18n\.js\?v=20260903-3"/);
+  assert.match(html, /src="i18n\.js\?v=20260908-4"/);
+  for (const hreflang of ["ko", "en", "ja", "zh-Hans", "zh-Hant", "x-default"]) {
+    assert.match(html, new RegExp(`hreflang="${hreflang}"`));
+  }
+  assert.match(script, /function applySeo\(locale, copy\)/);
+  assert.match(script, /link\[rel="canonical"\]/);
+  assert.match(script, /#starlight-detail-structured-data/);
   assert.match(html, /class="detail-header"/);
   assert.match(html, /class="detail-subnav"/);
   assert.match(html, /class="detail-toc"/);
@@ -134,7 +140,7 @@ test("별빛 스도쿠 랜딩은 모바일 크기 웹 체험판을 연결한다"
   assert.match(html, /class="play-scroll-button" href="https:\/\/softcastella\.github\.io\/Starlight-Sudoku\/" target="_blank" rel="noopener noreferrer" data-play-launch/);
   assert.doesNotMatch(html, /id="play-demo"|data-start-game|landing-game\.js/);
   assert.match(html, /landing\.css\?v=20260907-103/);
-  assert.match(html, /landing-i18n\.js\?v=20260907-35/);
+  assert.match(html, /landing-i18n\.js\?v=20260908-36/);
   assert.match(html, /landing-launch\.js\?v=20260907-37/);
   assert.match(html, /data-i18n="title">퍼즐을 풀어<br>별빛을 모으고,<br><strong>멈춰버린 밤에<br>아침을 불러오세요\.<\/strong>/);
   assert.match(script, /title: "퍼즐을 풀어<br>별빛을 모으고,<br><strong>멈춰버린 밤에<br>아침을 불러오세요\.<\/strong>"/);
@@ -142,6 +148,12 @@ test("별빛 스도쿠 랜딩은 모바일 크기 웹 체험판을 연결한다"
   assert.match(script, /body: "숫자 속에 흩어진 별빛을 모아 잠든 마을의 장소들을 하나씩 밝혀 나가는 감성 스도쿠 게임"/);
   assert.match(script, /playCta: "지금<br>플레이해보세요"/);
   assert.match(script, /pageTitle: "星明かりの数独 \| Starlight Sudoku"/);
+  for (const hreflang of ["ko", "en", "ja", "zh-Hans", "zh-Hant", "x-default"]) {
+    assert.match(html, new RegExp(`hreflang="${hreflang}"`));
+  }
+  assert.match(script, /function applySeo\(locale\)/);
+  assert.match(script, /link\[rel="canonical"\]/);
+  assert.match(script, /#starlight-structured-data/);
   assert.match(html, /data-i18n="releaseState">GOOGLE PLAY · 입점 준비 중/);
   assert.match(script, /releaseState: "GOOGLE PLAY · 입점 준비 중"/);
   assert.match(launchScript, /const playUrl = "https:\/\/softcastella\.github\.io\/Starlight-Sudoku\/"/);
@@ -246,19 +258,36 @@ test("별빛 스도쿠 랜딩은 모바일 크기 웹 체험판을 연결한다"
 test("별빛 스도쿠 랜딩은 선택 언어의 탭 제목과 CTA 이미지를 실제로 적용한다", async () => {
   const script = await readFile(new URL("starlight-sudoku-landing/landing-i18n.js", siteRoot), "utf8");
   const expected = new Map([
-    ["ko", ["별빛 스도쿠 | Starlight Sudoku", "CTA_KR.png"]],
-    ["en", ["Starlight Sudoku | TYCHE SPARK", "CTA_EN.png"]],
-    ["ja", ["星明かりの数独 | Starlight Sudoku", "CTA_JP.png"]],
-    ["zh-CN", ["星光数独 | Starlight Sudoku", "CTA_CN.png"]],
-    ["zh-TW", ["星光數獨 | Starlight Sudoku", "CTA_TW.png"]],
+    ["ko", ["별빛 스도쿠 | Starlight Sudoku", "CTA_KR.png", "https://starlight-sudoku.tycheworks.com/", "별빛 스도쿠", "ko"]],
+    ["en", ["Starlight Sudoku | TYCHE SPARK", "CTA_EN.png", "https://starlight-sudoku.tycheworks.com/?lang=en", "Starlight Sudoku", "en"]],
+    ["ja", ["星明かりの数独 | Starlight Sudoku", "CTA_JP.png", "https://starlight-sudoku.tycheworks.com/?lang=ja", "星明かりの数独", "ja"]],
+    ["zh-CN", ["星光数独 | Starlight Sudoku", "CTA_CN.png", "https://starlight-sudoku.tycheworks.com/?lang=zh-CN", "星光数独", "zh-Hans"]],
+    ["zh-TW", ["星光數獨 | Starlight Sudoku", "CTA_TW.png", "https://starlight-sudoku.tycheworks.com/?lang=zh-TW", "星光數獨", "zh-Hant"]],
   ]);
 
-  for (const [locale, [title, imageSuffix]] of expected) {
+  for (const [locale, [title, imageSuffix, canonicalUrl, schemaName, schemaLanguage]] of expected) {
     const ctaImage = { src: "" };
+    const canonical = { href: "" };
+    const structuredData = { textContent: JSON.stringify({ publisher: {} }) };
+    const metas = new Map([
+      ['meta[name="description"]', { content: "" }],
+      ['meta[property="og:title"]', { content: "" }],
+      ['meta[property="og:description"]', { content: "" }],
+      ['meta[property="og:url"]', { content: "" }],
+      ['meta[property="og:image"]', { content: "" }],
+      ['meta[property="og:image:alt"]', { content: "" }],
+      ['meta[property="og:locale"]', { content: "" }],
+      ['meta[name="twitter:title"]', { content: "" }],
+      ['meta[name="twitter:description"]', { content: "" }],
+      ['meta[name="twitter:image"]', { content: "" }],
+      ['meta[name="twitter:image:alt"]', { content: "" }],
+      ['link[rel="canonical"]', canonical],
+      ["#starlight-structured-data", structuredData],
+    ]);
     const document = {
       documentElement: { lang: "ko" },
       title: "",
-      querySelector: (selector) => selector === ".cta-star-art" ? ctaImage : null,
+      querySelector: (selector) => selector === ".cta-star-art" ? ctaImage : metas.get(selector) || null,
       querySelectorAll: () => [],
       dispatchEvent: () => {},
     };
@@ -278,6 +307,14 @@ test("별빛 스도쿠 랜딩은 선택 언어의 탭 제목과 CTA 이미지를
     assert.equal(document.documentElement.lang, locale);
     assert.equal(document.title, title);
     assert.ok(ctaImage.src.endsWith(imageSuffix), locale);
+    assert.equal(canonical.href, canonicalUrl);
+    assert.equal(metas.get('meta[property="og:url"]').content, canonicalUrl);
+    assert.equal(metas.get('meta[name="twitter:title"]').content, title);
+    assert.ok(metas.get('meta[name="description"]').content.length > 0);
+    const schema = JSON.parse(structuredData.textContent);
+    assert.equal(schema.name, schemaName);
+    assert.equal(schema.inLanguage, schemaLanguage);
+    assert.equal(schema.url, canonicalUrl);
   }
 });
 
