@@ -207,15 +207,23 @@ SEO 기본 점수는 canonical, 사이트맵과 공유 메타 완전성을 검�
 8. 스도쿠 풀이 로직이 이미 완성된 잘못된 보드를 해답으로 인정하지 않도록 행·열·블록 유효성 검사를
    추가했고, 손상된 로컬 진행 JSON은 시작 실패 대신 해당 스냅샷을 폐기하도록 보완했다.
 
-이 반영에는 운영 배포, Nginx include·reload, Search Console 사이트맵 제출이 포함되지 않는다. 운영 반영 뒤
-아래 명령과 실제 브라우저에서 응답 헤더, 리다이렉트, 언어별 CTA와 웹 데모 첫 화면을 다시 확인한다.
+이 저장소 반영 시점에는 운영 배포, Nginx include·reload, Search Console 사이트맵 제출이 포함되지 않았다.
+
+### 2026-09-07 공용 Nginx hardening 운영 적용
+
+1. `tycheworks.com`(및 `www`), `immersa`, `spark`, `loop`, `chemical-safety-vr`의 다섯 HTTPS 서버 블록에
+   `ops/nginx/tycheworks-public-hardening.conf` include를 추가했다. 기존 별빛 스도쿠 호스트까지 포함해 여섯 공개
+   호스트가 같은 `server_tokens off`, HTTP/2, `Strict-Transport-Security: max-age=86400`, gzip 정책을 사용한다.
+2. 30일 캐시 규칙을 공용 include로 옮겼고, 공용 정규식보다 우선하는 SPARK·LOOP의 `line-coming.css`에도
+   `expires 30d`를 명시했다. HTML과 API 응답은 이 규칙의 대상이 아니다.
+3. 적용 전 `/etc/nginx/sites-available/`의 세 사이트 설정을 백업했고, `nginx -t` 통과 후 reload했다. 여섯 호스트의
+   HTTPS 응답에서 HSTS와 `Server: nginx`(버전 미노출), 대표 정적 자산에서 `Cache-Control: max-age=2592000`을 확인했다.
+   HSTS에는 아직 `includeSubDomains` 또는 `preload`를 사용하지 않는다.
 
 ### 권장 적용 순서와 남은 운영 검증
 
-1. 저장소의 Nginx 공용 hardening과 이전 경로 설정을 실제 주 호스트 설정에 include하고 `nginx -t`를 통과시킨다.
-2. 운영 반영 뒤 HSTS, HTTP/2, 정적 캐시·압축, `server_tokens off`, `301`·`404` 응답을 호스트별로 확인한다.
-3. `Google-Extended`는 Gemini 검색 기반 노출 정책을 정한 뒤 유지 또는 변경한다.
-4. 대형 이미지를 변환하고 캐시·HTTP/2 적용 후 Lighthouse를 재실행한다. Search Console에서는 각 호스트
+1. `Google-Extended`는 Gemini 검색 기반 노출 정책을 정한 뒤 유지 또는 변경한다.
+2. 대형 이미지를 변환하고 캐시·HTTP/2 적용 후 Lighthouse를 재실행한다. Search Console에서는 각 호스트
    소유권, 사이트맵 처리, URL 검사, 페이지 색인과 보안 문제 보고서를 별도로 확인한다.
 
 핵심 결과는 다음 명령으로 다시 확인할 수 있다. 다른 공개 호스트와 경로에도 같은 검사를 반복한다.
