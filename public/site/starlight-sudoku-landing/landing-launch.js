@@ -64,18 +64,11 @@
     lastBurstAt = now;
     const buttonRect = playLink.getBoundingClientRect();
     const renderedScale = buttonRect.width / playLink.offsetWidth || 1;
-    const particleStarts = twinkles.map((twinkle, index) => {
+    const particleStarts = twinkles.map((twinkle) => {
       const rect = twinkle.getBoundingClientRect();
       const x = (rect.left + rect.width / 2 - (buttonRect.left + buttonRect.width / 2)) / renderedScale;
       const y = (rect.top + rect.height / 2 - (buttonRect.top + buttonRect.height / 2)) / renderedScale;
-      const length = Math.hypot(x, y) || 1;
-      const distance = 42 + (index % 4) * 9;
-      return {
-        x,
-        y,
-        endX: x + (x / length) * distance,
-        endY: y + (y / length) * distance - 8,
-      };
+      return { x, y };
     });
     burstLayer.replaceChildren();
     playLink.classList.remove("is-bursting");
@@ -87,8 +80,6 @@
       particle.className = "cta-burst-particle";
       particle.style.setProperty("--burst-start-x", `${start.x.toFixed(1)}px`);
       particle.style.setProperty("--burst-start-y", `${start.y.toFixed(1)}px`);
-      particle.style.setProperty("--burst-end-x", `${start.endX.toFixed(1)}px`);
-      particle.style.setProperty("--burst-end-y", `${start.endY.toFixed(1)}px`);
       particle.style.setProperty("--burst-size", `${3 + (index % 2)}px`);
       particle.style.setProperty("--burst-delay", `${(index % 4) * 0.018}s`);
       particle.style.setProperty("--burst-color", "#ffffff");

@@ -131,9 +131,9 @@ test("별빛 스도쿠 랜딩은 모바일 크기 웹 체험판을 연결한다"
   assert.match(css, /\.project-label:focus-visible\{[^}]*outline:/);
   assert.match(html, /class="play-scroll-button" href="https:\/\/softcastella\.github\.io\/Starlight-Sudoku\/" target="_blank" rel="noopener noreferrer" data-play-launch/);
   assert.doesNotMatch(html, /id="play-demo"|data-start-game|landing-game\.js/);
-  assert.match(html, /landing\.css\?v=20260907-101/);
+  assert.match(html, /landing\.css\?v=20260907-103/);
   assert.match(html, /landing-i18n\.js\?v=20260907-34/);
-  assert.match(html, /landing-launch\.js\?v=20260907-35/);
+  assert.match(html, /landing-launch\.js\?v=20260907-36/);
   assert.match(html, /data-i18n="title">퍼즐을 풀어<br>별빛을 모으고,<br><strong>멈춰버린 밤에<br>아침을 불러오세요\.<\/strong>/);
   assert.match(script, /title: "퍼즐을 풀어<br>별빛을 모으고,<br><strong>멈춰버린 밤에<br>아침을 불러오세요\.<\/strong>"/);
   assert.match(html, /data-i18n="body">숫자 속에 흩어진 별빛을 모아 잠든 마을의 장소들을 하나씩 밝혀 나가는 감성 스도쿠 게임<\/p>/);
@@ -212,6 +212,10 @@ test("별빛 스도쿠 랜딩은 모바일 크기 웹 체험판을 연결한다"
   assert.match(launchScript, /const twinkles = \[\.\.\.playLink\.querySelectorAll\("\.cta-twinkle"\)\]/);
   assert.match(launchScript, /particle\.style\.setProperty\("--burst-color", "#ffffff"\)/);
   assert.match(launchScript, /for \(const \[index, start\] of particleStarts\.entries\(\)\)/);
+  assert.doesNotMatch(launchScript, /--burst-end-x|--burst-end-y|endX|endY/);
+  assert.match(css, /\.play-scroll-button\.is-bursting,\.play-scroll-button\.is-bursting:active\{transform:translateX\(-50%\) scale\(1\.025\);transition:none\}/);
+  assert.match(css, /@keyframes cta-carbonation\{[^}]*var\(--burst-start-x\)[\s\S]*100%\{opacity:0;transform:translate\(calc\(-50% \+ var\(--burst-start-x\)\),calc\(-50% \+ var\(--burst-start-y\)\)\)\}/);
+  assert.doesNotMatch(css.match(/@keyframes cta-carbonation\{[^\n]+/)[0], /scale\(/);
   assert.match(launchScript, /playLink\.addEventListener\("pointerdown", createCtaBurst\)/);
   assert.match(launchScript, /\}, 420\);/);
   assert.match(css, /@keyframes cta-orbit-travel\{to\{offset-distance:112%\}\}/);
