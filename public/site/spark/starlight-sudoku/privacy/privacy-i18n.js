@@ -24,14 +24,14 @@ const translations = {
     changesTitle: "9. Changes", changesBody: "If the service or its data practices change, including the addition of advertising or analytics, the Google Play Data safety form and this page will be updated together and the revised effective date will be shown.", references: "Official references", userDataReference: "Google Play User Data policy", dataSafetyReference: "Google Play Data safety", reviewReference: "Google Play in-app reviews", common: "TYCHE WORKS general policy"
   },
   ja: {
-    pageTitle: "プライバシーポリシー | 星光数独", back: "← 星光数独の詳細へ", title: "プライバシーポリシー", intro: "星光数独アプリと公式ウェブページにおける情報の取り扱いについてご案内します。", effective: "施行日：2026年9月4日",
-    scopeTitle: "1. 適用範囲とサービス情報", scopeBody: "本ポリシーは、Tyche Worksが提供する星光数独の体験版Androidアプリと公式ウェブページに適用されます。アプリIDはcom.tychespark.starlightsudokuです。",
+    pageTitle: "プライバシーポリシー | 星明かりの数独", back: "← 星明かりの数独の詳細へ", title: "プライバシーポリシー", intro: "星明かりの数独アプリと公式ウェブページにおける情報の取り扱いについてご案内します。", effective: "施行日：2026年9月4日",
+    scopeTitle: "1. 適用範囲とサービス情報", scopeBody: "本ポリシーは、Tyche Worksが提供する星明かりの数独の体験版Androidアプリと公式ウェブページに適用されます。アプリIDはcom.tychespark.starlightsudokuです。",
     dataTitle: "2. アプリが収集しない情報", dataBody: "本アプリは、アカウント、氏名、メールアドレス、電話番号、位置情報、写真、広告IDを収集しません。また、Googleログイン、Firebase Analytics、AdMobも使用しません。",
     localTitle: "3. 端末内にのみ保存する情報", localBody: "パズルの進行・再開データ、スターライト、ステージのクリア状況、BGM・効果音の設定、オープニング・体験版案内の確認状況を端末内のアプリストレージに保存します。端末で生成したss-から始まる匿名ユーザーIDも保存しますが、アカウント識別子ではありません。これらの情報をTyche Worksのサーバーへ送信したり、サーバーにバックアップしたりすることはありません。",
     websiteTitle: "4. ウェブページが取り扱う情報", websiteBody: "ウェブページには会員登録や利用者情報の入力機能がありません。選択した言語はブラウザのstarlight-sudoku-localeに保存され、サーバーには送信されません。セキュリティと障害対応のため、通常のアクセスログにIP、アクセス時刻、リクエストURL、応答状態、参照元、ブラウザ情報が自動記録される場合があり、最長14日後に削除します。",
     sharingTitle: "5. 第三者提供と外部送信", sharingBody: "本アプリには広告・分析SDKがなく、端末に保存されたゲームデータを第三者に提供したり、国外へ送信したりしません。体験版終了後、利用者が任意で「送信」をタップすると、アプリはGoogle Playのアプリ内レビューフローを要求し、画面を表示するかどうかはGoogle Playが決定します。入力された評価とレビュー文はGoogle Playが収集してストアに公開する場合があり、送信時に暗号化されます。レビューはGoogle Play StoreまたはGoogleアカウントから削除できます。",
     deletionTitle: "6. 保存期間と削除", deletionBody: "アプリデータは、アプリを削除するか端末設定でアプリデータを消去するまで端末に残ります。ウェブページの言語設定はブラウザのサイトデータを削除すると消去できます。Tyche Worksのサーバーにはアプリデータのバックアップがないため、サーバー上のアプリデータに対する個別の削除依頼は不要です。",
-    childrenTitle: "7. 子どもの利用", childrenBody: "星光数独は年齢による利用制限を設けていないパズルゲームです。ただし、14歳未満の子どもを主な対象として企画・宣伝するサービスではなく、Google PlayのDesigned for Familiesプログラムの対象ではありません。本アプリは利用者の生年月日や年齢情報を収集しません。",
+    childrenTitle: "7. 子どもの利用", childrenBody: "星明かりの数独は年齢による利用制限を設けていないパズルゲームです。ただし、14歳未満の子どもを主な対象として企画・宣伝するサービスではなく、Google PlayのDesigned for Familiesプログラムの対象ではありません。本アプリは利用者の生年月日や年齢情報を収集しません。",
     rightsTitle: "8. 保護措置とお問い合わせ", rightsBody: "公式ウェブページは一般的なHTTPS接続を使用します。プライバシーに関するお問い合わせはtycheworks0101@gmail.comまでお願いします。",
     changesTitle: "9. ポリシーの変更", changesBody: "広告・分析機能の追加など、サービスまたはデータ処理方法が変わる場合は、Google Playのデータセーフティ表示と本ページを同時に更新し、変更後の施行日を表示します。", references: "公式資料", userDataReference: "Google Playユーザーデータポリシー", dataSafetyReference: "Google Playデータセーフティ", reviewReference: "Google Playアプリ内レビュー", common: "TYCHE WORKS 共通ポリシー"
   },

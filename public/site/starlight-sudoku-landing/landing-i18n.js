@@ -12,8 +12,8 @@ const copy = {
     demoTitle: "親手點亮第一束星光。", demoLead: "無需安裝，即可試玩簡單難度第 1 關。", trialBadge: "免費試玩", stageTitle: "簡單 · STAGE 01", timeLabel: "時間", mistakeLabel: "失誤", soundOff: "關閉", soundOn: "開啟", readyCopy: "找出藏在數字之間的第一束星光。", startButton: "開始", audioNotice: "點擊開始按鈕後將播放背景音樂。", controlGuide: "選擇空格並輸入數字。", eraseButton: "刪除", memoButton: "筆記", resetButton: "重新開始", privacyNote: "試玩記錄不會儲存或傳輸。", storeEyebrow: "GOOGLE PLAY · 即將推出", storeTitle: "星光數獨完整版", storeBody: "繼續探索小鎮的星光故事", demoTitleAlt: "星光數獨繁體中文標題", completeTitle: "第一扇窗亮起來了！", completeCopy: "獲得星光 +10。正式版中還有更多小鎮故事。", replayButton: "再玩一次"
   },
   ja: {
-    title: "パズルを解いて星の光を集め、<br><strong>止まった夜に朝を呼び戻そう。</strong>", body: "数字の中に散った星の光を集め、眠る村を一つずつ照らしていく心温まる数独ゲームです。", cta: "ゲーム詳細を見る", playCta: "今すぐ<br>プレイ", releaseState: "GOOGLE PLAY · 公開準備中", skip: "本文へ移動", pageTitle: "星光数独 | Starlight Sudoku",
-    demoTitle: "最初の星明かりを灯してみよう。", demoLead: "インストール不要で、かんたんステージ1を体験できます。", trialBadge: "無料体験", stageTitle: "かんたん · STAGE 01", timeLabel: "時間", mistakeLabel: "ミス", soundOff: "オフ", soundOn: "オン", readyCopy: "数字の間に隠れた最初の星明かりを見つけよう。", startButton: "プレイ", audioNotice: "プレイボタンを押すとBGMが流れます。", controlGuide: "空いているマスを選んで数字を入力してください。", eraseButton: "消す", memoButton: "メモ", resetButton: "やり直す", privacyNote: "プレイ記録は保存・送信されません。", storeEyebrow: "GOOGLE PLAY · 近日公開", storeTitle: "星光数独 フルバージョン", storeBody: "村の次の星明かりへ進もう", demoTitleAlt: "星光数独 日本語タイトル", completeTitle: "最初の窓に明かりが灯りました！", completeCopy: "星明かり +10を獲得。製品版で村の続きをお楽しみください。", replayButton: "もう一度プレイ"
+    title: "パズルを解いて星の光を集め、<br><strong>止まった夜に朝を呼び戻そう。</strong>", body: "数字の中に散った星の光を集め、眠る村を一つずつ照らしていく心温まる数独ゲームです。", cta: "ゲーム詳細を見る", playCta: "今すぐ<br>プレイ", releaseState: "GOOGLE PLAY · 公開準備中", skip: "本文へ移動", pageTitle: "星明かりの数独 | Starlight Sudoku",
+    demoTitle: "最初の星明かりを灯してみよう。", demoLead: "インストール不要で、かんたんステージ1を体験できます。", trialBadge: "無料体験", stageTitle: "かんたん · STAGE 01", timeLabel: "時間", mistakeLabel: "ミス", soundOff: "オフ", soundOn: "オン", readyCopy: "数字の間に隠れた最初の星明かりを見つけよう。", startButton: "プレイ", audioNotice: "プレイボタンを押すとBGMが流れます。", controlGuide: "空いているマスを選んで数字を入力してください。", eraseButton: "消す", memoButton: "メモ", resetButton: "やり直す", privacyNote: "プレイ記録は保存・送信されません。", storeEyebrow: "GOOGLE PLAY · 近日公開", storeTitle: "星明かりの数独 フルバージョン", storeBody: "村の次の星明かりへ進もう", demoTitleAlt: "星明かりの数独 日本語タイトル", completeTitle: "最初の窓に明かりが灯りました！", completeCopy: "星明かり +10を獲得。製品版で村の続きをお楽しみください。", replayButton: "もう一度プレイ"
   },
   en: {
     title: "Solve puzzles. Gather starlight.<br><strong>Bring morning back to a night frozen in time.</strong>", body: "A gentle Sudoku game about finding starlight hidden among the numbers and illuminating a sleeping village, one place at a time.", cta: "Explore the game", playCta: "Play<br>it now", releaseState: "GOOGLE PLAY · COMING SOON", skip: "Skip to content", pageTitle: "Starlight Sudoku | TYCHE SPARK",
@@ -27,6 +27,14 @@ const demoTitleImages = {
   "zh-TW": "Starlight%20Sdoku%20Title%20TW.png",
   ja: "Starlight%20Sdoku%20Title%20JP.png",
   en: "Starlight%20Sdoku%20Title%20EN.png",
+};
+
+const ctaImages = {
+  ko: "Starlight%20Sdoku%20landing%20CTA_KR.png",
+  "zh-CN": "Starlight%20Sdoku%20landing%20CTA_CN.png",
+  "zh-TW": "Starlight%20Sdoku%20landing%20CTA_TW.png",
+  ja: "Starlight%20Sdoku%20landing%20CTA_JP.png",
+  en: "Starlight%20Sdoku%20landing%20CTA_EN.png",
 };
 
 function normalizeLocale(value) {
@@ -47,6 +55,8 @@ function applyLocale(locale, updateUrl = true) {
     if (value) element.innerHTML = value;
   });
   document.querySelectorAll("[data-locale]").forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.locale === resolved)));
+  const ctaImage = document.querySelector(".cta-star-art");
+  if (ctaImage) ctaImage.src = ctaImages[resolved];
   const demoTitleImage = document.querySelector("[data-demo-title-art]");
   if (demoTitleImage) {
     demoTitleImage.src = `../assets/Spark/Starlight%20Sudoku/${demoTitleImages[resolved]}`;

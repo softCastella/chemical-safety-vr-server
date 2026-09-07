@@ -69,11 +69,11 @@ const translations = {
     imageAlt: "《星光數獨》繁體中文標題圖"
   },
   ja: {
-    pageTitle: "スターライト数独 | TYCHE SPARK", pageDescription: "数独を解いて星の光を集め、時が止まった村に朝を取り戻す物語型モバイル数独ゲームです。",
+    pageTitle: "星明かりの数独 | TYCHE SPARK", pageDescription: "数独を解いて星の光を集め、時が止まった村に朝を取り戻す物語型モバイル数独ゲームです。",
     navOverview: "概要", navGameplay: "遊び方", navWorld: "世界", navInfo: "情報",
     heroTitle: "パズルを解いて星の光を集め、<br>時が止まった村に朝を取り戻す数独。", heroBody: "クラシック数独の論理的な楽しさに、小さなファンタジー世界と村の復興という目標を加えた心温まるパズルゲームです。",
     storeStatus: "配信予定", storeBody: "リリース準備中です",
-    overviewTitle: "数字を合わせるだけでは終わらない<br>小さな物語のパズル体験。", overviewBody: "『星光数独』では、数独を解くことが村をよみがえらせる行動につながります。問題を一つ完成するたびに星の光が集まり、夜に止まった村が少しずつ変わります。",
+    overviewTitle: "数字を合わせるだけでは終わらない<br>小さな物語のパズル体験。", overviewBody: "『星明かりの数独』では、数独を解くことが村をよみがえらせる行動につながります。問題を一つ完成するたびに星の光が集まり、夜に止まった村が少しずつ変わります。",
     genreValue: "物語型数独パズル", coreValue: "集中 · 収集 · 村の復興", moodValue: "星明かり · 夜の村 · 穏やかな幻想",
     loopTitle: "解く、集める、照らす。", loopIntro: "おなじみのルールから世界の変化へつながる、3ステップのプレイ。",
     solveTitle: "数独を解く", solveBody: "おなじみの9×9数独のルールで、落ち着いて問題を完成させます。",
@@ -86,9 +86,9 @@ const translations = {
     bakeryTitle: "パン屋", bakeryBody: "温かな明かりが最初に戻るのにふさわしい、日常の場所。",
     libraryTitle: "図書館", libraryBody: "静かな村の記録と物語が眠る場所。",
     fountainTitle: "噴水広場", fountainBody: "村が再び動き始めたことを示す中心の場所。",
-    infoTitle: "TYCHE SPARKの<br>モバイルパズルプロジェクト。", infoName: "星光数独 / Starlight Sudoku", infoStatus: "Google Play 配信予定",
-    finalTitle: "数字がそろった瞬間、<br>村の時間が再び動き始めます。", finalBody: "星の光を集め、村の時間を動かす物語型数独パズル。", viewLanding: "ランディングページを見る", backSpark: "SPARKへ戻る", privacyPolicy: "星光数独プライバシーポリシー",
-    imageAlt: "『星光数独』日本語タイトル画像"
+    infoTitle: "TYCHE SPARKの<br>モバイルパズルプロジェクト。", infoName: "星明かりの数独 / Starlight Sudoku", infoStatus: "Google Play 配信予定",
+    finalTitle: "数字がそろった瞬間、<br>村の時間が再び動き始めます。", finalBody: "星の光を集め、村の時間を動かす物語型数独パズル。", viewLanding: "ランディングページを見る", backSpark: "SPARKへ戻る", privacyPolicy: "星明かりの数独プライバシーポリシー",
+    imageAlt: "『星明かりの数独』日本語タイトル画像"
   },
   en: {
     pageTitle: "Starlight Sudoku | TYCHE SPARK", pageDescription: "Solve Sudoku, gather starlight, and bring morning back to a village frozen in time.",

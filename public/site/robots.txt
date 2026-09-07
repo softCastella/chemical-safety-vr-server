@@ -17,6 +17,9 @@ Disallow: /
 User-agent: Bytespider
 Disallow: /
 
+User-agent: Applebot-Extended
+Disallow: /
+
 User-agent: Meta-ExternalAgent
 Disallow: /
 
@@ -25,3 +28,17 @@ Disallow: /
 
 User-agent: Amazonbot
 Disallow: /
+
+# Bulk SEO/link-index crawlers are unnecessary for this site.
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+Sitemap: https://tycheworks.com/sitemap.xml
+Sitemap: https://immersa.tycheworks.com/sitemap.xml
+Sitemap: https://spark.tycheworks.com/sitemap.xml
+Sitemap: https://starlight-sudoku.tycheworks.com/sitemap.xml
+Sitemap: https://loop.tycheworks.com/sitemap.xml
+Sitemap: https://chemical-safety-vr.tycheworks.com/sitemap.xml
