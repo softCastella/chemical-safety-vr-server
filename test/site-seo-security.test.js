@@ -80,7 +80,7 @@ test("Nginx 배포 초안은 공개 호스트 보안과 이전 경로 정책을 
   assert.match(legacyRoutes, /location \^~ \/app\/ \{ return 301 https:\/\/loop\.tycheworks\.com\//);
   assert.match(legacyRoutes, /location \^~ \/brand-v2\/ \{ return 404; \}/);
   assert.match(starlight, /include .*tycheworks-public-hardening\.conf;/);
-  assert.match(starlight, /location = \/index\.html \{ return 301 https:\/\/\$host\//);
+  assert.doesNotMatch(starlight, /location = \/index\.html/);
   assert.match(starlight, /expires 30d;/);
 });
 
