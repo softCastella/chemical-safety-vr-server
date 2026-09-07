@@ -52,7 +52,45 @@
   if (!playLink) return;
   playLink.href = playUrl;
 
+  const burstLayer = playLink.querySelector(".cta-burst-layer");
+  let lastBurstAt = 0;
+
+  function createCtaBurst() {
+    if (!burstLayer || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const now = performance.now();
+    if (now - lastBurstAt < 240) return;
+    lastBurstAt = now;
+    burstLayer.replaceChildren();
+    playLink.classList.remove("is-bursting");
+    void playLink.offsetWidth;
+    playLink.classList.add("is-bursting");
+
+    for (let index = 0; index < 18; index += 1) {
+      const particle = document.createElement("i");
+      const angle = ((index * 360) / 18 + (index % 2 ? 7 : -5)) * (Math.PI / 180);
+      const startRadius = 86 + (index % 4) * 8;
+      const endRadius = 132 + (index % 5) * 11;
+      particle.className = "cta-burst-particle";
+      particle.style.setProperty("--burst-start-x", `${(Math.cos(angle) * startRadius).toFixed(1)}px`);
+      particle.style.setProperty("--burst-start-y", `${(Math.sin(angle) * startRadius * 0.88).toFixed(1)}px`);
+      particle.style.setProperty("--burst-end-x", `${(Math.cos(angle) * endRadius).toFixed(1)}px`);
+      particle.style.setProperty("--burst-end-y", `${(Math.sin(angle) * endRadius * 0.92 - 12).toFixed(1)}px`);
+      particle.style.setProperty("--burst-size", `${2 + (index % 3)}px`);
+      particle.style.setProperty("--burst-delay", `${(index % 6) * 0.025}s`);
+      particle.style.setProperty("--burst-color", index % 3 === 0 ? "#fffaf0" : "#ffd86a");
+      burstLayer.append(particle);
+    }
+
+    window.setTimeout(() => {
+      playLink.classList.remove("is-bursting");
+      burstLayer.replaceChildren();
+    }, 1050);
+  }
+
+  playLink.addEventListener("pointerdown", createCtaBurst);
+
   playLink.addEventListener("click", (event) => {
+    createCtaBurst();
     if (window.matchMedia("(max-width: 680px)").matches) return;
 
     event.preventDefault();
