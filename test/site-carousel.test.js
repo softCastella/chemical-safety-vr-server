@@ -185,7 +185,7 @@ test('화학물질 안전훈련 VR 상세페이지는 SNS 공유 모달을 제�
     ),
   ]);
 
-  assert.match(html, /<script src="\/chemical-safety-training\/detail-share\.js\?v=20260831-11" defer><\/script>/);
+  assert.match(html, /<script src="\/chemical-safety-training\/detail-share\.js\?v=20260908-1" defer><\/script>/);
   assert.match(html, /class="detail-share-button"/);
   assert.match(html, /aria-label="이 페이지 공유하기"/);
   assert.match(html, /role="dialog" aria-modal="true"/);
@@ -208,7 +208,8 @@ test('화학물질 안전훈련 VR 상세페이지는 SNS 공유 모달을 제�
   assert.match(html, /linear-gradient\(135deg, #70a0f8 0%, #7cebf0 100%\) border-box/);
   assert.doesNotMatch(script, /navigator\.share|data-share-native/);
   assert.match(script, /fetch\("\/api\/public-site-config"/);
-  assert.match(script, /t1\.kakaocdn\.net\/kakao_js_sdk\/2\.8\.2\/kakao\.min\.js/);
+  assert.match(script, /t1\.kakaocdn\.net\/kakao_js_sdk\/2\.8\.3\/kakao\.min\.js/);
+  assert.match(script, /sha384-oroumrnFVE0xtgqyDZJARgERibXg2C28380uaUZz2kHDS5CR7tu20eGiOU6GkTpy/);
   assert.match(script, /kakaoSdk\.Share\.sendDefault/);
   assert.match(script, /imageWidth:\s*1200/);
   assert.match(script, /imageHeight:\s*630/);
@@ -222,6 +223,43 @@ test('화학물질 안전훈련 VR 상세페이지는 SNS 공유 모달을 제�
   assert.match(script, /social-plugins\.line\.me\/lineit\/share/);
   assert.match(script, /navigator\.clipboard\.writeText\(shareUrl\)/);
   assert.match(script, /event\.key === "Escape"/);
+});
+
+test('브랜드 페이지 패밀리의 상단 내비게이션은 모바일에서도 동일한 타이포와 전체 메뉴를 유지한다', async () => {
+  const [siteCss, immersaCss, sparkCss, loopCss] = await Promise.all([
+    readFile(new URL('styles.css', siteRoot), 'utf8'),
+    readFile(new URL('immersa/immersa.css', siteRoot), 'utf8'),
+    readFile(new URL('spark/spark.css', siteRoot), 'utf8'),
+    readFile(new URL('line-coming.css', siteRoot), 'utf8'),
+  ]);
+
+  for (const [name, css, selector] of [
+    ['TYCHE', siteCss, '.nav'],
+    ['IMMERSA', immersaCss, '.vr-nav'],
+    ['SPARK', sparkCss, '.spark-nav'],
+    ['LOOP', loopCss, '.line-nav'],
+  ]) {
+    const escapedSelector = selector.replace('.', '\\.');
+    const rule = css.match(new RegExp(`${escapedSelector}\\{([^}]+)\\}`));
+    assert.ok(rule, `${name} 내비게이션 기본 규칙이 필요하다`);
+    assert.match(rule[1], /color:#66707b/);
+    assert.match(rule[1], /font-size:12px/);
+    assert.match(rule[1], /font-weight:800/);
+    assert.match(rule[1], /line-height:1\.2/);
+    assert.match(rule[1], /letter-spacing:\.08em/);
+    assert.match(rule[1], /text-transform:uppercase/);
+  }
+
+  assert.doesNotMatch(siteCss, /\.nav a:nth-child\([^)]*\)[^{]*\{display:none\}/);
+  assert.doesNotMatch(immersaCss, /\.vr-nav a:nth-child\([^)]*\)[^{]*\{display:none\}/);
+  assert.doesNotMatch(loopCss, /\.line-nav a:nth-child\([^)]*\)[^{]*\{display:none\}/);
+  assert.match(sparkCss, /\.spark-nav a\{display:block!important\}/);
+
+  for (const css of [siteCss, immersaCss, sparkCss, loopCss]) {
+    assert.match(css, /flex:1 0 100%/);
+    assert.match(css, /flex-wrap:wrap/);
+    assert.match(css, /white-space:nowrap/);
+  }
 });
 
 test('서버 어드민 로그인과 대시보드는 새 원형 파비콘을 사용한다', async () => {
