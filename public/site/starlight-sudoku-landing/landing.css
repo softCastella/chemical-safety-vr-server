@@ -150,6 +150,11 @@ button{font:inherit}
 @media(max-width:900px) and (min-width:681px){.play-scroll-button{left:calc(50vw - 5vw)}}
 @media(max-width:680px){.hero-actions{min-height:0}.play-scroll-button{position:static;width:148px!important;min-width:148px;align-self:center;transform:none}.play-scroll-button:hover{transform:translateY(-3px)}}
 @media(prefers-reduced-motion:reduce){.star-dot{animation:none}}
+.cursor-stardust{position:fixed;inset:0;z-index:50;overflow:hidden;pointer-events:none;contain:strict}
+.cursor-stardust-particle{position:absolute;width:var(--cursor-dust-size);height:var(--cursor-dust-size);border-radius:50%;opacity:0;background:radial-gradient(circle,#fffbdc 0 20%,#f7d66f 42%,rgba(218,159,35,.38) 68%,rgba(218,159,35,0) 78%);box-shadow:0 0 4px rgba(255,230,139,.92),0 0 9px rgba(235,178,54,.48);mix-blend-mode:screen;transform:translate3d(-50%,-50%,0) scale(.7);will-change:transform,opacity}
+.cursor-stardust-particle.is-active{animation:cursor-stardust-trail var(--cursor-dust-duration) cubic-bezier(.2,.62,.32,1) both}
+@keyframes cursor-stardust-trail{0%{opacity:var(--cursor-dust-opacity);transform:translate3d(-50%,-50%,0) scale(.82)}28%{opacity:var(--cursor-dust-opacity);transform:translate3d(-50%,-50%,0) scale(1)}100%{opacity:0;transform:translate3d(calc(-50% + var(--cursor-dust-drift-x)),calc(-50% + var(--cursor-dust-drift-y)),0) scale(.25)}}
+@media(pointer:coarse),(prefers-reduced-motion:reduce){.cursor-stardust{display:none}}
 @media(min-width:681px){.splash-header{padding-top:20px;padding-bottom:20px}.splash-content{padding-top:clamp(12px,2.5vh,26px);padding-bottom:clamp(36px,5vh,56px)}}
 @media(min-width:681px){.game-mark{margin-bottom:46px}}
 

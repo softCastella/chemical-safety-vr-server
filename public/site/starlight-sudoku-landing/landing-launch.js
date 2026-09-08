@@ -54,6 +54,90 @@
     createStarField(stars, 160, 20260904);
   }
 
+  function setupCursorStardust() {
+    const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)");
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    if (!finePointer.matches || reducedMotion.matches) return;
+
+    const layer = document.createElement("div");
+    layer.className = "cursor-stardust";
+    layer.setAttribute("aria-hidden", "true");
+    const particles = Array.from({ length: 96 }, () => {
+      const particle = document.createElement("i");
+      particle.className = "cursor-stardust-particle";
+      layer.append(particle);
+      return particle;
+    });
+    document.body.append(layer);
+
+    let particleIndex = 0;
+    let animationFrame = 0;
+    let lastPoint = null;
+    let pendingPoint = null;
+
+    function emitParticle(point, movementX, movementY, progress) {
+      const particle = particles[particleIndex % particles.length];
+      particleIndex += 1;
+      const movementLength = Math.hypot(movementX, movementY);
+      const directionX = movementLength ? movementX / movementLength : 0;
+      const directionY = movementLength ? movementY / movementLength : 0;
+      const normalX = -directionY;
+      const normalY = directionX;
+      const tailRatio = 1 - progress;
+      const trailLength = 60 + Math.min(110, movementLength * 2.8);
+      const backDistance = tailRatio * trailLength * (0.72 + Math.random() * 0.28);
+      const halfWidth = 5 + tailRatio * (44 + Math.min(36, movementLength * 0.6));
+      const sideDistance = (Math.random() * 2 - 1) * halfWidth;
+      const driftBack = 8 + tailRatio * 20 + Math.random() * 12;
+      const driftSide = (Math.random() - 0.5) * (18 + tailRatio * 32);
+      const x = point.x - directionX * backDistance + normalX * sideDistance;
+      const y = point.y - directionY * backDistance + normalY * sideDistance;
+      const driftX = -directionX * driftBack + normalX * driftSide;
+      const driftY = -directionY * driftBack + normalY * driftSide;
+
+      particle.style.left = `${x.toFixed(1)}px`;
+      particle.style.top = `${y.toFixed(1)}px`;
+      particle.style.setProperty("--cursor-dust-size", `${(2.4 + Math.random() * 2.8).toFixed(1)}px`);
+      particle.style.setProperty("--cursor-dust-opacity", `${(0.86 + Math.random() * 0.13).toFixed(2)}`);
+      particle.style.setProperty("--cursor-dust-drift-x", `${driftX.toFixed(1)}px`);
+      particle.style.setProperty("--cursor-dust-drift-y", `${driftY.toFixed(1)}px`);
+      particle.style.setProperty("--cursor-dust-duration", `${Math.round(680 + tailRatio * 240 + Math.random() * 280)}ms`);
+      particle.classList.remove("is-active");
+      void particle.offsetWidth;
+      particle.classList.add("is-active");
+    }
+
+    function drawCursorStardust(timestamp) {
+      animationFrame = 0;
+      if (!pendingPoint || !finePointer.matches || reducedMotion.matches) return;
+      const point = pendingPoint;
+      pendingPoint = null;
+      const movementX = lastPoint ? point.x - lastPoint.x : 0;
+      const movementY = lastPoint ? point.y - lastPoint.y : 0;
+      const movementLength = Math.hypot(movementX, movementY);
+      if (!lastPoint || movementLength >= 2) {
+        const emissionCount = !lastPoint ? 1 : movementLength >= 20 ? 3 : 2;
+        for (let index = 1; index <= emissionCount; index += 1) {
+          const progress = index / emissionCount;
+          emitParticle(point, movementX, movementY, progress);
+        }
+        lastPoint = point;
+      }
+    }
+
+    document.addEventListener("pointermove", (event) => {
+      if (event.pointerType && event.pointerType !== "mouse") return;
+      pendingPoint = { x: event.clientX, y: event.clientY };
+      if (!animationFrame) animationFrame = window.requestAnimationFrame(drawCursorStardust);
+    }, { passive: true });
+    document.addEventListener("pointerleave", () => {
+      pendingPoint = null;
+      lastPoint = null;
+    });
+  }
+
+  setupCursorStardust();
+
   const playLink = document.querySelector("[data-play-launch]");
   if (!playLink) return;
   playLink.href = localizedPlayUrl();

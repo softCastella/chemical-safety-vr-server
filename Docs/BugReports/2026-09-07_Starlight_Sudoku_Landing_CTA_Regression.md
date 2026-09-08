@@ -2,12 +2,14 @@
 
 ## 상태
 
-- **로컬 v103 수정 및 자동 검증 완료**
-- 변경 전 기준 커밋: `9a7da20`
+- **로컬 CSS v107·다국어 v37·동작 v42 수정 및 자동 검증 완료**
+- 변경 전 서버 기준 커밋: `7312db209a1557bb2f441e8c293e77aa100cf947`
+- 확인한 클라이언트 기준 커밋: `f6db61b405563c49168f20872bb13430cc03dbb1`
 - 운영 배포: 실행하지 않음
 - 사용자가 실제로 확인한 경로: `C:\Workspace\chemical-safety-vr-server\public\site\starlight-sudoku-landing\index.html`
 - 저장소 기본 작업 경로: `C:\Users\lanoc\OneDrive\문서\Workspace\chemical-safety-vr-server`
-- 두 경로는 별도 clone이지만 랜딩 코드·테스트·이미지와 본 버그 리포트를 같은 `v103` 내용으로 맞췄다.
+- 두 경로는 별도 clone이다. 현재 미커밋 변경은 `C:\Workspace` clone에만 있으며, OneDrive clone은 `5673fdb4df2181ba1a70dcf55681bb8f97595ee8` 상태로 이번 변경을 동기화하지 않았다.
+- 이번 변경은 서버가 제공하는 정적 랜딩에만 해당하며 Unity 클라이언트 코드·데이터 계약 변경은 없다.
 
 ### v95 이미지 마스크 시도 롤백과 v97 반영
 
@@ -27,6 +29,21 @@
 - `v102`에서 클릭 점 입자의 바깥 방향 이동을 제거했다. 점은 각 방사 별의 좌표에서 생성된 뒤 같은 자리에 머물며 작아지고 사라진다.
 - `v103`에서 점의 크기 변화와 CTA 클릭 축소도 제거해, 점 중심이 흔들리지 않고 같은 자리에서 밝아졌다가 투명해지도록 보정했다.
 - 클릭 직후와 중간 프레임의 24개 점 중심 좌표를 비교한 결과 최대 이동 거리는 `0px`였다.
+
+### 다국어 제목 v37과 포인터 금빛 별가루 v42
+
+- `landing-i18n.js?v=20260908-37`에서 영어·일본어·중국어 간체·중국어 번체 제목을 한국어와 같은 방식으로 의미 단위 줄바꿈했다.
+  - 영어: `Solve puzzles. / Gather starlight. / Bring morning back / to a night / frozen in time.`
+  - 일본어: `パズルを解いて / 星の光を集め、 / 止まった夜に / 朝を呼び戻そう。`
+  - 중국어 간체: `解开谜题， / 收集星光， / 让清晨重回 / 停驻的长夜。`
+  - 중국어 번체: `解開謎題， / 收集星光， / 讓清晨重回 / 停駐的長夜。`
+- `landing-launch.js?v=20260908-42`와 `landing.css?v=20260908-107`에 데스크톱 마우스용 금빛 별가루 트레일을 추가했다.
+- 커서 끝에는 입자를 즉시 표시하고, 나머지 입자는 이동 반대 방향으로 갈수록 좌우 폭과 수명이 커지는 부채꼴로 배치한다.
+- 이동 거리가 20px 이상이면 한 프레임에 3개, 그보다 작으면 2개를 배치하며 최초 진입은 현재 포인터 위치에 1개만 배치한다.
+- 입자는 96개 DOM 풀을 순환 재사용한다. 크기는 `2.4~5.2px`, opacity는 `0.86~0.99`, 지속 시간은 꼬리 위치에 따라 약 `0.68~1.2초`다.
+- 색은 흰색 중심과 샴페인 골드 후광을 사용한다. 십자형 입자와 위로 튀는 편향을 제거해 불꽃이 아니라 미세한 금가루처럼 보이도록 했다.
+- `(hover: hover) and (pointer: fine)` 환경에서만 생성하고, 터치 포인터와 `prefers-reduced-motion: reduce` 환경에서는 비활성화한다.
+- 사용자가 삭제한 공용 `Starlight Sdoku landing CTA.png`는 현재 코드에서 참조하지 않는다. 랜딩은 언어별 `CTA_KR/CN/TW/JP/EN.png`만 사용한다.
 
 ## 사용자 기대 결과
 
@@ -66,6 +83,9 @@
 - 안쪽으로 파인 꼭짓점까지 둥글어져 별 모양이 부자연스럽다.
 - 어두운 배경에서 바닥 그림자를 식별하기 어렵다.
 - 사각형으로 번지는 필터를 제거하면서 별 마스크 레이어의 hover 강화 글로우를 함께 복구하지 않아 hover 효과가 사라졌다.
+- 외국어 제목은 긴 문장 중간에 `<br>`가 한 번만 있어 화면 폭에 따라 번역의 의미와 무관한 위치에서 자동 줄바꿈됐다.
+- 최초 포인터 입자는 커서 주변에 밀집했고, 초반 fade-in과 뒤쪽 오프셋 때문에 포인터보다 늦게 따라오는 것처럼 보였다.
+- 십자형 하이라이트와 위쪽 이동 편향은 불꽃처럼 보였고, 이를 제거한 뒤 사용한 `0.9~2.5px` 입자는 기존 배경 별보다 작아 식별하기 어려웠다.
 
 ## 재현 절차
 
@@ -95,17 +115,22 @@
 
 충돌하던 후반 CSS를 제거하고 버튼 전체 필터를 끄는 과정에서 CTA 필수 효과를 항목별로 보존하는 회귀 확인을 하지 않았다. 사각형 글로우를 없앤 뒤 글로우를 별 마스크 pseudo-element로 완전히 옮기지 않았고, 별을 덜 뾰족하게 만들 때 바깥 끝의 곡률만 조절하지 않고 전체 외곽 반경과 안쪽 골까지 축소했다. 정지 화면의 위치를 먼저 확인하고 기본·hover 상태와 전체 애니메이션을 같은 검증 묶음으로 확인하지 않은 것이 추가 회귀의 원인이다.
 
+### 다국어 줄바꿈과 포인터 효과
+
+- 외국어 제목을 한 개의 긴 텍스트 노드로 두고 브라우저 자동 줄바꿈에 맡긴 것이 의미 단위가 깨진 원인이다.
+- 최초 포인터 효과는 커서 좌표 주변의 임의 반경과 위쪽 drift를 사용해 이동 방향을 표현하지 못했다.
+- 최종 구현은 직전 좌표와 현재 좌표의 방향 벡터로 진행 방향·법선 방향을 계산한다. 커서 끝은 좁게 유지하고 꼬리 비율이 커질수록 후방 거리와 법선 폭을 함께 늘려 부채꼴을 만든다.
+- CSS 애니메이션의 시작 opacity를 즉시 목표값으로 설정해 커서와 입자 사이의 시각적 지연을 제거했다.
+
 ## 현재 미커밋 변경 상태
 
 수정·추가된 관련 파일은 다음과 같다.
 
 - `public/site/starlight-sudoku-landing/index.html`
 - `public/site/starlight-sudoku-landing/landing-i18n.js`
+- `public/site/starlight-sudoku-landing/landing-launch.js`
 - `public/site/starlight-sudoku-landing/landing.css`
-- `public/site/starlight-sudoku-landing/Starlight Sdoku landing CTA.png`
-- `public/site/starlight-sudoku-landing/sudoku_number_1.png`
-- `public/site/starlight-sudoku-landing/sudoku_number_3.png`
-- `public/site/starlight-sudoku-landing/sudoku_number_7.png`
+- `public/site/starlight-sudoku-landing/Starlight Sdoku landing CTA.png` — 사용자 의도에 따라 삭제
 - `test/spark-site.test.js`
 - `Docs/BugReports/2026-09-07_Starlight_Sudoku_Landing_CTA_Regression.md`
 
@@ -205,11 +230,24 @@
   - 360ms 중간 프레임에서 보이는 입자: 18개, 최대 opacity 약 `0.672`
   - 같은 프레임에서 기존 주변 별 opacity 약 `0.568`로 감소
   - headless 캡처의 프레임을 고정하기 위해 Web Animations의 `currentTime`을 360ms로 이동해 시각 상태를 확인했다.
+- 영어·일본어·중국어 간체·중국어 번체 제목 문자열에 의도한 `<br>` 순서가 유지되는지 정적 회귀 하네스로 확인했다.
+- 포인터 동적 하네스에서 다음을 확인했다.
+  - 금빛 별가루 레이어와 96개 입자 풀이 한 번만 생성된다.
+  - 마우스 `pointermove` 후 첫 입자가 즉시 활성화된다.
+  - 빠른 이동에서는 한 프레임의 3개 입자가 모두 활성화된다.
+  - 터치 `pointermove`는 입자를 생성하지 않는다.
+- 최종 `node --test test/spark-site.test.js`: 7개 통과.
+- 최종 `npm test`: 86개 통과, 실패 0개.
+- 사용자가 실제 화면에서 포인터 끝은 즉시 반응하고 뒤쪽은 넓은 부채꼴 금가루로 퍼지는 최종 방향을 확인했다.
+- 저장소 전체 검색에서 삭제한 공용 `Starlight Sdoku landing CTA.png`의 코드 참조가 없음을 확인했다.
 
 ## 남은 수정과 검증
 
-1. 사용자가 실제 Chrome 화면에서 `v92` 구도와 hover·click 모션을 최종 확인한다.
-2. 승인 후 필요하면 커밋·푸시·운영 배포를 별도 수행한다.
+1. 커밋·푸시·운영 배포는 아직 실행하지 않았다.
+2. 배포 후 운영 URL에서 캐시 버전 `CSS v107`, `i18n v37`, `launch v42` 적용 여부를 확인한다.
+3. 운영 데스크톱 Chrome에서 금빛 별가루의 최종 밀도·길이와 언어별 제목 줄바꿈을 확인한다.
+4. 터치 기기와 모션 감소 설정에서 포인터 별가루가 표시되지 않는지 수동 확인한다.
+5. OneDrive clone에서도 작업할 필요가 생기면 현재 `C:\Workspace` 변경을 Git 커밋 기준으로 동기화한다.
 
 ## 영향 범위
 
