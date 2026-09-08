@@ -256,9 +256,26 @@ Nginx 설정을 별도 백업하고, 패치 기준 줄이 운영 설정과 일�
 - `http://www.tycheworks.com/*`와 `https://www.tycheworks.com/*`는 경로·쿼리를 보존해
   `https://tycheworks.com/*`로 `301` 전환
 - IMMERSA 카카오 공유 CSP의 `sharer.kakao.com`, `accounts.kakao.com`, `kapi.kakao.com` 허용 유지
+- 운영 문서 동기화 기준: `main@0924b105952c64bb232c596098e1e1a6b1b2136f`,
+  `production/spark-starlight-20260903@2aa8d32bcb96f9ae56b572248f45c1ef5769660d`
 
-남은 수동 검증은 Search Console의 `사용자가 선택한 표준이 없는 중복 페이지`에서
-`https://www.tycheworks.com/` 항목에 대해 `수정 결과 확인`을 시작하고 Google 재크롤링 결과를 기다리는 것이다.
+#### Search Console 수동 조치 결과
+
+2026-09-08에 Search Console의 도메인 속성 `tycheworks.com`에서 다음 조치를 완료했다.
+
+- `사용자가 선택한 표준이 없는 중복 페이지`의 `https://www.tycheworks.com/`에 대해
+  `수정 결과 확인`을 실행했다. 유효성 검사는 `시작됨`, 접수 중 1개, 실패 0개로 확인했다.
+- `리디렉션이 포함된 페이지`의 `http://tycheworks.com/`과 `http://www.tycheworks.com/`도
+  유효성 검사 `시작됨` 상태를 확인했다.
+- 화면에 표시된 `https://www.tycheworks.com/`의 최종 크롤링 날짜는 2026-09-03으로,
+  2026-09-08의 서버 수정·배포보다 이전 기록이다. 해당 URL이 결과 목록에 남아 있는 것은
+  재크롤링 전의 정상적인 지연이며 추가 색인 요청이나 삭제 요청을 반복하지 않는다.
+
+남은 수동 검증은 Google의 재크롤링 완료를 기다린 뒤 유효성 검사 성공 여부를 확인하는 것이다.
+처리에는 며칠에서 몇 주가 걸릴 수 있다. `www` 또는 HTTP 주소가 이후
+`리디렉션이 포함된 페이지`로 분류되는 것은 정상이며, 이 주소들은 색인 대상이 아니다.
+대표 주소 `https://tycheworks.com/`만 색인 대상으로 유지한다. 유효성 검사가 실패하면 실패 URL의
+최종 크롤링 날짜가 2026-09-08 이후인지 먼저 확인하고, 그 경우에만 운영 `301` 응답을 다시 점검한다.
 
 핵심 결과는 다음 명령으로 다시 확인할 수 있다. 다른 공개 호스트와 경로에도 같은 검사를 반복한다.
 
@@ -607,8 +624,11 @@ Nginx가 정적 파일을 직접 제공하므로 PM2 재시작, Nginx reload, DB
 ### 완료 검증과 남은 수동 검증
 
 - 정적 회귀 테스트에서 네 패밀리의 기본 타이포 값, 모바일 전체 메뉴 노출, 줄바꿈 규칙을 확인한다.
-- 인앱 브라우저 연결 대상이 없어 렌더링 비교는 수행하지 못했다. 배포 후 320px, 375px,
-  430px 너비에서 메뉴 누락·가로 잘림·헤더 높이와 sticky 동작을 수동 확인한다.
+- 구현 기준은 `main@6bafdca63c884e52f204226aba7702ad0c2964b7`, 캐시 갱신 기준은
+  `main@4767d11b0cf26fdde68b8bff39b514c904c19a70`, 운영 반영 기준은
+  `production/spark-starlight-20260903@a0e54e09b6c941cf66ab4aa4a1579395b8dfb819`이다.
+- 운영 배포 후 모바일 페이지에서 메뉴 노출과 줄바꿈 반영을 확인했다. 기기별 차이를 점검할 때는
+  320px, 375px, 430px 너비에서 메뉴 누락·가로 잘림·헤더 높이와 sticky 동작을 확인한다.
 
 ## Resend 문의 폼과 VR 상세 공유 운영 배포
 
@@ -727,6 +747,13 @@ Kakao SDK가 공유 팝업의 크기와 로그인·친구 선택 흐름을 관�
 `connect-src`의 카카오 API 출처를 유지하면서, 데스크톱 로그인 리디렉션에 필요한
 `accounts.kakao.com`을 `form-action`에 추가하는 교체 패치다. SDK는 2.8.3과 해당 SRI 해시를 사용하고
 `detail-share.js` 참조 버전은 `20260908-1`이다.
+
+모바일 CSP와 공유 코드의 구현 기준은 `main@6bafdca63c884e52f204226aba7702ad0c2964b7`,
+데스크톱 `about:blank` 수정 기준은 `main@900ec73d9853cd6c49d809ef7ec895093a7815c2`이다.
+운영 반영 기준은 각각
+`production/spark-starlight-20260903@a0e54e09b6c941cf66ab4aa4a1579395b8dfb819`과
+`production/spark-starlight-20260903@0f9154a65b8739580c89f3ab21e58dc18f1db38d`이며, 반영 후 모바일 공유와 데스크톱 팝업 이동을
+수동 확인했다.
 
 저장소 변경만으로 운영 CSP는 바뀌지 않는다. 운영 적용 시에는 기존 설정을 별도 백업하고 패치의
 대상 서버 블록을 확인한 뒤 `nginx -t` 통과 후 Nginx를 다시 불러온다. PM2 재시작과 DB 변경은
