@@ -228,6 +228,24 @@ SEO 기본 점수는 canonical, 사이트맵과 공유 메타 완전성을 검�
 2. 대형 이미지를 변환하고 캐시·HTTP/2 적용 후 Lighthouse를 재실행한다. Search Console에서는 각 호스트
    소유권, 사이트맵 처리, URL 검사, 페이지 색인과 보안 문제 보고서를 별도로 확인한다.
 
+### WWW 대표 URL 통합
+
+Google Search Console은 `https://www.tycheworks.com/`을 `https://tycheworks.com/`과 내용이 같은
+중복 페이지로 발견했다. HTTP 주소 두 개가 HTTPS로 이동하는 것은 의도한 동작이지만, 기존 HTTPS 서버
+블록은 `www`와 루트 도메인에 같은 HTML을 `200`으로 제공해 검색 신호가 나뉠 수 있었다.
+
+`ops/nginx/tycheworks-www-canonical-redirect.patch`는 다음 두 경로를 모두 경로와 쿼리를 보존한
+단일 `301` 응답으로 대표 URL에 통합한다.
+
+- `http://www.tycheworks.com/*` → `https://tycheworks.com/*`
+- `https://www.tycheworks.com/*` → `https://tycheworks.com/*`
+
+루트 도메인 `https://tycheworks.com/*`의 기존 정적 페이지와 API 동작은 변경하지 않는다. 적용 전 활성
+Nginx 설정을 별도 백업하고, 패치 기준 줄이 운영 설정과 일치하는지 확인한 다음 `nginx -t` 통과 시에만
+다시 불러온다. 적용 후에는 루트 URL `200`, 두 WWW URL `301`, 경로·쿼리 보존과 Search Console의
+사용자 선언 canonical을 확인한다. Search Console의 기존 제외 보고서는 Google 재크롤링 뒤 갱신되며,
+리디렉션 URL 자체는 색인 대상이 아니다.
+
 핵심 결과는 다음 명령으로 다시 확인할 수 있다. 다른 공개 호스트와 경로에도 같은 검사를 반복한다.
 
 ```powershell
