@@ -7,7 +7,7 @@ img{display:block;max-width:100%}
 .shell{width:min(var(--shell),calc(100% - 40px));margin:auto}
 .spark-header{position:sticky;top:0;z-index:50;height:76px;display:flex;align-items:center;justify-content:space-between;padding:0 max(20px,calc((100vw - var(--shell))/2));border-bottom:1px solid rgba(16,23,40,.1);background:rgba(255,255,255,.94);backdrop-filter:blur(16px)}
 .spark-brand{display:flex;align-items:center}.spark-brand img{width:164px;height:62px;object-fit:contain;object-position:left center}
-.spark-nav{display:flex;align-items:center;gap:25px;color:#5c6470;font-size:12px;font-weight:850;letter-spacing:.08em}.spark-nav a{transition:color .2s}.spark-nav a:hover{color:var(--orange)}
+.spark-nav{display:flex;align-items:center;gap:25px;color:#66707b;font-size:12px;font-weight:800;line-height:1.2;letter-spacing:.08em;text-transform:uppercase}.spark-nav a{transition:color .2s}.spark-nav a:hover{color:var(--orange)}
 .night-sky{position:relative;isolation:isolate;color:#fff;background:radial-gradient(circle at 18% 10%,rgba(116,154,218,.18),transparent 27%),radial-gradient(circle at 75% 25%,rgba(240,199,106,.08),transparent 23%),linear-gradient(180deg,#0a162f,#11264b 72%,#1a3158)}
 .night-sky:before,.night-sky:after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background-image:radial-gradient(circle,#ffe8a9 0 1px,transparent 1.5px),radial-gradient(circle,#fff 0 1px,transparent 1.6px);background-position:0 0,37px 46px;background-size:91px 91px,137px 137px;opacity:.32}
 .night-sky:after{background-image:radial-gradient(circle,#ffe8a9 0 2px,transparent 2.5px);background-size:233px 211px;background-position:82px 28px;opacity:.25}
@@ -77,3 +77,6 @@ img{display:block;max-width:100%}
 .detail-subnav .locale-switcher{position:static;right:auto;top:auto}
 @media(max-width:720px){.detail-subnav{min-height:100px;align-items:stretch;flex-direction:column;gap:8px;padding:10px 14px}.detail-toc{gap:18px;align-self:flex-start}.detail-subnav .locale-switcher{align-self:flex-end}.detail-header .spark-nav a:nth-child(3),.detail-header .spark-nav a:nth-child(4){display:none}}
 @media(max-width:480px){.detail-header .spark-nav a:nth-child(2){display:none}.detail-toc{width:100%;justify-content:space-between;gap:8px}.detail-toc a{font-size:10px}}
+
+/* Keep every desktop destination available on mobile SPARK headers. */
+@media(max-width:720px){.spark-header{height:auto;min-height:108px;align-content:center;flex-wrap:wrap;gap:4px 14px;padding:8px 14px 10px}.spark-nav{flex:1 0 100%;order:2;justify-content:space-between;flex-wrap:wrap;gap:4px 10px;font-size:12px;white-space:nowrap}.spark-nav a{display:block!important}}

@@ -43,8 +43,8 @@ if (shareButton && shareDialog && shareBackdrop && shareStatus) {
     if (!window.Kakao) {
       await new Promise((resolve, reject) => {
         const script = document.createElement("script");
-        script.src = "https://t1.kakaocdn.net/kakao_js_sdk/2.8.2/kakao.min.js";
-        script.integrity = "sha384-zt/G7/KfaRQ9dT/QIkS0ujMtzouJqzuSJcXVQu50x0rl/+mD1dc70AeOejVbMD9E";
+        script.src = "https://t1.kakaocdn.net/kakao_js_sdk/2.8.3/kakao.min.js";
+        script.integrity = "sha384-oroumrnFVE0xtgqyDZJARgERibXg2C28380uaUZz2kHDS5CR7tu20eGiOU6GkTpy";
         script.crossOrigin = "anonymous";
         script.addEventListener("load", resolve, { once: true });
         script.addEventListener("error", reject, { once: true });
