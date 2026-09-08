@@ -246,6 +246,20 @@ Nginx 설정을 별도 백업하고, 패치 기준 줄이 운영 설정과 일�
 사용자 선언 canonical을 확인한다. Search Console의 기존 제외 보고서는 Google 재크롤링 뒤 갱신되며,
 리디렉션 URL 자체는 색인 대상이 아니다.
 
+#### 2026-09-08 운영 적용 결과
+
+- 메인 구현 커밋: `main@21b1065858db5442b40e4c865742d9acdb635eb0`
+- 운영 브랜치 병합 커밋: `production/spark-starlight-20260903@9fd90db9f814c6beb142df7041870772a5ebd40d`
+- 활성 설정 백업: `/home/linuxuser/.config/tycheworks/nginx-backups/tycheworks-20260908-www-canonical-before.conf`
+- 로컬과 운영 서버에서 자동 테스트 85개, `git diff --check`, Nginx 패치 dry-run과 `nginx -t` 통과
+- Nginx reload 후 서비스 `active`, `https://tycheworks.com/`과 `/brand`는 `200` 유지
+- `http://www.tycheworks.com/*`와 `https://www.tycheworks.com/*`는 경로·쿼리를 보존해
+  `https://tycheworks.com/*`로 `301` 전환
+- IMMERSA 카카오 공유 CSP의 `sharer.kakao.com`, `accounts.kakao.com`, `kapi.kakao.com` 허용 유지
+
+남은 수동 검증은 Search Console의 `사용자가 선택한 표준이 없는 중복 페이지`에서
+`https://www.tycheworks.com/` 항목에 대해 `수정 결과 확인`을 시작하고 Google 재크롤링 결과를 기다리는 것이다.
+
 핵심 결과는 다음 명령으로 다시 확인할 수 있다. 다른 공개 호스트와 경로에도 같은 검사를 반복한다.
 
 ```powershell
