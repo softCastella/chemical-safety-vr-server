@@ -139,11 +139,19 @@ test("별빛 스도쿠 랜딩은 모바일 크기 웹 체험판을 연결한다"
   assert.match(css, /\.project-label:focus-visible\{[^}]*outline:/);
   assert.match(html, /class="play-scroll-button" href="https:\/\/softcastella\.github\.io\/Starlight-Sudoku\/" target="_blank" rel="noopener noreferrer" data-play-launch/);
   assert.doesNotMatch(html, /id="play-demo"|data-start-game|landing-game\.js/);
-  assert.match(html, /landing\.css\?v=20260907-103/);
-  assert.match(html, /landing-i18n\.js\?v=20260908-36/);
-  assert.match(html, /landing-launch\.js\?v=20260907-37/);
+  assert.match(html, /landing\.css\?v=20260908-107/);
+  assert.match(html, /landing-i18n\.js\?v=20260908-37/);
+  assert.match(html, /landing-launch\.js\?v=20260908-42/);
   assert.match(html, /data-i18n="title">퍼즐을 풀어<br>별빛을 모으고,<br><strong>멈춰버린 밤에<br>아침을 불러오세요\.<\/strong>/);
   assert.match(script, /title: "퍼즐을 풀어<br>별빛을 모으고,<br><strong>멈춰버린 밤에<br>아침을 불러오세요\.<\/strong>"/);
+  for (const localizedTitle of [
+    'title: "Solve puzzles.<br>Gather starlight.<br><strong>Bring morning back<br>to a night<br>frozen in time.</strong>"',
+    'title: "パズルを解いて<br>星の光を集め、<br><strong>止まった夜に<br>朝を呼び戻そう。</strong>"',
+    'title: "解开谜题，<br>收集星光，<br><strong>让清晨重回<br>停驻的长夜。</strong>"',
+    'title: "解開謎題，<br>收集星光，<br><strong>讓清晨重回<br>停駐的長夜。</strong>"',
+  ]) {
+    assert.ok(script.includes(localizedTitle), `${localizedTitle} 의미 단위 줄바꿈이 유지되어야 한다`);
+  }
   assert.match(html, /data-i18n="body">숫자 속에 흩어진 별빛을 모아 잠든 마을의 장소들을 하나씩 밝혀 나가는 감성 스도쿠 게임<\/p>/);
   assert.match(script, /body: "숫자 속에 흩어진 별빛을 모아 잠든 마을의 장소들을 하나씩 밝혀 나가는 감성 스도쿠 게임"/);
   assert.match(script, /playCta: "지금<br>플레이해보세요"/);
@@ -179,6 +187,23 @@ test("별빛 스도쿠 랜딩은 모바일 크기 웹 체험판을 연결한다"
   assert.match(launchScript, /function createStaticStarField\(container, count, seed\)/);
   assert.match(launchScript, /createStaticStarField\(stars, 240, 20260904\)/);
   assert.match(launchScript, /lowerSky = random\(\) < 0\.68/);
+  assert.match(launchScript, /function setupCursorStardust\(\)/);
+  assert.match(launchScript, /window\.matchMedia\("\(hover: hover\) and \(pointer: fine\)"\)/);
+  assert.match(launchScript, /window\.matchMedia\("\(prefers-reduced-motion: reduce\)"\)/);
+  assert.match(launchScript, /Array\.from\(\{ length: 96 \}/);
+  assert.match(launchScript, /const trailLength = 60 \+ Math\.min\(110, movementLength \* 2\.8\)/);
+  assert.match(launchScript, /const halfWidth = 5 \+ tailRatio \* \(44 \+ Math\.min\(36, movementLength \* 0\.6\)\)/);
+  assert.match(launchScript, /const sideDistance = \(Math\.random\(\) \* 2 - 1\) \* halfWidth/);
+  assert.match(launchScript, /const emissionCount = !lastPoint \? 1 : movementLength >= 20 \? 3 : 2/);
+  assert.match(launchScript, /document\.addEventListener\("pointermove"/);
+  assert.match(launchScript, /window\.requestAnimationFrame\(drawCursorStardust\)/);
+  assert.match(css, /\.cursor-stardust\{[^}]*position:fixed;[^}]*pointer-events:none;[^}]*contain:strict/);
+  assert.match(css, /\.cursor-stardust-particle\{[^}]*#f7d66f[^}]*rgba\(235,178,54,\.48\)[^}]*mix-blend-mode:screen/);
+  assert.match(launchScript, /0\.86 \+ Math\.random\(\) \* 0\.13/);
+  assert.match(css, /0%\{opacity:var\(--cursor-dust-opacity\)/);
+  assert.doesNotMatch(css, /\.cursor-stardust-particle\.is-spark/);
+  assert.match(css, /\.cursor-stardust-particle\.is-active\{animation:cursor-stardust-trail/);
+  assert.match(css, /@media\(pointer:coarse\),\(prefers-reduced-motion:reduce\)\{\.cursor-stardust\{display:none\}\}/);
   assert.match(css, /\.stars,\.demo-stars\{opacity:1;background:none\}/);
   assert.match(css, /\.star-dust\{[^}]*background:#ffe8a0/);
   assert.match(css, /\.star-dot\{[^}]*background:#ffd86a/);
@@ -253,6 +278,78 @@ test("별빛 스도쿠 랜딩은 모바일 크기 웹 체험판을 연결한다"
   assert.match(css, /@media\(min-width:681px\)\{\.game-mark\{margin-bottom:46px\}\}/);
   assert.match(css, /@keyframes launch-arrow/);
   assert.doesNotMatch(css, /star-drift/);
+});
+
+test("별빛 스도쿠 랜딩의 금빛 별가루 커서는 입자 풀을 재사용한다", async () => {
+  const script = await readFile(new URL("starlight-sudoku-landing/landing-launch.js", siteRoot), "utf8");
+  const listeners = new Map();
+  const bodyChildren = [];
+  let scheduledFrame = null;
+
+  function createElement() {
+    const element = {
+      className: "",
+      children: [],
+      attributes: new Map(),
+      style: {
+        properties: new Map(),
+        setProperty(name, value) { this.properties.set(name, value); },
+      },
+      append(child) { this.children.push(child); },
+      setAttribute(name, value) { this.attributes.set(name, value); },
+      get offsetWidth() { return 1; },
+    };
+    element.classList = {
+      contains: (name) => element.className.split(" ").includes(name),
+      add: (name) => {
+        if (!element.classList.contains(name)) element.className = `${element.className} ${name}`.trim();
+      },
+      remove: (name) => {
+        element.className = element.className.split(" ").filter((value) => value && value !== name).join(" ");
+      },
+    };
+    return element;
+  }
+
+  const document = {
+    body: { append: (child) => bodyChildren.push(child) },
+    createElement,
+    querySelector: () => null,
+    addEventListener: (name, listener) => listeners.set(name, listener),
+  };
+  const window = {
+    matchMedia: (query) => ({ matches: query.includes("pointer: fine") }),
+    requestAnimationFrame: (callback) => {
+      scheduledFrame = callback;
+      return 1;
+    },
+  };
+
+  vm.runInNewContext(script, { document, window, URL, Math });
+
+  assert.equal(bodyChildren.length, 1);
+  const layer = bodyChildren[0];
+  assert.equal(layer.className, "cursor-stardust");
+  assert.equal(layer.attributes.get("aria-hidden"), "true");
+  assert.equal(layer.children.length, 96);
+  assert.ok(listeners.has("pointermove"));
+
+  listeners.get("pointermove")({ pointerType: "mouse", clientX: 120, clientY: 84 });
+  assert.equal(typeof scheduledFrame, "function");
+  scheduledFrame(30);
+  assert.ok(layer.children[0].classList.contains("is-active"));
+  assert.notEqual(layer.children[0].style.left, "");
+  assert.ok(layer.children[0].style.properties.has("--cursor-dust-duration"));
+  assert.ok(layer.children[0].style.properties.has("--cursor-dust-opacity"));
+
+  scheduledFrame = null;
+  listeners.get("pointermove")({ pointerType: "mouse", clientX: 180, clientY: 84 });
+  scheduledFrame(60);
+  assert.ok(layer.children[3].classList.contains("is-active"), "빠른 이동 구간을 보간해 긴 꼬리를 만들어야 한다");
+
+  scheduledFrame = null;
+  listeners.get("pointermove")({ pointerType: "touch", clientX: 40, clientY: 40 });
+  assert.equal(scheduledFrame, null);
 });
 
 test("별빛 스도쿠 랜딩은 선택 언어의 탭 제목과 CTA 이미지를 실제로 적용한다", async () => {
