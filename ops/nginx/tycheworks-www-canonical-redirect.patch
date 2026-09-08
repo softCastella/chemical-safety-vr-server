@@ -1,0 +1,14 @@
+--- tycheworks
++++ tycheworks
+@@ -10,2 +10,6 @@
+ server {
++    if ($host = www.tycheworks.com) {
++        return 301 https://tycheworks.com$request_uri;
++    }
++
+     server_name tycheworks.com www.tycheworks.com;
+@@ -161,3 +165,3 @@
+ server {
+     if ($host = www.tycheworks.com) {
+-        return 301 https://$host$request_uri;
++        return 301 https://tycheworks.com$request_uri;

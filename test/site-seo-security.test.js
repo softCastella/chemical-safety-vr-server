@@ -73,6 +73,7 @@ test("Nginx 배포 초안은 공개 호스트 보안과 이전 경로 정책을 
   const legacyRoutes = await readFile(new URL("tycheworks-legacy-routes.conf", nginxRoot), "utf8");
   const starlight = await readFile(new URL("tycheworks-starlight-sudoku.conf", nginxRoot), "utf8");
   const immersaKakaoCspPatch = await readFile(new URL("tycheworks-immersa-kakao-share-csp.patch", nginxRoot), "utf8");
+  const wwwCanonicalPatch = await readFile(new URL("tycheworks-www-canonical-redirect.patch", nginxRoot), "utf8");
 
   assert.match(hardening, /server_tokens off;/);
   assert.match(hardening, /http2 on;/);
@@ -90,6 +91,11 @@ test("Nginx 배포 초안은 공개 호스트 보안과 이전 경로 정책을 
     /form-action 'self' https:\/\/sharer\.kakao\.com https:\/\/accounts\.kakao\.com/,
   );
   assert.match(immersaKakaoCspPatch, /connect-src 'self' https:\/\/kapi\.kakao\.com/);
+  assert.equal(
+    (wwwCanonicalPatch.match(/^\+\s+return 301 https:\/\/tycheworks\.com\$request_uri;/gm) || []).length,
+    2,
+  );
+  assert.doesNotMatch(wwwCanonicalPatch, /^\+\s+return 301 https:\/\/\$host\$request_uri;/m);
 });
 
 test("비공개 시안과 개인정보 문서는 검색 색인에서 제외한다", async () => {
