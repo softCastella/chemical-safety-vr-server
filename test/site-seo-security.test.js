@@ -85,7 +85,10 @@ test("Nginx 배포 초안은 공개 호스트 보안과 이전 경로 정책을 
   assert.match(starlight, /include .*tycheworks-public-hardening\.conf;/);
   assert.doesNotMatch(starlight, /location = \/index\.html/);
   assert.doesNotMatch(starlight, /location ~\* \\\.\(\?:css\|js\|png/);
-  assert.match(immersaKakaoCspPatch, /form-action 'self' https:\/\/sharer\.kakao\.com/);
+  assert.match(
+    immersaKakaoCspPatch,
+    /form-action 'self' https:\/\/sharer\.kakao\.com https:\/\/accounts\.kakao\.com/,
+  );
   assert.match(immersaKakaoCspPatch, /connect-src 'self' https:\/\/kapi\.kakao\.com/);
 });
 
