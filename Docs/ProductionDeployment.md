@@ -669,27 +669,32 @@ Kakao SDK가 공유 팝업의 크기와 로그인·친구 선택 흐름을 관�
 카카오 SDK와 공유 폼이 CSP에 차단되지 않도록 운영 Nginx 정책에 다음 출처를 허용한다.
 
 - `script-src`: `https://t1.kakaocdn.net`
-- `form-action`: `https://sharer.kakao.com`
+- `form-action`: `https://sharer.kakao.com`, `https://accounts.kakao.com`
 - `connect-src`: `https://kapi.kakao.com`
 
 모바일 브라우저에서는 SDK가 카카오톡 앱을 열기 전에 `kapi.kakao.com`의
-`/v2/api/kakaolink/talk/template/default`로 템플릿을 검증한다. 데스크톱 브라우저는
-`sharer.kakao.com/picker/link`로 폼을 제출하므로 기존 정책에서도 공유 선택 화면이 열릴 수 있지만,
-기존 운영 CSP의 `connect-src 'self'`는 모바일 검증 요청을 차단했다. 이 차이가 모바일에서 빈 탭 또는
-실패 화면만 남는 근본 원인이다.
+`/v2/api/kakaolink/talk/template/default`로 템플릿을 검증한다. 기존 운영 CSP의
+`connect-src 'self'`는 이 요청을 차단해 모바일에서 빈 탭 또는 실패 화면을 남겼다.
+
+데스크톱 브라우저는 `sharer.kakao.com/picker/link`로 폼을 제출하고, 카카오 로그인이 없으면
+`accounts.kakao.com/login`으로 이동한다. Chrome은 `form-action`을 리디렉션 목적지에도 적용하므로
+`sharer.kakao.com`만 허용하면 최초 공유 팝업은 열리지만 계정 로그인 이동이 차단되어 `about:blank`로
+남는다.
 
 운영 키를 노출하지 않는 읽기 전용 점검에서 다음을 확인했다.
 
 - `GET https://immersa.tycheworks.com/api/public-site-config`: `200`, `Cache-Control: no-store`
 - 현재 앱 키·호출 도메인·기본 피드 템플릿으로 `https://sharer.kakao.com/picker/link` 검증:
   카카오 계정 로그인 화면까지 `200`으로 진행
-- 운영 `immersa.tycheworks.com` CSP: `script-src`와 `form-action`은 허용되어 있으나
-  `connect-src`에는 `https://kapi.kakao.com`이 누락됨
+- 운영 `immersa.tycheworks.com` CSP와 SDK 2.8.3에서 모바일 공유 정상 동작 확인
+- 격리된 데스크톱 Chrome에서 공유 클릭 시 `about:blank`를 재현하고, 브라우저 보안 로그에서
+  `form-action` 차단을 확인
+- 같은 조건에서 CSP 검사를 우회한 진단 실행은 `accounts.kakao.com/login` 화면까지 이동함을 확인
 
-저장소의 `ops/nginx/tycheworks-immersa-kakao-share-csp.patch`는 IMMERSA 서버 블록에서 기존 CSP
-한 줄의 `connect-src`에 카카오 API 출처를 추가하는 교체 패치다. 같은 SDK 파일을 장기 캐시한
-브라우저가 남지 않도록 SDK를 2.8.3과 해당 SRI 해시로 갱신하고 `detail-share.js` 참조 버전도
-`20260908-1`로 변경했다.
+저장소의 `ops/nginx/tycheworks-immersa-kakao-share-csp.patch`는 IMMERSA 서버 블록에서 모바일용
+`connect-src`의 카카오 API 출처를 유지하면서, 데스크톱 로그인 리디렉션에 필요한
+`accounts.kakao.com`을 `form-action`에 추가하는 교체 패치다. SDK는 2.8.3과 해당 SRI 해시를 사용하고
+`detail-share.js` 참조 버전은 `20260908-1`이다.
 
 저장소 변경만으로 운영 CSP는 바뀌지 않는다. 운영 적용 시에는 기존 설정을 별도 백업하고 패치의
 대상 서버 블록을 확인한 뒤 `nginx -t` 통과 후 Nginx를 다시 불러온다. PM2 재시작과 DB 변경은
@@ -697,13 +702,15 @@ Kakao SDK가 공유 팝업의 크기와 로그인·친구 선택 흐름을 관�
 별도로 수행한다.
 
 1. 상세페이지 공유 모달 열기·닫기와 키보드 `Escape` 동작을 확인한다.
-2. 카카오톡에서 새 메시지를 공유하고 이미지 비율, 본문과 `VR 상세페이지 보기` 링크를 확인한다.
-3. 카카오 Developers 설정 변경은 이미 보낸 메시지에 소급 적용되지 않으므로 반드시 새 카드로
+2. 데스크톱 Chrome에서 카카오 공유 팝업이 `about:blank`에 머물지 않고 계정 로그인 또는 공유 선택
+   화면으로 이동하는지 확인한다.
+3. 모바일 카카오톡에서 새 메시지를 공유하고 이미지 비율, 본문과 `VR 상세페이지 보기` 링크를 확인한다.
+4. 카카오 Developers 설정 변경은 이미 보낸 메시지에 소급 적용되지 않으므로 반드시 새 카드로
    확인한다.
-4. 네이버 공유가 빈 페이지가 아닌 공식 공유 화면을 열고 제목과 URL을 전달하는지 확인한다.
-5. Facebook, X, LinkedIn, Telegram과 LINE에서 공개 URL 및 OG 미리보기를 확인한다. 각 서비스가
+5. 네이버 공유가 빈 페이지가 아닌 공식 공유 화면을 열고 제목과 URL을 전달하는지 확인한다.
+6. Facebook, X, LinkedIn, Telegram과 LINE에서 공개 URL 및 OG 미리보기를 확인한다. 각 서비스가
    이전 미리보기를 캐시하면 서비스별 캐시 갱신 도구 또는 새 공유 요청으로 다시 확인한다.
-6. 모바일 Chrome과 Safari에서 개발자 도구 또는 CSP 보고로 `kapi.kakao.com` 차단이 사라졌는지
+7. 모바일 Chrome과 Safari에서 개발자 도구 또는 CSP 보고로 `kapi.kakao.com` 차단이 사라졌는지
    확인하고, 카카오톡 앱의 친구·채팅방 선택 화면이 실제로 열리는지 확인한다.
 
 ## SPARK 별빛 스도쿠 운영 배포
