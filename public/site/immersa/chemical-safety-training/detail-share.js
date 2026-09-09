@@ -81,6 +81,38 @@ if (shareButton && shareDialog && shareBackdrop && shareStatus) {
     }
   }
 
+  async function copyShareUrl() {
+    if (navigator.clipboard?.writeText) {
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        return true;
+      } catch {
+        // 권한 거부나 미지원 환경에서는 아래 선택 복사 방식으로 다시 시도한다.
+      }
+    }
+
+    const copyField = document.createElement("textarea");
+    copyField.value = shareUrl;
+    copyField.setAttribute("readonly", "");
+    copyField.setAttribute("aria-hidden", "true");
+    copyField.style.position = "fixed";
+    copyField.style.left = "-9999px";
+    copyField.style.opacity = "0";
+    copyField.style.pointerEvents = "none";
+    document.body.append(copyField);
+    copyField.focus({ preventScroll: true });
+    copyField.select();
+    copyField.setSelectionRange(0, copyField.value.length);
+
+    try {
+      return document.execCommand("copy");
+    } catch {
+      return false;
+    } finally {
+      copyField.remove();
+    }
+  }
+
   for (const link of platformLinks) {
     link.href = platformUrls[link.dataset.sharePlatform];
     link.addEventListener("click", () => {
@@ -134,11 +166,13 @@ if (shareButton && shareDialog && shareBackdrop && shareStatus) {
   }
 
   copyButton.addEventListener("click", async () => {
-    try {
-      await navigator.clipboard.writeText(shareUrl);
+    const copied = await copyShareUrl();
+
+    if (copied) {
       setDialogOpen(false);
       showStatus("링크를 복사했습니다");
-    } catch {
+    } else {
+      copyButton.focus();
       showStatus("주소창의 링크를 복사해주세요");
     }
   });
