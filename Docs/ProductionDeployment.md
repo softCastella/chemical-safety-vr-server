@@ -1041,3 +1041,23 @@ Google Search Console 소유권 확인 TXT는 Vultr DNS의 `tycheworks.com` 루�
 - GitHub Pages 체험판이 HTTP `200`, `text/html`로 응답하는 것을 확인
 - PM2와 Nginx를 재시작하지 않았고 DB 마이그레이션, 운영 DB·환경 변수와 사용자 데이터도
   변경하지 않았다.
+
+## 2026-09-09 Meta Alpha Release 텔레메트리 수신 준비
+
+- 운영 구현 기준은 `main@5b8138865991408215011078328f74a0df229982`다. Vultr에 fast-forward한 뒤
+  `npm ci`와 자동 테스트 93개를 통과했다.
+- 변경 전 운영 `.env`와 DB를 저장소 밖에 백업했다. 채택한 DB 백업은
+  `--no-tablespaces --single-transaction` 방식이며 gzip 무결성, dump 완료 마커와 SHA-256
+  `ff524514c7ea1187cb4f496e305b5c2dc67fbd7f8e1ad92d6c694dc22262`를 확인했다.
+- 실제 Meta App Secret은 보안 입력으로 서버에서만 `OC|APP_ID|APP_SECRET` 형식의 App Access Token을
+  구성했다. `.env`와 백업은 권한 `600`이며 secret·token 원문을 명령 출력·Git·문서에 남기지 않았다.
+- training telemetry migration `009`~`012`를 새로 적용해 전체 16개가 됐다. 초기 참여자·세션·이벤트는
+  모두 0건이다.
+- PM2를 재시작해 `online`, 내부 health `200`, 빈 인증 요청 `400`, 비인증 조회 `401`을 확인했다.
+- `/etc/nginx/sites-available/tycheworks`를 백업한 뒤 IMMERSA HTTPS 서버 블록에
+  `ops/nginx/tycheworks-immersa-training-telemetry.conf`를 include했다. 이 경로는 POST만 허용하고
+  `public_site` rate limit, 1MB 본문 상한과 짧은 upstream timeout을 사용한다.
+- `nginx -t` 통과 후 reload했으며 공개 인증 POST `400`, 공개 조회 GET `403`, 기존 health와 IMMERSA
+  상세페이지 `200`, TLS 검증 성공을 확인했다.
+- 실제 Meta User Proof와 Quest Release 세션 적재는 아직 확인하지 않았다. code 6 생성 전에 테스트 사용자
+  한 명으로 인증·세션·이벤트·완료·중복 재전송과 DB 원본을 대조한다.

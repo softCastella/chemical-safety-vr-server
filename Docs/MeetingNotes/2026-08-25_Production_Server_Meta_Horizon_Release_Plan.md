@@ -2419,8 +2419,8 @@ Meta 업로드 검사가 첫 출시 서명 APK에서 Android Target SDK 36, 자�
 
 ### 현재 확인 상태
 
-- 클라이언트 기준: `main@b840b2dc2e4d0235c087fb4693a1486bd21dab9c`, 서버 기준:
-  `main@efbf6d58bafb1aa2bee116d97e1d481f45fb2cf5`.
+- 클라이언트 기준: `main@b840b2dc2e4d0235c087fb4693a1486bd21dab9c`, 서버 구현·운영 반영 기준:
+  `main@5b8138865991408215011078328f74a0df229982`.
 - code 5 Development APK는 보존되어 있고 code 6 Release APK는 아직 없다. 이는 1~2단계 구현 중에는
   정상적인 대기 상태다.
 - 서버 Release 인증과 클라이언트 Release HTTPS 전송 경로를 구현한 뒤
@@ -2432,9 +2432,12 @@ Meta 업로드 검사가 첫 출시 서명 APK에서 Android Target SDK 36, 자�
 ### 완료 검증과 아직 필요한 검증
 
 - 완료: 역할·순서·단계별 진입 조건 문서화, Meta User Proof 서버 검증, 검증 사용자용 단기 토큰,
-  세션 소유권 검사, 클라이언트 Android Release HTTPS 인증·업로드 경로, 서버 자동 테스트 92개 PASS,
+  세션 소유권 검사, 클라이언트 Android Release HTTPS 인증·업로드 경로, 최신 `main` 기준 서버 자동
+  테스트 93개 PASS,
   클라이언트 런타임·Editor C# 정적 빌드 오류 0, Unity Editor 재컴파일과 `App Startup Synchronization`,
   `PPE Training Data Contract`, `Documentation Policy` 하네스 PASS, 공용 문서 동기화를 확인했다.
-- 미완료: 운영과 같은 HTTPS 통합 실행, code 6 Release APK, Quest 단독 실행, 운영 서버 적재·재조회와
-  Alpha 업로드.
+- 운영 서버 반영 완료: 운영 `.env` 비밀값 설정, migration `009`~`012` 적용, 전체 migration 16개,
+  텔레메트리 초기 참여자·세션·이벤트 0건, PM2 `online`, Nginx POST 전용 경로와 HTTPS/TLS를 확인했다.
+- 미완료: 실제 Meta User Proof 왕복, code 6 Release APK, Quest 단독 실행, 같은 세션의 운영 서버
+  적재·재조회와 Alpha 업로드.
 - 대시보드 화면·KPI 확정은 Alpha 제출 완료 조건이 아니며 7단계까지 보류한다.

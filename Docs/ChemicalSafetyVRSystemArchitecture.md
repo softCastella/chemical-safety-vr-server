@@ -6,11 +6,11 @@
 
 ## 문서 기준
 
-- 서버 저장소: `softCastella/chemical-safety-vr-server` `main@efbf6d58bafb1aa2bee116d97e1d481f45fb2cf5`
+- 서버 저장소 구현·운영 반영 기준: `softCastella/chemical-safety-vr-server` `main@5b8138865991408215011078328f74a0df229982`
 - 클라이언트 저장소: `softCastella/chemical-safety-vr-client` `main@b840b2dc2e4d0235c087fb4693a1486bd21dab9c`
 - 실행 데이터 기준: 2026-09-08 Unity Editor와 Quest Link로 수집한 6개 시나리오·모드 조합
 - 이 문서는 위 커밋의 코드와 `Docs/MeetingNotes/2026-08-30_Client_Server_Auth_Channel_Handoff.md`, `Docs/ProductionDeployment.md`의 검증 기록을 기준으로 작성했다.
-- 두 저장소에 별도 미커밋 변경이 있으므로 해당 변경의 동작은 이 문서의 확정 사실에 포함하지 않는다.
+- 클라이언트 Release 전송 변경은 아직 미커밋 상태이므로 Quest Release 동작을 확정 사실로 확대하지 않는다.
 
 ## 현재 VR 교육 데이터 검증 구조
 
