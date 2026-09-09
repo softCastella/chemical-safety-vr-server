@@ -34,6 +34,60 @@ export function createTrainingTelemetryTokenAuthorizer(expectedToken) {
       return;
     }
 
+    request.trainingTelemetryPrincipal = Object.freeze({ kind: "development" });
     next();
   };
+}
+
+export function createTrainingTelemetryAuthorizers({
+  developmentToken,
+  sessionTokenService,
+}) {
+  const hasDevelopmentToken = typeof developmentToken === "string" &&
+    developmentToken.length > 0;
+  const authorizeDevelopment = hasDevelopmentToken
+    ? createTrainingTelemetryTokenAuthorizer(developmentToken)
+    : null;
+
+  if (!authorizeDevelopment && !sessionTokenService) {
+    throw new Error(
+      "TRAINING_TELEMETRY_UPLOAD_TOKEN or Meta training telemetry authentication must be configured when ENABLE_TRAINING_TELEMETRY_INGEST=true.",
+    );
+  }
+
+  function bearerToken(request) {
+    const authorization = request.get("authorization") ?? "";
+    return authorization.startsWith("Bearer ")
+      ? authorization.slice("Bearer ".length)
+      : "";
+  }
+
+  return Object.freeze({
+    authorizeUpload(request, response, next) {
+      const token = bearerToken(request);
+      if (authorizeDevelopment && tokensMatch(token, developmentToken)) {
+        request.trainingTelemetryPrincipal = Object.freeze({ kind: "development" });
+        next();
+        return;
+      }
+      if (sessionTokenService) {
+        try {
+          request.trainingTelemetryPrincipal = sessionTokenService.verify(token);
+          next();
+        } catch (error) {
+          next(error);
+        }
+        return;
+      }
+      authorizeDevelopment(request, response, next);
+    },
+
+    authorizeRead(request, response, next) {
+      if (!authorizeDevelopment) {
+        next(unauthorized("A development telemetry read token is required."));
+        return;
+      }
+      authorizeDevelopment(request, response, next);
+    },
+  });
 }

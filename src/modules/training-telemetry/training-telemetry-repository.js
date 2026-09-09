@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 
-import { conflict, notFound } from "../../lib/app-error.js";
+import { conflict, notFound, unauthorized } from "../../lib/app-error.js";
 
 function toIsoString(value) {
   if (value === null || value === undefined) {
@@ -160,6 +160,28 @@ function acceptedThrough(rows) {
 
 export function createTrainingTelemetryRepository(pool) {
   return {
+    async assertSessionMetaUserId(sessionId, metaUserId) {
+      const [rows] = await pool.execute(
+        `
+          SELECT identity.identity_value
+          FROM training_telemetry_sessions AS session
+          INNER JOIN training_telemetry_identities AS identity
+            ON identity.participant_id = session.participant_id
+           AND identity.source_project = session.source_project
+           AND identity.identity_type = 'meta'
+          WHERE session.session_id = ?
+            AND identity.identity_value = ?
+          LIMIT 1
+        `,
+        [sessionId, metaUserId],
+      );
+      if (rows.length !== 1) {
+        throw unauthorized(
+          "The verified Meta user does not own this telemetry session.",
+        );
+      }
+    },
+
     async createSession(session) {
       const connection = await pool.getConnection();
       try {

@@ -1,4 +1,4 @@
-import { conflict, notFound } from "../src/lib/app-error.js";
+import { conflict, notFound, unauthorized } from "../src/lib/app-error.js";
 
 function clone(value) {
   return structuredClone(value);
@@ -45,6 +45,15 @@ export function createInMemoryTrainingTelemetryRepository() {
   }
 
   return {
+    async assertSessionMetaUserId(sessionId, metaUserId) {
+      const stored = sessions.get(sessionId);
+      if (!stored || stored.input.metaUserId !== metaUserId) {
+        throw unauthorized(
+          "The verified Meta user does not own this telemetry session.",
+        );
+      }
+    },
+
     async createSession(input) {
       const participant = resolveParticipant(input);
       const existing = sessions.get(input.sessionId);

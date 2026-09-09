@@ -15,7 +15,12 @@ import { createServerAdminRepository } from "./modules/server-admin/server-admin
 import { createServerAdminRouter } from "./modules/server-admin/server-admin-routes.js";
 import { createServerAdminCountryLookup } from "./modules/server-admin/server-admin-country-lookup.js";
 import { createServerAdminPushService } from "./modules/server-admin/server-admin-push.js";
-import { createTrainingTelemetryTokenAuthorizer } from "./modules/training-telemetry/training-telemetry-auth.js";
+import { createTrainingTelemetryAuthorizers } from "./modules/training-telemetry/training-telemetry-auth.js";
+import {
+  createMetaUserProofVerifier,
+  createTrainingTelemetryMetaAuthenticator,
+  createTrainingTelemetrySessionTokenService,
+} from "./modules/training-telemetry/training-telemetry-meta-auth.js";
 import { createTrainingTelemetryRepository } from "./modules/training-telemetry/training-telemetry-repository.js";
 import { createTrainingTelemetryRouter } from "./modules/training-telemetry/training-telemetry-routes.js";
 import { createContactRouter } from "./modules/contact/contact-routes.js";
@@ -42,6 +47,12 @@ export function createApp({
   trainingTelemetryRepository,
   enableTrainingTelemetryIngest = env.enableTrainingTelemetryIngest,
   trainingTelemetryUploadToken = env.trainingTelemetryUploadToken,
+  enableMetaTrainingTelemetryAuth = env.enableMetaTrainingTelemetryAuth,
+  metaPlatformAppAccessToken = env.metaPlatformAppAccessToken,
+  trainingTelemetrySessionTokenSecret = env.trainingTelemetrySessionTokenSecret,
+  trainingTelemetrySessionTokenTtlSeconds = env.trainingTelemetrySessionTokenTtlSeconds,
+  trainingTelemetryMetaProofVerifier,
+  trainingTelemetryTokenClock,
   serverAdminRepository,
   serverAdminCountryLookupService,
   serverAdminPushService,
@@ -129,14 +140,31 @@ export function createApp({
   if (enableTrainingTelemetryIngest) {
     const resolvedTrainingTelemetryRepository =
       trainingTelemetryRepository ?? createTrainingTelemetryRepository(databasePool);
-    const authorize = createTrainingTelemetryTokenAuthorizer(
-      trainingTelemetryUploadToken,
-    );
+    const sessionTokenService = enableMetaTrainingTelemetryAuth
+      ? createTrainingTelemetrySessionTokenService({
+          secret: trainingTelemetrySessionTokenSecret,
+          lifetimeSeconds: trainingTelemetrySessionTokenTtlSeconds,
+          now: trainingTelemetryTokenClock,
+        })
+      : null;
+    const { authorizeUpload, authorizeRead } = createTrainingTelemetryAuthorizers({
+      developmentToken: trainingTelemetryUploadToken,
+      sessionTokenService,
+    });
+    const authenticateMeta = enableMetaTrainingTelemetryAuth
+      ? createTrainingTelemetryMetaAuthenticator({
+          verifyUserProof: trainingTelemetryMetaProofVerifier ??
+            createMetaUserProofVerifier({ appAccessToken: metaPlatformAppAccessToken }),
+          sessionTokenService,
+        })
+      : null;
     app.use(
       "/api/training-telemetry",
       createTrainingTelemetryRouter({
         repository: resolvedTrainingTelemetryRepository,
-        authorize,
+        authorizeUpload,
+        authorizeRead,
+        authenticateMeta,
       }),
     );
     app.get(

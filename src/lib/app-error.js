@@ -23,3 +23,7 @@ export function notFound(message) {
 export function conflict(message) {
   return new AppError(409, "CONFLICT", message);
 }
+
+export function serviceUnavailable(message) {
+  return new AppError(503, "SERVICE_UNAVAILABLE", message);
+}

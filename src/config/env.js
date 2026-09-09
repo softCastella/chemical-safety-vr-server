@@ -68,6 +68,20 @@ export const env = Object.freeze({
   ),
   trainingTelemetryUploadToken:
     process.env.TRAINING_TELEMETRY_UPLOAD_TOKEN ?? "",
+  enableMetaTrainingTelemetryAuth: readBoolean(
+    "ENABLE_META_TRAINING_TELEMETRY_AUTH",
+    false,
+  ),
+  metaPlatformAppAccessToken:
+    process.env.META_PLATFORM_APP_ACCESS_TOKEN ?? "",
+  trainingTelemetrySessionTokenSecret:
+    process.env.TRAINING_TELEMETRY_SESSION_TOKEN_SECRET ?? "",
+  trainingTelemetrySessionTokenTtlSeconds: readInteger(
+    "TRAINING_TELEMETRY_SESSION_TOKEN_TTL_SECONDS",
+    900,
+    60,
+    3600,
+  ),
   enableServerAdmin: readBoolean("ENABLE_SERVER_ADMIN", nodeEnv === "production"),
   vultrApiKey: process.env.VULTR_API_KEY ?? "",
   serverAdminCountryLookup: Object.freeze({

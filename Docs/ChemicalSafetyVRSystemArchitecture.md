@@ -6,7 +6,7 @@
 
 ## 문서 기준
 
-- 서버 저장소: `softCastella/chemical-safety-vr-server` `main@bd3ec3bd28c2c1fc424da17e849882dc5bf7ded7`
+- 서버 저장소: `softCastella/chemical-safety-vr-server` `main@efbf6d58bafb1aa2bee116d97e1d481f45fb2cf5`
 - 클라이언트 저장소: `softCastella/chemical-safety-vr-client` `main@b840b2dc2e4d0235c087fb4693a1486bd21dab9c`
 - 실행 데이터 기준: 2026-09-08 Unity Editor와 Quest Link로 수집한 6개 시나리오·모드 조합
 - 이 문서는 위 커밋의 코드와 `Docs/MeetingNotes/2026-08-30_Client_Server_Auth_Channel_Handoff.md`, `Docs/ProductionDeployment.md`의 검증 기록을 기준으로 작성했다.
@@ -44,7 +44,7 @@ flowchart LR
 
 ## Meta Horizon 입점 이후 운영 목표 구조
 
-Meta의 Alpha 등 배포 채널 또는 Store 심사를 통과한 뒤에도 심사 통과만으로 운영 연동이 완료되지는 않는다. Quest Release 앱의 실제 HTTPS 전송, 운영 MySQL 적재, 인증된 대시보드 조회까지 통합 검증한 뒤에 운영 시스템으로 전환한다.
+Meta의 Alpha 등 배포 채널 또는 Store 심사를 통과한 뒤에도 심사 통과만으로 운영 연동이 완료되지는 않는다. Quest Release 앱의 실제 HTTPS 전송, 운영 MySQL 적재, 인증된 대시보드 조회까지 통합 검증한 뒤에 운영 시스템으로 전환한다. 단, Alpha 심사 기간에 원본을 잃지 않도록 Release HTTPS 전송과 인증 경로는 Alpha 제출 전에 구현·검증한다.
 
 ```mermaid
 flowchart LR
@@ -131,5 +131,6 @@ flowchart LR
 ## 문서 동기화 상태
 
 - 서버 문서 작성: 완료
-- 클라이언트 같은 상대 경로 반영: 필요
-- 클라이언트 동기화 시 `Docs/SharedDocumentManifest.md`의 기준에 따라 양쪽 문서 내용과 커밋을 대조한다.
+- 클라이언트 같은 상대 경로 반영: 완료
+- 양쪽 `Docs/SharedDocumentManifest.md` 반영: 완료
+- 이후 어느 저장소에서든 공용 사실을 변경하면 두 파일 내용과 기준 커밋을 다시 대조한다.

@@ -1,4 +1,4 @@
-import { badRequest, conflict, notFound } from "../../lib/app-error.js";
+import { badRequest, conflict, notFound, unauthorized } from "../../lib/app-error.js";
 
 const supportedSchemaVersion = 1;
 const sessionIdPattern = /^[A-Za-z0-9-]{1,128}$/;
@@ -321,12 +321,29 @@ function normalizeEvent(event, expectedSessionId, index) {
 }
 
 export function createTrainingTelemetryService({ repository }) {
+  function requireMatchingMetaIdentity(principal, metaUserId) {
+    if (principal?.kind !== "meta") {
+      return;
+    }
+    if (metaUserId !== principal.metaUserId) {
+      throw unauthorized(
+        "The verified Meta user does not match the telemetry session identity.",
+      );
+    }
+  }
+
+  async function requireSessionOwnership(principal, sessionId) {
+    if (principal?.kind === "meta") {
+      await repository.assertSessionMetaUserId(sessionId, principal.metaUserId);
+    }
+  }
+
   return {
-    async createSession(payload) {
+    async createSession(payload, principal) {
       requireObject(payload, "request body");
       rejectUnknownFields(payload, sessionFields, "request body");
 
-      return repository.createSession({
+      const input = {
         schemaVersion: readSchemaVersion(payload.schemaVersion),
         sourceProject: (() => {
           const sourceProject = readRequiredString(
@@ -370,10 +387,12 @@ export function createTrainingTelemetryService({ repository }) {
         scene: readOptionalString(payload.scene, "scene", 512),
         mode: readOptionalString(payload.mode, "mode", 64),
         workPlan: readOptionalString(payload.workPlan, "workPlan", 128),
-      });
+      };
+      requireMatchingMetaIdentity(principal, input.metaUserId);
+      return repository.createSession(input);
     },
 
-    async saveEvents(sessionIdValue, payload) {
+    async saveEvents(sessionIdValue, payload, principal) {
       const sessionId = readRequiredString(
         sessionIdValue,
         "sessionId",
@@ -395,10 +414,11 @@ export function createTrainingTelemetryService({ repository }) {
         throw conflict("A batch must not contain duplicate eventId or sequence values.");
       }
 
+      await requireSessionOwnership(principal, sessionId);
       return repository.saveEvents(sessionId, events);
     },
 
-    async completeSession(sessionIdValue, payload) {
+    async completeSession(sessionIdValue, payload, principal) {
       const sessionId = readRequiredString(
         sessionIdValue,
         "sessionId",
@@ -412,6 +432,7 @@ export function createTrainingTelemetryService({ repository }) {
         "request body",
       );
 
+      await requireSessionOwnership(principal, sessionId);
       return repository.completeSession(sessionId, {
         schemaVersion: readSchemaVersion(payload.schemaVersion),
         endedAtUtc: readTimestamp(payload.endedAtUtc, "endedAtUtc"),

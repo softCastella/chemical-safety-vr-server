@@ -924,3 +924,53 @@ Quest APK 한 세션의 용량이나 운영 사용량으로 확대하지 않는�
 - `ConfinedSpace/Test`의 일반 로컬 DB 전송은 종료 이벤트 전 sequence까지만 반영되어 서버 상태가 아직
   `open`이고, 나머지 PPE Room 직접 시작 회차는 자동 업로드되지 않았다. 따라서 현재 채택은 로컬 JSONL과
   보존 복사본 기준이며, 기준 DB 반영·상세 조회 대조·DB 백업은 아직 완료되지 않았다.
+
+## 2026-09-09 Alpha 제출용 Release 인증·전송 구현 인수인계
+
+### 이번 변경과 보존한 동작
+
+- 이번 변경은 Alpha 제출용 Android Release 앱이 Meta 검증을 거쳐 공개 HTTPS로 원본 JSONL을 업로드하게
+  한다. PPE 흐름, JSONL 우선 기록, ACK checkpoint, 지수형 재시도, 재실행 복구와 기존 Editor·Android
+  Development 전송은 그대로 보존한다.
+- Release에서 장기 공용 token이나 Meta App Secret을 APK에 넣지 않는다. 앱은 앱 범위 Meta ID와 일회용
+  `User Proof`만 서버에 보내고, 서버가 검증 후 15분 기본 수명의 업로드 전용 Bearer token을 발급한다.
+- Release token은 세션 생성·이벤트·완료 POST에만 사용할 수 있다. 텔레메트리 GET 조회는 기존 개발용
+  token으로 분리하며, 검증된 Meta 사용자와 세션의 `metaUserId`가 다르면 업로드를 거부한다.
+
+### 교차 저장소 계약
+
+1. 클라이언트는 `Users.GetUserProof()`와 `MetaPlatformIdentityProbe.CurrentAppScopedUserId`를 사용한다.
+2. `POST /api/training-telemetry/auth/meta` 요청은 `metaUserId`, `userProof`만 포함한다.
+3. 서버는 Meta `user_nonce_validate`에 proof, 사용자 ID와 서버 전용 App Access Token을 HTTPS POST 폼으로
+   전달하며 비밀값을 URL 쿼리에 넣지 않는다.
+4. 성공 응답은 `data.accessToken`, `data.tokenType=Bearer`, `data.expiresIn`, `data.metaUserId`를 반환한다.
+5. 클라이언트는 만료 60초 전 token을 갱신하고 업로드 HTTP 401이면 캐시를 폐기한다.
+6. Android Release만 `productionServerBaseUrl`을 사용한다. `0_App` 작성값은
+   `https://immersa.tycheworks.com`이며 기본 443 포트의 공개 HTTPS 루트만 허용한다.
+
+서버 환경 변수 이름은 다음과 같고 실제 값은 Git·문서·클라이언트에 기록하지 않는다.
+
+- `ENABLE_META_TRAINING_TELEMETRY_AUTH`
+- `META_PLATFORM_APP_ACCESS_TOKEN`
+- `TRAINING_TELEMETRY_SESSION_TOKEN_SECRET`
+- `TRAINING_TELEMETRY_SESSION_TOKEN_TTL_SECONDS`
+
+### 검증 상태
+
+- **서버 코드·자동 테스트:** Meta proof 성공·실패, token 발급·만료·변조, Meta ID 불일치, Release GET
+  차단, 공식 검증 URL 계약과 필수 설정 누락을 포함해 `npm test` 92개가 통과했다.
+- **클라이언트 정적·Editor 확인:** `Assembly-CSharp.csproj`와 `Assembly-CSharp-Editor.csproj` 빌드가
+  오류 0으로 통과했다. Unity Editor 재컴파일 뒤 `App Startup Synchronization`,
+  `PPE Training Data Contract`, `Documentation Policy` 하네스 실행도 모두 PASS했다.
+- **제출 게이트:** Release 전송 차단 FAIL은 해소됐다. `MetaAlphaSubmissionGateHarness`는 code 6 Release
+  APK가 아직 없어서만 `WAIT`다. 로컬 기준 Express PM2 프로세스와 health·확인 페이지·인증 조회는
+  HTTP 200이다.
+- **아직 미검증:** 운영 HTTPS 환경 변수 적용, 실제 Meta proof 왕복, Quest Release 한 세션의 서버
+  적재·재조회, 양안·입력·음성과 Alpha 채널 설치는 아직 수행하지 않았다.
+
+### 다음 실행 순서
+
+1. 운영 서버 변경은 별도 승인 뒤 환경 변수를 비밀 저장소에 설정하고 배포·migration·PM2 재시작을 한다.
+2. 운영과 같은 HTTPS 경로에서 Meta 테스트 사용자 한 명의 인증·세션·이벤트·완료·중복 재전송을 대조한다.
+3. 그 뒤 사용자와 함께 짧은 Quest 수동 회귀를 수행하고 code 6 Release APK를 만든다.
+4. code 6을 Alpha 채널에 업로드한 뒤 같은 세션의 Quest JSONL과 서버 원본을 최종 대조한다.

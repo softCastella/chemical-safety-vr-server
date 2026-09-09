@@ -73,6 +73,7 @@ test("Nginx 배포 초안은 공개 호스트 보안과 이전 경로 정책을 
   const legacyRoutes = await readFile(new URL("tycheworks-legacy-routes.conf", nginxRoot), "utf8");
   const starlight = await readFile(new URL("tycheworks-starlight-sudoku.conf", nginxRoot), "utf8");
   const immersaKakaoCspPatch = await readFile(new URL("tycheworks-immersa-kakao-share-csp.patch", nginxRoot), "utf8");
+  const immersaTrainingTelemetry = await readFile(new URL("tycheworks-immersa-training-telemetry.conf", nginxRoot), "utf8");
   const wwwCanonicalPatch = await readFile(new URL("tycheworks-www-canonical-redirect.patch", nginxRoot), "utf8");
 
   assert.match(hardening, /server_tokens off;/);
@@ -84,6 +85,11 @@ test("Nginx 배포 초안은 공개 호스트 보안과 이전 경로 정책을 
   assert.match(legacyRoutes, /location \^~ \/app\/ \{ return 301 https:\/\/loop\.tycheworks\.com\//);
   assert.match(legacyRoutes, /location \^~ \/brand-v2\/ \{ return 404; \}/);
   assert.match(starlight, /include .*tycheworks-public-hardening\.conf;/);
+  assert.match(immersaTrainingTelemetry, /location \^~ \/api\/training-telemetry\//);
+  assert.match(immersaTrainingTelemetry, /limit_except POST \{ deny all; \}/);
+  assert.match(immersaTrainingTelemetry, /limit_req zone=public_site burst=20 nodelay;/);
+  assert.match(immersaTrainingTelemetry, /client_max_body_size 1m;/);
+  assert.match(immersaTrainingTelemetry, /proxy_pass http:\/\/127\.0\.0\.1:3000;/);
   assert.doesNotMatch(starlight, /location = \/index\.html/);
   assert.doesNotMatch(starlight, /location ~\* \\\.\(\?:css\|js\|png/);
   assert.match(
