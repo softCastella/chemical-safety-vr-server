@@ -10,7 +10,7 @@
 - 클라이언트 저장소: `softCastella/chemical-safety-vr-client` `main@b840b2dc2e4d0235c087fb4693a1486bd21dab9c`
 - 실행 데이터 기준: 2026-09-08 Unity Editor와 Quest Link로 수집한 6개 시나리오·모드 조합
 - 이 문서는 위 커밋의 코드와 `Docs/MeetingNotes/2026-08-30_Client_Server_Auth_Channel_Handoff.md`, `Docs/ProductionDeployment.md`의 검증 기록을 기준으로 작성했다.
-- 클라이언트 Release 전송 변경은 아직 미커밋 상태이므로 Quest Release 동작을 확정 사실로 확대하지 않는다.
+- 클라이언트 Release 전송 코드는 정적·Editor 하네스를 통과했지만 code 6 Release APK와 Quest 실기 검증 전이므로 실제 Quest Release 동작을 확정 사실로 확대하지 않는다.
 
 ## 현재 VR 교육 데이터 검증 구조
 
