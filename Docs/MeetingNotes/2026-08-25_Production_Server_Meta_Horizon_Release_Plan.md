@@ -2065,8 +2065,10 @@ Meta 업로드 검사가 첫 출시 서명 APK에서 Android Target SDK 36, 자�
   `Builds/MetaHorizonAlpha/ChemicalSafetyVR_TelemetryDev_0_1_0_5.apk`, 크기 277,724,175 bytes,
   SHA-256 `81C59E9375AD347330992230A8382BECF88B8D021DDEE56FD7FE5D77A8E84DAF`다.
   `DEBUGGABLE`인 Development APK이므로 Meta Alpha 배포본으로 업로드하지 않는다.
-- 다음 Release를 준비하기 위해 `ProjectSettings/ProjectSettings.asset`의
-  `AndroidBundleVersionCode`를 6으로 올렸다. code 6 Release APK 빌드와 업로드는 아직 실행하지 않았다.
+- 학원 PC의 `ProjectSettings/ProjectSettings.asset`에서는 다음 Release를 준비하기 위해
+  `AndroidBundleVersionCode=6`으로 올렸다. 현재 이 PC의 작업 트리는 아직
+  `AndroidBundleVersionCode=5`이므로 두 PC의 설정 상태를 합쳐 쓰지 않는다. code 6 Release APK 빌드와
+  업로드는 아직 실행하지 않았다.
 
 ### 근본 원인과 영향 범위
 
@@ -2108,3 +2110,181 @@ Meta 업로드 검사가 첫 출시 서명 APK에서 Android Target SDK 36, 자�
 - **Unity Editor 확인:** code 6 Release 빌드와 빌드 후 하네스 실행은 아직 하지 않았다.
 - **Quest/OpenXR 확인:** 선생님 Quest 3에서 기존 code 5 다운로드까지만 확인했다. code 6 설치, 최신 화질,
   양안과 주변 시야는 미검증이다.
+
+## 2026-09-08 단일 변경 후 검증 실행 계획
+
+### 목적과 기준 데이터
+
+- 알려진 PPE 음성 결함, 파트너 로고 거리와 Android 화질 후보를 한 APK에서 동시에 변경하지 않는다.
+  각 단계는 `한 가지 변경 → 정적/Editor 검증 → Play 또는 Quest 확인 → 채택/복구 결정` 순서로 끝낸 뒤
+  다음 단계로 진행한다.
+- 2026-09-08에 채택한 Unity Editor + Quest Link 6개 회차는 변경 전 행동·시간 기준으로 보존한다.
+  시각 설정 비교마다 6개 회차를 다시 수집하지 않고, 최종 Release 후보가 확정된 뒤 필요한 최소 통합 회차만
+  새 기준과 구분해 수집한다.
+- 현재 저장소 기준은 `main@f6db61b405563c49168f20872bb13430cc03dbb1`이다. 사용자 작업인 Android
+  Keystore 경로 변경은 보존하고 이번 순차 실험의 변수로 취급하지 않는다.
+
+### 1단계 — 정상 장화·안전모 Education Grab 음성
+
+- **대응 요청:** 정상 장화와 정상 안전모를 최초 Grab했을 때 전용 교육 음원이 재생되지 않는 결함만 수정한다.
+- **보존 동작:** Training/Test 음성 정책, 하자 PPE 선택·폐기, PPE 착용 순서, UI, 텔레포트, 화질과
+  텔레메트리 계약을 변경하지 않는다.
+- `PPEVoiceFlowDirector.m_HelmetActionPanel`을 정상 안전모 패널로 교정하고, `m_BootActionPanels`에는 기존
+  하자 좌·우 장화를 보존한 채 정상 좌·우 장화를 추가했다. 정적 C# 빌드와
+  `PPETrainTestModeValidationHarness.ValidateBatch`는 통과했다.
+- **실행 게이트:** Education에서 방호복 착용 후 정상 안전모와 정상 장화 최초 Grab 음성이 각각 1회
+  재생되고, 재잡기·반대쪽 장화에서는 중복되지 않아야 한다. 하자 안전모·장화 선택 처리와 Training/Test의
+  교육 음성 미재생도 보존돼야 한다.
+- Play Mode와 Quest/OpenXR의 실제 청취 및 `voice_playback_started` 대조가 끝나기 전에는 2단계 씬 값을
+  변경하지 않는다.
+
+### 2단계 — 파트너 로고 거리 단일 변수 비교
+
+- **변경 전 공간 기준:** 대상은 `Assets/Scenes/1_Title.unity` 하나이며, World Space Canvas의 작성 Z는
+  `200`, `PartnerLogos`의 현재 로컬 Z는 `0`이다. `TitleSplashController`는 런타임에 CanvasGroup alpha를
+  변경하지만 `PartnerLogos`의 Z 위치를 덮어쓰지 않는다.
+- **선행 진단:** Unity에서 `PartnerLogos`를 선택하고 공간 진단 하네스로 전체 부모 경로, Canvas와 카메라,
+  월드 코너·스케일·거리·양안 방향을 기록한다. 씬 좌표만 보고 카메라 방향을 추정해 값을 바꾸지 않는다.
+- **단일 변경:** `PartnerLogos`의 작성 Z만 한 단계 HMD 쪽으로 이동한다. 로고 RectTransform 크기, 앵커,
+  피벗, 자식 크기, Canvas Z, Render Scale과 TextureImporter는 고정한다.
+- **비교 조건:** 같은 Quest, 같은 시작 자세와 머리 이동 조건에서 정지 선명도, 시머링, 화면 점유율,
+  Title 메인 로고와의 깊이·정렬, 양안 불일치와 시야 가장자리 깨짐을 변경 전 캡처와 비교한다.
+- 개선이 없거나 깊이 분리·시머링이 악화되면 작성 Z를 기준값으로 복구한다. 통과 전에는 텍스처 설정을
+  함께 조정하지 않는다.
+
+### 3단계 — Android 텍스처 렌더링 단일 변수 비교
+
+- 현재 기준은 Mobile URP Render Scale `1.0`, MSAA 4x, 파트너 로고 mipmap On, Trilinear, aniso 8,
+  mip bias `-0.5`, Android `RGBA32 + Uncompressed`다.
+- `to21_logo.png`와 `seoulit_logo.png`는 원본 해상도가 작으므로 압축 포맷 변경이 원본에 없는 픽셀을
+  복원하지 못한다. 가능하면 고해상도 공식 원본 확보를 첫 자산 후보로 삼되, 원본 교체와 Importer 변경을
+  같은 비교에 넣지 않는다.
+- Android 포맷을 비교할 때는 대표 로고 하나에서 `RGBA32 + Uncompressed`와 한 가지 Android 후보만
+  비교한다. 포맷, max size, mipmap, filter, aniso, mip bias와 Render Scale 중 둘 이상을 한 APK에서
+  바꾸지 않는다.
+- 각 후보는 APK의 실제 Android Import 결과, eye texture 크기, 정지 선명도, 머리 이동 시 시머링,
+  GPU frame time과 양안 안정성을 기록한다. Game View 또는 빌드 성공만으로 채택하지 않는다.
+
+### 4단계 — 기준 데이터와 code 6 Release
+
+- 학원 PC에는 `AndroidBundleVersionCode=6`이 적용돼 있고 현재 이 PC에는 code 5가 남아 있다.
+  1~3단계의 채택값이 확정되면 실제 Release를 생성할 단일 PC와 작업 트리를 먼저 확정하고, 그 기준에서
+  `AndroidBundleVersionCode=6`과 `MetaAlphaSubmissionGateHarness`의 기대 version·Release 경로를 함께
+  확인한다. 이미 적용된 학원 PC의 code 6을 미적용 또는 오류 상태로 소급해 기록하지 않는다.
+- 보존된 6개 JSONL은 기준 DB 반영, 상세 조회 대조와 DB 백업을 완료해야 한다. 현재 게이트의
+  `기준 Express 서버 TCP 3000 미기동`, 기준 DB `session 0 / event 0` 상태는 미완료로 유지한다.
+- 최종 code 6 Release는 Android Manifest·ARM64·Target SDK 34·서명 v2·`DEBUGGABLE` 비활성·개발 LAN
+  비밀값 미포함을 검사한 뒤 Alpha 채널에 업로드한다. 업로드, 채널 할당, Quest 3 설치, 실제 실행과 화질
+  확인을 각각 분리해 기록한다.
+
+### 단계별 완료 상태
+
+| 단계 | 정적 확인 | Unity Editor | Play Mode | Quest/OpenXR |
+| --- | --- | --- | --- | --- |
+| 1. 장화·안전모 Grab 음성 | 완료 | 배치 하네스 PASS | 사용자 Game View 잠정 통과 | 미완료 |
+| 2. 파트너 로고 거리 | Z `-20` 단일 diff 확인 | 씬 로드·시작 하네스 PASS | 미실행 | 미실행 |
+| 3. Android 텍스처 | 현재 기준 확인 | 미실행 | 해당 없음 | 미실행 |
+| 4. 기준 DB·code 6 Release | 계획 확정 | 미실행 | 미실행 | 미실행 |
+
+## 2026-09-09 다음 작업 세션 인수인계
+
+### 현재 확정 상태
+
+- 정상 장화·안전모 Education Grab 음성 참조를 교정했고 정적 빌드와
+  `PPETrainTestModeValidationHarness.ValidateBatch`가 PASS했다.
+- 사용자는 방호복을 먼저 착용한 Game View 순서에서 음성 흐름이 확인된 것으로 보고했다. 이 결과는
+  `Play Mode 잠정 통과`이며 Quest/OpenXR 실제 Grip과 원본 텔레메트리 대조는 아직 완료하지 않았다.
+- `Assets/Scenes/1_Title.unity`의 `Canvas/PartnerLogos` 로컬 Z만 `0`에서 `-20`으로 변경했다. 크기,
+  앵커, 피벗, 자식 로고, Canvas Z, Render Scale과 TextureImporter는 변경하지 않았다.
+- 로고 변경 후 Unity 배치 Import에서 `1_Title`이 정상 로드됐고
+  `AppStartupSynchronizationHarness.Validate`가 PASS했다. 이 결과는 씬 로드와 시작 계약 확인이며 Game
+  View와 Quest/OpenXR 시각 결과는 미확인이다.
+
+### 다음 세션 첫 실행 순서
+
+1. Unity의 Play Mode와 컴파일·Import 진행 여부를 확인한다. 사용자가 보존해야 할 `4_PPE_Room`의 미저장
+   변경이 있다면 먼저 저장 여부를 직접 판단한다.
+2. 생산 대상인 `Assets/Scenes/1_Title.unity`만 열고 `PartnerLogos`의 작성 로컬 Z가 `-20`인지 확인한다.
+   다른 Title variant나 다른 씬은 수정하지 않는다.
+3. 같은 시작 자세에서 정지 선명도, 화면 점유율, 메인 로고와의 깊이 정렬을 Game View로 먼저 비교한다.
+4. 같은 Quest와 머리 이동 조건에서 시머링, 양안 불일치와 주변 시야 깨짐을 확인한다.
+5. 개선되면 `-20`을 채택하고 결과를 기존 Title 로고 버그 문서에 기록한다. 개선이 없거나 깊이 불편,
+   시머링 또는 양안 문제가 생기면 다른 값을 탐색하지 않고 로컬 Z만 `0`으로 복구한다.
+6. 로고 거리 결과가 확정되기 전에는 Android texture format, max size, mipmap, filter, aniso, mip bias와
+   Render Scale을 변경하지 않는다.
+
+### 다음 단계와 남은 검증
+
+- 로고 거리 채택 또는 복구가 끝난 뒤에만 Android/AOS 텍스처 후보 하나를 선택해 별도 APK로 비교한다.
+- 학원 PC의 code 6과 현재 PC의 code 5를 혼합하지 않는다. 최종 빌드 PC와 작업 트리를 확정한 뒤 기준 DB
+  반영, Release 빌드, Meta Alpha 업로드 순서로 진행한다.
+- 이번 인수인계 커밋에서는 사용자 개인 환경값인 `ProjectSettings/ProjectSettings.asset`의 Keystore 경로
+  변경을 제외한다.
+
+## 2026-09-09 결정: 심사 기간을 활용한 서버 우선 Alpha 전략
+
+### 결정 이유
+
+- 현재는 대시보드에 최종적으로 어떤 지표와 화면을 보여줄지 확정되지 않았다.
+- 대시보드를 서둘러 고정하면 실제 훈련 데이터와 운영 요구를 확인하기 전에 지표·분류·상세 조회 구조를
+  잘못 확정할 수 있다.
+- 따라서 Alpha를 먼저 제출하고 Meta 심사 기간을 대시보드의 지표·화면·상세 조회 기준을 결정하고
+  구현하는 기간으로 활용한다.
+- 이 전략은 서버 연동을 미루는 뜻이 아니다. **제출용 Release Alpha는 원본 텔레메트리를 서버로 전송할
+  수 있어야 한다.** 그래야 심사 기간에 실제 원본을 근거로 대시보드를 설계하고, 이미 배포된 Alpha의
+  행동 데이터를 잃지 않는다.
+
+### 제출과 심사 기간의 분리 계약
+
+1. **Alpha 제출 전 필수:** Release 빌드에서 로컬 JSONL 원본을 보존하고, 운영 HTTPS와 릴리스용 인증을
+   사용해 서버 수집 API로 전송하는 경로를 구현한다. 개발용 LAN 주소와 개발용 업로드 token을 Release에
+   포함하지 않는다.
+2. **Alpha 제출 전 검증:** Release 후보와 같은 전송 경로에서 `sessionId`, `eventId`, `sequence`,
+   `schemaVersion`, `appVersion`, 원본 event payload의 서버 수락·저장·재조회 일치를 최소 한 세션으로
+   확인한다. 서버 자동 테스트만으로 Quest Release 통합 성공을 대신하지 않는다.
+3. **심사 기간에 확정:** 대시보드 표시 항목은 Meta 심사 기간에 확정한다. 교육·훈련·테스트별 KPI,
+   합격 기준, 집계 카드, 필터와 상세 조회 화면은 원본 데이터와 사용자 결정을 근거로 순차 구현한다.
+4. **원본 보존:** 원본 이벤트를 삭제하거나 대시보드 지표에 맞춰 축약하지 않는다. 대시보드 요구가
+   바뀌어도 서버 원본에서 다시 계산할 수 있도록 스키마 버전, 식별자, 순서와 원본 payload를 보존한다.
+5. **완료 상태 분리:** 대시보드 완성 여부를 Alpha 제출 완료 조건으로 묶지 않는다. 동시에 Release Alpha
+   서버 전송과 대시보드 완성을 하나의 완료 상태로 합치지 않는다. 상태는 `Release 전송 구현`,
+   `서버 반영`, `Release 통합 검증`, `대시보드 설계`, `대시보드 구현`으로 구분한다.
+
+### 현재 상태와 하네스 판정
+
+- **클라이언트 반영:** JSONL 원본 기록과 Editor·Android Development Build의 durable 업로드 경로는
+  존재한다. 현재 `TycheTrainingTelemetryUploader`는 Release Player 전송을 명시적으로 차단하므로 이번
+  전략의 Release 전송 조건은 아직 충족하지 않는다.
+- **서버 반영:** 서버 `main@d380f106e461599641bc3f87a60cf91d16a2c9c9`에는 인증된 텔레메트리 세션·이벤트·완료
+  API와 저장소가 있다. 이번 기록에서는 운영 HTTPS 배포와 Release용 인증의 실제 성공을 새로 검증하지
+  않았다.
+- **통합 검증:** 과거 Editor·Development 경로의 실제 적재 근거는 있지만 Release Alpha의 Quest → 운영
+  서버 적재·재조회는 미검증이다. 이전 Development 성공을 Release 성공으로 확대하지 않는다.
+- `node Tools/MetaAlphaSubmissionGateHarness.mjs`는 위 전략 문구를 검사하고, 업로더에
+  `Release players never enable this transport` 차단 계약이 남아 있으면 FAIL한다. 이는 현재 미완료를
+  숨기지 않기 위한 의도적인 red gate다. 릴리스 인증 구조가 확정되면 하네스에 HTTPS·인증·비밀값 미포함과
+  실제 적재 증거의 positive gate를 추가한다.
+
+### 변경 전 필수 질문 답변
+
+1. **기존 Inspector/씬 작성값을 보존하는가?** 이번 변경은 문서와 Node 하네스만 수정하며 씬,
+   Inspector, UI와 입력 작성값은 변경하지 않는다.
+2. **단일 기준 오브젝트와 상태 소유자는 무엇인가?** 클라이언트 원본은
+   `PPETrainingTelemetryCapture`, 전송 ACK와 재시도는 `TycheTrainingTelemetryUploader`, 서버 원본은
+   training telemetry repository가 소유한다. 대시보드는 원본의 소비자이며 원본 상태 소유자가 아니다.
+3. **입력 전체 경로는 무엇인가?** 이번 변경은 입력 장치, Interactor/Caster, Raycaster, Layer,
+   Collider, press/select action과 handler를 변경하지 않는다.
+4. **실패 시 자동 수리 대신 멈춰야 하는가?** Release 전송 경로가 없거나 실제 적재 증거가 없으면 제출
+   하네스가 명확히 FAIL한다. 하네스가 서버 설정, 씬 또는 대시보드를 자동 생성·수리하지 않는다.
+5. **함께 영향을 받는 소비자는 무엇인가?** Release 전송, 서버 수집·저장, 개인정보 고지와 향후
+   대시보드가 영향을 받는다. UI, 텔레포트, PPE Grab, 거울, XR 양안과 음성 동작은 변경하지 않는다.
+6. **변경 전후 비교 실행은 무엇인가?** 변경 전 하네스는 Release LAN 차단 문구를 필수 계약으로
+   인정했다. 변경 후에는 같은 문구가 남아 있으면 전략 위반으로 FAIL하며 대시보드 미완성 자체는 실패로
+   판정하지 않는다.
+7. **검증 수준은 어디까지인가?** 이번 기록은 문서·하네스 정적 검증까지만 수행한다. Unity Editor,
+   Play Mode, Quest/OpenXR, Release APK 네트워크와 운영 서버 적재는 새 실행 증거가 없으므로 미검증이다.
+
+이번 변경이 대응하는 사용자 요청은 `대시보드 내용을 성급히 확정하지 않고 Meta 심사 기간을 전략적으로
+활용하되, 제출 Alpha부터 서버에 재가공 가능한 원본 데이터를 보내는 판단을 하네스로 고정`하는 것이다.
+보존해야 하는 기존 동작은 로컬 JSONL, durable 재전송, eventId 멱등성, Development LAN 검증과 기존
+교육·훈련·테스트 흐름이며, 대시보드 지표나 새로운 사용자 분류를 이번 변경에서 만들지 않는다.
