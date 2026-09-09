@@ -38,7 +38,7 @@ test('모든 사이트 페이지는 공용 또는 프로젝트 전용 파비콘�
   assert.match(faviconSvg, /<circle cx="627" cy="627" r="627"\/>/);
   assert.match(faviconSvg, /clip-path="url\(#round-crop\)"/);
   assert.match(faviconSvg, /href="data:image\/png;base64,/);
-  assert.equal(htmlFiles.length, 19);
+  assert.equal(htmlFiles.length, 20);
 
   for (const htmlFile of htmlFiles) {
     const html = await readFile(htmlFile, 'utf8');
@@ -55,6 +55,7 @@ test('모든 사이트 페이지는 공용 또는 프로젝트 전용 파비콘�
 
   const projectFavicons = [
     ['immersa/chemical-safety-training/index.html', vrFaviconUrl],
+    ['immersa/chemical-safety-training/plan/index.html', vrFaviconUrl],
     ['chemical-safety-vr-landing/index.html', vrFaviconUrl],
     ['spark/starlight-sudoku/index.html', starlightFaviconUrl],
     ['starlight-sudoku-landing/index.html', starlightFaviconUrl],
