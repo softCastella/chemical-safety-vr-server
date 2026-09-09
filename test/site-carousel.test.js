@@ -237,6 +237,11 @@ test('화학물질 안전훈련 VR 상세페이지는 SNS 공유 모달을 제�
   assert.match(html, /data-share-platform="line"/);
   assert.match(html, /data-share-platform="email"/);
   assert.match(html, /data-share-copy/);
+  assert.match(html, /\.detail-share-option\s*\{[\s\S]*?font-size:\s*11px/);
+  assert.match(html, /\.detail-share-brand-line\s*\{[^}]*font-size:\s*11px/);
+  assert.doesNotMatch(html, /\.detail-share-option\s*\{[\s\S]*?font-size:\s*10px/);
+  assert.match(html, /<rect x="8" y="8" width="12" height="12" rx="2"/);
+  assert.match(html, /d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/);
   assert.match(html, /\.detail-share-status\s*\{[\s\S]*?top:\s*76px/);
   assert.match(html, /\.detail-share-dialog\s*\{[\s\S]*?position:\s*fixed/);
   assert.match(html, /linear-gradient\(145deg, rgba\(124, 235, 240, 0\.22\), rgba\(112, 160, 248, 0\.34\)\)/);
