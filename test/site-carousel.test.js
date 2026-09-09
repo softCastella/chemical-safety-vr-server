@@ -140,6 +140,43 @@ test('화학물질 안전훈련 VR 상세페이지 푸터는 공개 개인정보
   assert.match(html, /rel="icon" type="image\/png" href="\.\.\/\.\.\/assets\/Immersa\/Chemical%20Safety%20Training%20VR\/safety_vr_banner_square\.png"/);
 });
 
+test('화학물질 안전훈련 VR 상세페이지는 세 학습 모드의 실제 차이를 안내한다', async () => {
+  const html = await readFile(
+    new URL('immersa/chemical-safety-training/index.html', siteRoot),
+    'utf8',
+  );
+
+  const modeSection = html.match(
+    /<section class="learning-modes-section"[\s\S]*?<\/section>/,
+  )?.[0] ?? '';
+  const aboutSection = html.match(
+    /<section class="detail-about-section"[\s\S]*?<\/section>/,
+  )?.[0] ?? '';
+  assert.match(html, /<span class="chip">PPE Training<\/span>/);
+  assert.match(aboutSection, /화학물질 작업 전,[\s\S]*?PPE를 올바르게 선택하고 착용합니다/);
+  assert.match(aboutSection, /작업계획에 맞는 개인보호구/);
+  assert.match(aboutSection, /오염·손상 여부를 판별/);
+  assert.match(aboutSection, /PPE 착용 안전교육입니다/);
+  assert.ok(modeSection);
+  assert.equal((modeSection.match(/class="learning-mode-card /g) ?? []).length, 3);
+  assert.match(modeSection, /<h3>교육 모드<\/h3>[\s\S]*?상세 음성 안내[\s\S]*?정답 해설/);
+  assert.match(modeSection, /<h3>훈련 모드<\/h3>[\s\S]*?오답 후 재선택[\s\S]*?반복 연습/);
+  assert.match(modeSection, /<h3>테스트 모드<\/h3>[\s\S]*?첫 선택 채점[\s\S]*?결과 확인/);
+  assert.match(modeSection, /선택한 작업 시나리오에 맞춰 PPE 선택·상태 판단·착용·거울 확인·5문항 퀴즈/);
+  assert.match(modeSection, /현재는 밀폐공간과 누출 대응 시나리오를 제공합니다/);
+  assert.doesNotMatch(modeSection, /무작위|랜덤/);
+  assert.ok(
+    html.indexOf('detail-about-section') < html.indexOf('learning-modes-section'),
+    'PPE 착용 교육 소개는 세 학습 모드보다 먼저 표시해야 한다',
+  );
+  assert.ok(
+    html.indexOf('learning-modes-section') < html.indexOf('id="overview"'),
+    '학습 모드 안내는 상세 체험 순서보다 먼저 표시해야 한다',
+  );
+  assert.match(html, /<dt>학습 구성<\/dt>\s*<dd>교육 모드 · 훈련 모드 · 테스트 모드<\/dd>/);
+  assert.match(html, /<dt>현재 시나리오<\/dt>\s*<dd>밀폐공간 작업 전 PPE 착용 · 화학물질 누출 대응 PPE 착용<\/dd>/);
+});
+
 test('브랜드 홈은 공용 개인정보처리방침으로 연결한다', async () => {
   const [home, brand, policy] = await Promise.all([
     readFile(new URL('index.html', siteRoot), 'utf8'),

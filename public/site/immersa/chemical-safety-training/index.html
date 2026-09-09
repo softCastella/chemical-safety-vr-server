@@ -6,9 +6,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>화학물질 안전훈련 VR — TYCHE IMMERSA</title>
-    <meta name="description" content="작업계획 확인부터 보호구 선택과 상태 점검까지 직접 수행하는 Meta Quest 기반 화학물질 안전훈련 VR입니다.">
+    <meta name="description" content="작업계획에 맞는 PPE 선택, 오염·손상 판별과 착용을 교육·훈련·테스트 세 모드로 수행하는 Meta Quest 기반 화학물질 안전훈련 VR입니다.">
     <meta property="og:title" content="화학물질 안전훈련 VR — TYCHE IMMERSA">
-    <meta property="og:description" content="위험한 작업을 먼저 안전하게 경험하는 Meta Quest 기반 VR 안전교육 프로젝트입니다.">
+    <meta property="og:description" content="작업계획에 맞는 PPE를 선택하고 상태를 판별해 착용하는 Meta Quest 기반 VR 안전교육입니다.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://immersa.tycheworks.com/chemical-safety-training">
     <meta property="og:image" content="https://tycheworks.com/assets/Immersa/Chemical%20Safety%20Training%20VR/metahorizon_og_banner_1200x630.png">
@@ -17,11 +17,11 @@
     <meta property="og:image:alt" content="화학물질 안전훈련 VR 대표 이미지">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="화학물질 안전훈련 VR — TYCHE IMMERSA">
-    <meta name="twitter:description" content="위험한 작업을 먼저 안전하게 경험하는 Meta Quest 기반 VR 안전교육 프로젝트입니다.">
+    <meta name="twitter:description" content="작업계획에 맞는 PPE를 선택하고 상태를 판별해 착용하는 Meta Quest 기반 VR 안전교육입니다.">
     <meta name="twitter:image" content="https://tycheworks.com/assets/Immersa/Chemical%20Safety%20Training%20VR/metahorizon_og_banner_1200x630.png">
     <meta name="twitter:image:alt" content="화학물질 안전훈련 VR 대표 이미지">
     <link rel="canonical" href="https://immersa.tycheworks.com/chemical-safety-training">
-    <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","@id":"https://immersa.tycheworks.com/chemical-safety-training#application","name":"화학물질 안전훈련 VR","description":"작업계획 확인부터 보호구 선택과 상태 점검까지 직접 수행하는 Meta Quest 기반 화학물질 안전훈련 VR입니다.","url":"https://immersa.tycheworks.com/chemical-safety-training","image":"https://tycheworks.com/assets/Immersa/Chemical%20Safety%20Training%20VR/metahorizon_og_banner_1200x630.png","applicationCategory":"EducationalApplication","operatingSystem":"Meta Quest","inLanguage":"ko","publisher":{"@type":"Organization","@id":"https://tycheworks.com/#organization","name":"TYCHE WORKS","url":"https://tycheworks.com/"}}</script>
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","@id":"https://immersa.tycheworks.com/chemical-safety-training#application","name":"화학물질 안전훈련 VR","description":"작업계획에 맞는 PPE 선택, 오염·손상 판별과 착용을 교육·훈련·테스트 세 모드로 수행하는 Meta Quest 기반 화학물질 안전훈련 VR입니다.","url":"https://immersa.tycheworks.com/chemical-safety-training","image":"https://tycheworks.com/assets/Immersa/Chemical%20Safety%20Training%20VR/metahorizon_og_banner_1200x630.png","applicationCategory":"EducationalApplication","operatingSystem":"Meta Quest","inLanguage":"ko","publisher":{"@type":"Organization","@id":"https://tycheworks.com/#organization","name":"TYCHE WORKS","url":"https://tycheworks.com/"}}</script>
     <link rel="stylesheet" href="../immersa.css?v=20260908-1">
     <script src="/chemical-safety-training/detail-share.js?v=20260908-1" defer></script>
     <style>
@@ -93,9 +93,18 @@
             margin: 0;
         }
 
-        .detail-about-section > p {
-            max-width: 760px;
+        .detail-about-copy h2 {
+            max-width: 780px;
             margin: 0;
+            color: var(--ink);
+            font-size: clamp(32px, 3.7vw, 48px);
+            letter-spacing: -0.055em;
+            line-height: 1.08;
+        }
+
+        .detail-about-copy p {
+            max-width: 760px;
+            margin: 22px 0 0;
             color: var(--muted);
             font-size: 17px;
             line-height: 1.8;
@@ -127,6 +136,125 @@
             margin: 0;
             color: var(--muted);
             font-size: 16px;
+        }
+
+        .learning-modes-section {
+            padding: 112px 0 126px;
+            border-bottom: 1px solid rgba(125, 139, 153, 0.22);
+        }
+
+        .learning-modes-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .learning-mode-card {
+            position: relative;
+            display: flex;
+            min-height: 360px;
+            overflow: hidden;
+            flex-direction: column;
+            padding: 32px 30px 28px;
+            border: 1px solid rgba(125, 139, 153, 0.22);
+            border-radius: 24px;
+            background: #fff;
+            box-shadow: 0 18px 48px rgba(12, 43, 80, 0.07);
+        }
+
+        .learning-mode-card::before {
+            position: absolute;
+            top: 0;
+            right: 0;
+            left: 0;
+            height: 5px;
+            background: var(--mode-accent);
+            content: "";
+        }
+
+        .learning-mode-card-education {
+            --mode-accent: #2878ff;
+            --mode-tint: #edf5ff;
+        }
+
+        .learning-mode-card-training {
+            --mode-accent: #19a49a;
+            --mode-tint: #ebfaf7;
+        }
+
+        .learning-mode-card-test {
+            --mode-accent: #6c4bd8;
+            --mode-tint: #f3f0ff;
+        }
+
+        .learning-mode-number {
+            display: grid;
+            width: 42px;
+            height: 42px;
+            place-items: center;
+            margin-bottom: 26px;
+            border-radius: 13px;
+            color: var(--mode-accent);
+            background: var(--mode-tint);
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+        }
+
+        .learning-mode-card .eyebrow {
+            margin-bottom: 10px;
+            color: var(--mode-accent);
+        }
+
+        .learning-mode-card h3 {
+            margin: 0;
+            color: var(--ink);
+            font-size: 28px;
+            letter-spacing: -0.045em;
+            line-height: 1.15;
+        }
+
+        .learning-mode-card > p:not(.eyebrow) {
+            margin: 20px 0 30px;
+            color: var(--muted);
+            font-size: 15px;
+            line-height: 1.75;
+        }
+
+        .learning-mode-summary {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px;
+            margin-top: auto;
+        }
+
+        .learning-mode-summary span {
+            padding: 7px 10px;
+            border-radius: 999px;
+            color: var(--mode-accent);
+            background: var(--mode-tint);
+            font-size: 11px;
+            font-weight: 900;
+        }
+
+        .learning-modes-note {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 22px 0 0;
+            padding: 15px 18px;
+            border-radius: 14px;
+            color: #4f6174;
+            background: #f5f8fb;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .learning-modes-note strong {
+            flex: 0 0 auto;
+            color: var(--blue);
+            font-size: 11px;
+            letter-spacing: 0.08em;
         }
 
         .experience-room {
@@ -742,6 +870,14 @@
                 gap: 16px;
             }
 
+            .learning-modes-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .learning-mode-card {
+                min-height: 0;
+            }
+
             .experience-step-reverse .experience-step-media,
             .experience-step-reverse .experience-step-copy {
                 order: initial;
@@ -761,6 +897,25 @@
         @media(max-width:600px) {
             .experience-overview {
                 padding: 76px 0 100px;
+            }
+
+            .learning-modes-section {
+                padding: 76px 0 88px;
+            }
+
+            .learning-mode-card {
+                padding: 28px 24px 24px;
+                border-radius: 20px;
+            }
+
+            .learning-mode-card h3 {
+                font-size: 25px;
+            }
+
+            .learning-modes-note {
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 5px;
             }
 
             .experience-room,
@@ -893,7 +1048,7 @@
             <div class="detail-hero-badges">
                 <p class="eyebrow">TYCHE IMMERSA / PROJECT 01</p>
                 <div class="detail-hero-image-tags" aria-label="프로젝트 기술 및 콘텐츠 분류">
-                    <span class="chip">Meta Quest</span><span class="chip">Unity XR</span><span class="chip">XR Interaction Toolkit</span><span class="chip">Safety Training</span>
+                    <span class="chip">Meta Quest</span><span class="chip">Unity XR</span><span class="chip">XR Interaction Toolkit</span><span class="chip">PPE Training</span>
                 </div>
             </div>
             <div class="detail-hero-visual">
@@ -938,13 +1093,49 @@
             </div>
         </section>
         <section class="detail-about-section" aria-labelledby="detail-about-title">
-            <h2 id="detail-about-title" class="eyebrow">ABOUT THE EXPERIENCE</h2>
-            <p>화학물질 작업에 필요한 보호구를 확인하고 착용하는 과정을 가상현실 안에서 직접 수행하며 학습하는 실감형 안전교육 콘텐츠.</p>
+            <p class="eyebrow">ABOUT THE EXPERIENCE</p>
+            <div class="detail-about-copy">
+                <h2 id="detail-about-title">화학물질 작업 전,<br>PPE를 올바르게 선택하고 착용합니다.</h2>
+                <p>현재 콘텐츠는 작업계획에 맞는 개인보호구를 고르고, 착용 전 오염·손상 여부를 판별한 뒤 올바른 순서로 착용하고 거울에서 최종 상태를 확인하는 PPE 착용 안전교육입니다.</p>
+            </div>
         </section>
         <div class="status-panel">
             <div><span>STATUS</span><br><strong>Meta Horizon 입점 예정</strong></div>
             <div>Meta Quest 기반 독립형 VR · 한국어</div>
         </div>
+        <section class="learning-modes-section" aria-labelledby="learning-modes-title">
+            <div class="detail-section-heading">
+                <div>
+                    <p class="eyebrow">THREE WAYS TO LEARN</p>
+                    <h2 id="learning-modes-title">배우고, 반복하고,<br>스스로 확인합니다.</h2>
+                </div>
+                <p>같은 PPE 안전 절차도 안내 수준과 피드백 방식이 다른 세 모드로 경험합니다. 처음 익히는 단계부터 독립 수행 평가까지 순서대로 이어갈 수 있습니다.</p>
+            </div>
+            <div class="learning-modes-grid">
+                <article class="learning-mode-card learning-mode-card-education">
+                    <span class="learning-mode-number" aria-hidden="true">01</span>
+                    <p class="eyebrow">EDUCATION</p>
+                    <h3>교육 모드</h3>
+                    <p>보호구를 집고 상태를 판단하는 과정에서 장비별 음성과 선택 피드백을 제공합니다. 5문항 퀴즈에서는 정답 해설과 함께 절차를 익힙니다.</p>
+                    <div class="learning-mode-summary" aria-label="교육 모드 특징"><span>상세 음성 안내</span><span>선택 피드백</span><span>정답 해설</span></div>
+                </article>
+                <article class="learning-mode-card learning-mode-card-training">
+                    <span class="learning-mode-number" aria-hidden="true">02</span>
+                    <p class="eyebrow">TRAINING</p>
+                    <h3>훈련 모드</h3>
+                    <p>정답을 바로 알려주는 상세 안내를 줄이고, 잘못 선택하면 짧은 오답 안내 뒤 다시 고릅니다. 5문항 퀴즈도 정답을 찾을 때까지 반복하며 판단을 연습합니다.</p>
+                    <div class="learning-mode-summary" aria-label="훈련 모드 특징"><span>최소 미션 안내</span><span>오답 후 재선택</span><span>반복 연습</span></div>
+                </article>
+                <article class="learning-mode-card learning-mode-card-test">
+                    <span class="learning-mode-number" aria-hidden="true">03</span>
+                    <p class="eyebrow">TEST</p>
+                    <h3>테스트 모드</h3>
+                    <p>선택 중 해설과 정오답 표시 없이 독립적으로 수행합니다. 퀴즈는 문항별 첫 선택을 채점하고, 완료 후 소요 시간·퀴즈 점수·PPE 오선택 횟수를 보여줍니다.</p>
+                    <div class="learning-mode-summary" aria-label="테스트 모드 특징"><span>무해설 수행</span><span>첫 선택 채점</span><span>결과 확인</span></div>
+                </article>
+            </div>
+            <p class="learning-modes-note"><strong>COMMON FLOW</strong><span>선택한 작업 시나리오에 맞춰 PPE 선택·상태 판단·착용·거울 확인·5문항 퀴즈를 수행합니다. 현재는 밀폐공간과 누출 대응 시나리오를 제공합니다.</span></p>
+        </section>
         <section id="overview" class="experience-overview">
             <div class="experience-heading">
                 <div>
@@ -1005,6 +1196,14 @@
                 <div class="project-info-row">
                     <dt>콘텐츠 범위</dt>
                     <dd>작업계획서 확인 · 개인보호구 선택 · 상태 점검 · 착용 확인</dd>
+                </div>
+                <div class="project-info-row">
+                    <dt>학습 구성</dt>
+                    <dd>교육 모드 · 훈련 모드 · 테스트 모드</dd>
+                </div>
+                <div class="project-info-row">
+                    <dt>현재 시나리오</dt>
+                    <dd>밀폐공간 작업 전 PPE 착용 · 화학물질 누출 대응 PPE 착용</dd>
                 </div>
                 <div class="project-info-row">
                     <dt>플랫폼</dt>
