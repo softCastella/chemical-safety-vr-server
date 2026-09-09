@@ -23,6 +23,12 @@ body {
   word-break: keep-all;
 }
 
+html:lang(ja) body,
+html:lang(zh-CN) body,
+html:lang(zh-TW) body {
+  word-break: normal;
+}
+
 body::before,
 body::after {
   position: fixed;
@@ -133,6 +139,7 @@ a {
   margin: 64px auto;
   padding: 62px;
   overflow: hidden;
+  overflow-wrap: anywhere;
   border: 1px solid rgba(255, 255, 255, .68);
   border-radius: 30px;
   background:

@@ -88,7 +88,7 @@ test("별빛 스도쿠 개인정보처리방침은 앱·웹 데이터 처리와 
 
   assert.match(html, /data-detail-link/);
   assert.match(html, /starlight-sudoku-locale/);
-  assert.match(html, /privacy\.css\?v=20260904-1/);
+  assert.match(html, /privacy\.css\?v=20260909-1/);
   assert.match(html, /privacy-i18n\.js\?v=20260904-1/);
   for (const locale of ["ko", "en", "ja", "zh-CN", "zh-TW"]) {
     assert.match(html, new RegExp(`data-locale="${locale}"`));
@@ -112,6 +112,8 @@ test("별빛 스도쿠 개인정보처리방침은 앱·웹 데이터 처리와 
   assert.match(css, /\.policy-shell \{[\s\S]*?var\(--ivory\)/);
   assert.match(css, /body::before,[\s\S]*body::after/);
   assert.match(css, /@keyframes star-twinkle/);
+  assert.match(css, /html:lang\(ja\) body,[\s\S]*html:lang\(zh-CN\) body,[\s\S]*html:lang\(zh-TW\) body \{[\s\S]*word-break: normal/);
+  assert.match(css, /\.policy-shell \{[\s\S]*overflow-wrap: anywhere/);
 });
 
 test("별빛 스도쿠 랜딩은 모바일 크기 웹 체험판을 연결한다", async () => {
