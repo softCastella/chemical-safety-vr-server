@@ -144,31 +144,61 @@ npm test
 
 로컬 DB에 migration을 적용하고 관리자 계정으로 로그인해야 실제 DB 대시보드까지 확인할 수 있다. `npm run db:migrate`는 이 저장소의 미적용 migration 전체에 영향을 줄 수 있으므로 별도 테스트 DB에서 대상 목록을 검토한 뒤 실행한다. 이번 작업에서는 migration과 서버 프로세스를 실행하지 않았다.
 
-## 10. 운영 연결 전 결정·작업
+## 10. 확정한 공개 구조
+
+정적 서비스의 목표 주소는 다음과 같다.
+
+```text
+https://starlight.tycheworks.com/       랜딩
+https://starlight.tycheworks.com/play/  웹 체험판
+```
+
+랜딩과 게임은 같은 프로토콜·호스트·포트를 쓰고 경로만 나눈다. 두 화면이 같은 Origin이 되므로 `localStorage`의 `anonymous_user_id`를 공유할 수 있고, UTM과 익명 사용자 행동을 함께 분석할 수 있다.
+
+정적 파일은 서버 장애와 관계없이 열리도록 GitHub Pages를 계속 사용할 수 있다. 단, 서로 다른 Pages 저장소를 각각 공개하는 방식이 아니라 하나의 배포 산출물에 랜딩 루트와 `/play/` Flutter Web 빌드를 합친다. Tyche 서버는 Analytics collector와 관리자 대시보드만 담당한다.
+
+```text
+GitHub Pages 배포 산출물
+├─ index.html          랜딩
+├─ 랜딩 정적 자산
+└─ play/
+   ├─ index.html       Flutter WebDemo
+   ├─ flutter_bootstrap.js
+   └─ assets/
+
+Tyche 서버
+├─ POST /api/starlight-analytics/events/batch
+├─ GET  /api/starlight-analytics/dashboard
+└─ GET  /starlight-analytics/
+```
+
+현재 데스크톱 CTA는 게임을 새 창으로 열 수 있다. 같은 Origin이면 익명 사용자 ID는 공유되지만 `sessionStorage` 기반 세션 ID는 새 창에서 새로 생성될 수 있다. 랜딩부터 게임까지 하나의 방문 세션으로 정확히 묶어야 할 때는 CTA를 같은 탭 이동으로 바꾸거나, 서버가 발급하는 짧은 수명의 `journey_id` 쿠키/일회용 token을 추가한다.
+
+## 11. 후속 작업
 
 다음 순서로 진행한다.
 
-1. 대시보드/collector의 최종 호스트와 WebDemo를 같은 Origin 아래 둘지 결정한다.
-2. 개인정보처리방침에 익명 이벤트, 좌표, 보관기간, GA4 사용 여부와 삭제 기준을 반영한다.
-3. 테스트 DB 백업과 migration 목록 확인 후 `017`을 적용한다.
-4. 운영 CORS 허용 Origin, rate limit, 수집 플래그를 설정한다.
-5. 랜딩과 WebDemo의 collector URL을 최종 HTTPS 주소로 지정하고 수집을 켠다.
-6. 관리자 로그인 후 샘플 배지, 실제 전환, 필터, 화면별 히트맵을 검증한다.
-7. Threads 링크는 예를 들어 `utm_source=threads`, `utm_medium=organic_social`, `utm_campaign`, `utm_content`를 게시물별로 다르게 붙인다.
-8. 보관기간/삭제 job, 모니터링과 DB 용량 경고를 추가한 뒤 제한된 트래픽부터 연다.
+1. Pages 배포 workflow가 랜딩과 Flutter Web 빌드를 하나의 산출물로 조립하도록 만든다.
+2. Flutter Web을 `/play/` 기준 경로로 빌드하고 모든 자산·새로고침 경로를 검증한다.
+3. 랜딩 CTA를 `/play/`로 바꾸고 다섯 UTM 값과 익명 사용자 ID 연속성을 자동 테스트한다.
+4. `starlight.tycheworks.com` custom domain과 HTTPS를 Pages 배포에 연결한다.
+5. 개인정보처리방침에 익명 이벤트, 좌표, 보관기간, GA4 사용 여부와 삭제 기준을 반영한다.
+6. 테스트 DB 백업과 migration 목록 확인 후 `017`을 적용한다.
+7. 운영 CORS 허용 Origin, rate limit, 수집 플래그를 설정한다.
+8. 랜딩과 WebDemo의 collector URL을 최종 HTTPS 주소로 지정하고 수집을 켠다.
+9. 관리자 로그인 후 샘플 배지, 실제 전환, 필터, 화면별 히트맵을 검증한다.
+10. Threads 링크는 `utm_source=threads`, `utm_medium=organic_social`, `utm_campaign`, `utm_content`를 게시물별로 다르게 붙인다.
+11. 보관기간/삭제 job, 모니터링과 DB 용량 경고를 추가한 뒤 제한된 트래픽부터 연다.
 
 ### 반드시 먼저 해결할 식별 연속성
 
-현재 랜딩은 Tyche 서버, WebDemo는 `softcastella.github.io`로 Origin이 다르다. UTM은 URL로 정상 전달되지만 브라우저의 `localStorage`와 `sessionStorage`는 Origin별로 분리되므로 랜딩의 익명 사용자/세션 ID가 게임의 ID와 자동으로 이어지지 않는다.
+현재 배포된 랜딩은 Tyche 서버, WebDemo는 `softcastella.github.io`로 Origin이 다르다. UTM은 URL로 정상 전달되지만 브라우저의 `localStorage`와 `sessionStorage`는 Origin별로 분리되므로 랜딩의 익명 사용자/세션 ID가 게임의 ID와 자동으로 이어지지 않는다.
 
-따라서 지금 상태에서 캠페인별 유입과 각 Origin 내부 행동은 측정할 수 있지만, `landing_view → game_open`을 동일 개인 기준으로 정확히 연결한 전환율과 평균 전환시간은 확정할 수 없다. 도메인 협의 때 다음 중 하나를 결정해야 한다.
-
-- 권장: 랜딩과 WebDemo를 같은 Origin 아래 경로로 제공한다.
-- 대안: 개인정보 영향을 검토한 짧은 수명의 서명된 handoff token을 사용한다.
+따라서 지금 상태에서 캠페인별 유입과 각 Origin 내부 행동은 측정할 수 있지만, `landing_view → game_open`을 동일 개인 기준으로 정확히 연결한 전환율과 평균 전환시간은 확정할 수 없다. 후속 Pages 통합 배포에서 두 화면을 `starlight.tycheworks.com`의 루트와 `/play/`로 합쳐 이 문제를 해결한다. 통합 전 기존 주소에서 모인 데이터는 Origin 간 동일 사용자 퍼널로 해석하지 않는다.
 
 지속 익명 ID를 URL에 그대로 노출하는 방식은 사용하지 않는다.
 
-## 11. 이번 1차 범위 밖
+## 12. 이번 1차 범위 밖
 
 - 운영 도메인, Nginx, DNS, TLS와 실제 배포
 - 운영 DB migration 적용과 기존 데이터 백필
@@ -179,7 +209,7 @@ npm test
 - 실제 데이터로 병목 점수 임계값과 Rage Click 기준 보정
 - 시선 추적 기반 Attention 분석
 
-## 12. 검증 결과
+## 13. 검증 결과
 
 - `npm test`: 101개 통과, 실패 0개
 - 새 수집/집계/랜딩/대시보드 테스트: 8개 통과
