@@ -371,7 +371,7 @@ test("Meta 식별·연령 필드와 로컬 파일 경로는 수신하지 않는�
   assert.match(localPath.body.error.message, /local filesystem path/);
 });
 
-test("완료 세션은 idempotent하게 종료되고 새 이벤트를 받지 않는다", async () => {
+test("완료 세션은 종료와 기존 이벤트 재전송에 idempotent하고 새 이벤트를 받지 않는다", async () => {
   const invalidCompletion = await request(`/api/training-telemetry/sessions/${sessionId}/complete`, {
     method: "POST",
     body: {
@@ -399,6 +399,18 @@ test("완료 세션은 idempotent하게 종료되고 새 이벤트를 받지 않
     body: completion,
   });
   assert.equal(repeated.response.status, 200);
+
+  const duplicateEvents = await request(`/api/training-telemetry/sessions/${sessionId}/events`, {
+    method: "POST",
+    body: { events: [event(1), event(2)] },
+  });
+  assert.equal(duplicateEvents.response.status, 200);
+  assert.deepEqual(duplicateEvents.body, {
+    accepted: 0,
+    duplicates: 2,
+    rejected: 0,
+    acceptedThroughSequence: 3,
+  });
 
   const lateEvent = await request(`/api/training-telemetry/sessions/${sessionId}/events`, {
     method: "POST",

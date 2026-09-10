@@ -240,15 +240,36 @@ export function createTrainingTelemetryRepository(pool) {
         if (!session) {
           throw notFound("Training telemetry session not found.");
         }
-        if (session.status !== "open") {
-          throw conflict("Completed training telemetry sessions cannot accept new events.");
-        }
+        const sessionCompleted = session.status !== "open";
 
         let accepted = 0;
         let duplicates = 0;
         for (const event of events) {
           const payloadJson = payloadFor(event);
           const sha256 = payloadHash(payloadJson);
+
+          if (sessionCompleted) {
+            const [rows] = await connection.execute(
+              `
+                SELECT session_id, event_id, sequence, payload_sha256
+                FROM training_telemetry_events
+                WHERE event_id = ? OR (session_id = ? AND sequence = ?)
+                FOR UPDATE
+              `,
+              [event.eventId, sessionId, event.sequence],
+            );
+            const exactDuplicate = rows.some((row) =>
+              row.session_id === sessionId &&
+              row.event_id === event.eventId &&
+              Number(row.sequence) === event.sequence &&
+              row.payload_sha256 === sha256);
+            if (!exactDuplicate) {
+              throw conflict("Completed training telemetry sessions cannot accept new events.");
+            }
+            duplicates += 1;
+            continue;
+          }
+
           try {
             await connection.execute(
               `

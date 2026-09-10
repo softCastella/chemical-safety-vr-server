@@ -87,9 +87,7 @@ export function createInMemoryTrainingTelemetryRepository() {
     async saveEvents(sessionId, events) {
       const stored = sessions.get(sessionId);
       if (!stored) throw notFound("Training telemetry session not found.");
-      if (stored.session.status !== "open") {
-        throw conflict("Completed training telemetry sessions cannot accept new events.");
-      }
+      const sessionCompleted = stored.session.status !== "open";
       let accepted = 0;
       let duplicates = 0;
       const nextEvents = clone(stored.events);
@@ -102,6 +100,9 @@ export function createInMemoryTrainingTelemetryRepository() {
           }
           duplicates += 1;
         } else {
+          if (sessionCompleted) {
+            throw conflict("Completed training telemetry sessions cannot accept new events.");
+          }
           nextEvents.push(clone(event));
           accepted += 1;
         }
