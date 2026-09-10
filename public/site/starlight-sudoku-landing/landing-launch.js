@@ -1,5 +1,5 @@
 (() => {
-  const playUrl = "https://softcastella.github.io/Starlight-Sudoku/";
+  const playUrl = "https://softcastella.github.io/Starlight-Sudoku-WebDemo/";
 
   function localizedPlayUrl() {
     const url = new URL(playUrl);
