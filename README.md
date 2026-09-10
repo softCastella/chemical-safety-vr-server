@@ -11,6 +11,7 @@ Unity XR 클라이언트와 전체 프로젝트 문서는 별도 비공개 저�
 - Unity 훈련 등록 데이터 수신 및 조회
 - Unity 로컬 텔레메트리 세션 조회
 - PPE 훈련 데이터 대시보드 제공
+- 별빛 스도쿠 익명 이벤트 수집·집계와 화면별 UX 히트맵 대시보드
 - Tyche Works 브랜드 및 VR 상세 웹페이지 제공
 - Resend 기반 웹사이트 문의 메일 API
 - MySQL 사용자 데이터 저장과 SQL 마이그레이션
@@ -26,6 +27,7 @@ Unity XR 클라이언트와 전체 프로젝트 문서는 별도 비공개 저�
 - 테스트: `test`, `test-support`
 - 교차 저장소 공용 문서: `Docs`
 - 운영 배포 구성과 검증 범위: `Docs/ProductionDeployment.md`
+- 별빛 스도쿠 Analytics 계약과 운영 전 체크리스트: `Docs/StarlightSudokuAnalytics.md`
 - Codex 작업 지침: `AGENTS.md`
 
 ## 개발 환경
@@ -55,6 +57,9 @@ npm run dev
 - 로컬 텔레메트리: `/api/local-telemetry`
 - 문의 메일: `POST /api/contact` (`ENABLE_CONTACT_FORM=true`일 때만 활성화)
 - 대시보드: `/dashboard/`
+- 별빛 스도쿠 분석 수집: `POST /api/starlight-analytics/events/batch` (`ENABLE_STARLIGHT_ANALYTICS_INGEST=true`일 때만 활성화)
+- 별빛 스도쿠 관리자 집계: `GET /api/starlight-analytics/dashboard`
+- 별빛 스도쿠 관리자 대시보드: `/starlight-analytics/`
 - 정적 사이트: `/`
 
 사용자 CRUD, 로컬 훈련 등록, 텔레메트리 조회와 문의 메일은 환경 변수로 활성화 여부를 제어합니다. 문의 메일을 켤 때에는 `RESEND_API_KEY`, Resend에서 인증한 `CONTACT_FROM_EMAIL`과 `CONTACT_TO_EMAIL`을 모두 설정해야 합니다. 운영 적용 전 인증·권한, HTTPS, DB 마이그레이션과 데이터 보관 정책을 별도로 검증해야 합니다.
