@@ -4,7 +4,9 @@
   function localizedPlayUrl() {
     const url = new URL(playUrl);
     url.searchParams.set("lang", document.documentElement.lang || "ko");
-    return url.toString();
+    return window.starlightAnalytics
+      ? window.starlightAnalytics.decorateUrl(url.toString())
+      : url.toString();
   }
 
   function seededRandom(seed) {
@@ -140,6 +142,8 @@
 
   const playLink = document.querySelector("[data-play-launch]");
   if (!playLink) return;
+  window.starlightAnalytics?.setScreen("landing", null, null);
+  window.starlightAnalytics?.trackJson(JSON.stringify({ event_name: "landing_view" }));
   playLink.href = localizedPlayUrl();
   document.addEventListener("starlight:locale", () => {
     playLink.href = localizedPlayUrl();
@@ -189,6 +193,13 @@
 
   playLink.addEventListener("click", (event) => {
     event.preventDefault();
+    window.starlightAnalytics?.trackJson(JSON.stringify({
+      event_name: "landing_cta_click",
+      screen_id: "landing",
+      target_id: "landing_cta",
+      target_type: "link",
+      is_interactive: true,
+    }));
     createCtaBurst();
     if (launchTimer) return;
 

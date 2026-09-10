@@ -32,6 +32,13 @@ function readBoolean(name, fallback) {
   throw new Error(`${name} must be either true or false.`);
 }
 
+function readList(name) {
+  return (process.env[name] ?? "")
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean);
+}
+
 const nodeEnv = process.env.NODE_ENV ?? "development";
 const defaultUnityTelemetryDirectory = process.env.USERPROFILE
   ? path.join(
@@ -101,6 +108,19 @@ export const env = Object.freeze({
     ),
   }),
   enableContactForm: readBoolean("ENABLE_CONTACT_FORM", false),
+  enableStarlightAnalyticsIngest: readBoolean(
+    "ENABLE_STARLIGHT_ANALYTICS_INGEST",
+    false,
+  ),
+  starlightAnalyticsAllowedOrigins: Object.freeze(
+    readList("STARLIGHT_ANALYTICS_ALLOWED_ORIGINS"),
+  ),
+  starlightAnalyticsRateLimitPerHour: readInteger(
+    "STARLIGHT_ANALYTICS_RATE_LIMIT_PER_HOUR",
+    1200,
+    10,
+    100000,
+  ),
   kakaoJavaScriptKey: process.env.KAKAO_JAVASCRIPT_KEY ?? "",
   contact: Object.freeze({
     resendApiKey: process.env.RESEND_API_KEY ?? "",
