@@ -25,6 +25,8 @@ import { createTrainingTelemetryRepository } from "./modules/training-telemetry/
 import { createTrainingTelemetryRouter } from "./modules/training-telemetry/training-telemetry-routes.js";
 import { createContactRouter } from "./modules/contact/contact-routes.js";
 import { createResendContactMailer } from "./modules/contact/resend-contact-mailer.js";
+import { createStarlightAnalyticsRepository } from "./modules/starlight-analytics/starlight-analytics-repository.js";
+import { createStarlightAnalyticsRouter } from "./modules/starlight-analytics/starlight-analytics-routes.js";
 
 const publicRoot = fileURLToPath(new URL("../public/", import.meta.url));
 const dashboardRoot = path.join(publicRoot, "dashboard");
@@ -36,6 +38,7 @@ const chemicalSafetyTrainingRoot = path.join(
 );
 const serverStatusRoot = path.join(publicRoot, "server-status");
 const telemetryIngestTestRoot = path.join(publicRoot, "telemetry-ingest-test");
+const starlightAnalyticsRoot = path.join(publicRoot, "starlight-analytics");
 
 export function createApp({
   userRepository,
@@ -60,6 +63,10 @@ export function createApp({
   contactMailer,
   enableContactForm = env.enableContactForm,
   contactRateLimitPerHour = env.contact.rateLimitPerHour,
+  starlightAnalyticsRepository,
+  enableStarlightAnalyticsIngest = env.enableStarlightAnalyticsIngest,
+  starlightAnalyticsAllowedOrigins = env.starlightAnalyticsAllowedOrigins,
+  starlightAnalyticsRateLimitPerHour = env.starlightAnalyticsRateLimitPerHour,
   kakaoJavaScriptKey = env.kakaoJavaScriptKey,
 } = {}) {
   const app = express();
@@ -90,6 +97,23 @@ export function createApp({
 
     response.status(200).json({ kakaoJavaScriptKey });
   });
+
+  const starlightAnalyticsEnabled = enableStarlightAnalyticsIngest || enableServerAdmin;
+  const resolvedStarlightAnalyticsRepository = starlightAnalyticsEnabled
+    ? starlightAnalyticsRepository ?? createStarlightAnalyticsRepository(databasePool)
+    : null;
+  if (enableStarlightAnalyticsIngest) {
+    app.use(
+      "/api/starlight-analytics",
+      createStarlightAnalyticsRouter({
+        repository: resolvedStarlightAnalyticsRepository,
+        ingestEnabled: true,
+        allowedOrigins: starlightAnalyticsAllowedOrigins,
+        rateLimitPerHour: starlightAnalyticsRateLimitPerHour,
+        requireAdmin: null,
+      }),
+    );
+  }
 
   if (enableContactForm) {
     const resolvedContactMailer =
@@ -185,6 +209,16 @@ export function createApp({
       pushService: resolvedPushService,
     });
     app.use("/api/server-status", router);
+    app.use(
+      "/api/starlight-analytics",
+      createStarlightAnalyticsRouter({
+        repository: resolvedStarlightAnalyticsRepository,
+        ingestEnabled: false,
+        allowedOrigins: starlightAnalyticsAllowedOrigins,
+        rateLimitPerHour: starlightAnalyticsRateLimitPerHour,
+        requireAdmin,
+      }),
+    );
     app.get("/server-status/login", (_request, response) => response.sendFile(path.join(serverStatusRoot, "login.html")));
     app.get("/server-status/login.html", (_request, response) => response.redirect(308, "/server-status/login"));
     for (const asset of ["status.css", "controls.css", "login.js", "dashboard.js", "push-worker.js", "manifest.webmanifest"]) {
@@ -192,6 +226,8 @@ export function createApp({
     }
     app.get("/server-status/favicon.svg", (_request, response) => response.sendFile(path.join(siteRoot, "assets", "Immersa", "Chemical Safety Training VR", "favicon_round_crop.svg")));
     app.get(["/server-status", "/server-status/"], requireAdmin, (_request, response) => response.sendFile(path.join(serverStatusRoot, "index.html")));
+    app.get(["/starlight-analytics", "/starlight-analytics/"], requireAdmin, (_request, response) => response.sendFile(path.join(starlightAnalyticsRoot, "index.html")));
+    app.use("/starlight-analytics", requireAdmin, express.static(starlightAnalyticsRoot, { index: false }));
   }
 
   app.use("/dashboard", express.static(dashboardRoot));
