@@ -4,39 +4,39 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" href="data:,">
-  <meta name="description" content="기업 VR 안전교육의 운영 현황, 직원별 이력, PPE 수행과 서비스 품질을 분석하는 대시보드">
-  <title>TYCHE VR 안전교육 운영 대시보드</title>
+  <meta name="description" content="VR 안전교육 사용자의 모드·시나리오별 이수율, 반복 수행과 구간별 체류시간을 분석하는 대시보드">
+  <title>TYCHE VR 안전교육 학습 대시보드</title>
   <link rel="stylesheet" href="/server/dashboard-switcher.css?v=20260911-1">
-  <link rel="stylesheet" href="dashboard.css?v=20260911-1">
+  <link rel="stylesheet" href="dashboard.css?v=20260911-2">
 </head>
 <body>
 <div class="app">
   <aside class="sidebar">
-    <div class="brand"><b>TYCHE PPE</b><small>ENTERPRISE ANALYTICS</small></div>
+    <div class="brand"><b>TYCHE SAFETY VR</b><small>LEARNING ANALYTICS</small></div>
     <nav class="nav" id="desktopNav">
-      <button class="active" data-view="overview">운영 개요</button>
-      <button data-view="improvement">서비스 개선</button>
-      <button data-view="people">회원사·직원</button>
-      <button data-view="sessions">직원 상세</button>
-      <button data-view="content">콘텐츠 품질</button>
-      <button data-view="attrition">이탈 분석</button>
-      <button data-view="evidence">감사 근거</button>
+      <button class="active" data-view="overview">학습 현황</button>
+      <button data-view="content">모드·시나리오</button>
+      <button data-view="people">사용자별 반복</button>
+      <button data-view="improvement">구간별 병목</button>
+      <button data-view="sessions">플레이 상세</button>
+      <button data-view="attrition">완료 전 종료</button>
+      <button data-view="evidence">데이터 근거</button>
     </nav>
     <div class="source-status" id="sideStatus"><b>교육 데이터 연결 중</b>VR 훈련 세션과 원본 이벤트를 불러오고 있습니다.</div>
   </aside>
   <main class="main">
     <div class="top">
-      <div><div class="eyebrow">TYCHE ENTERPRISE SAFETY TRAINING</div><h1 id="pageTitle">VR 안전교육 운영 개요</h1><p class="subtitle" id="pageSubtitle">기업 교육의 이수 현황과 직원별 반복 수행을 관리하고, PPE 콘텐츠와 상호작용 품질을 개선합니다.</p><div class="badge" id="dataBadge">교육 데이터 불러오는 중</div></div>
+      <div><div class="eyebrow">TYCHE SAFETY TRAINING ANALYTICS</div><h1 id="pageTitle">VR 안전교육 학습 현황</h1><p class="subtitle" id="pageSubtitle">일반 사용자의 이수 현황, 반복 수행과 플레이 구간별 체류시간을 확인합니다.</p><div class="badge" id="dataBadge">교육 데이터 불러오는 중</div></div>
       <div class="actions dashboard-actions"><button class="btn" id="refreshButton">새로고침</button><div data-dashboard-switcher></div></div>
     </div>
     <div class="mobile-nav" id="mobileNav"></div>
-    <section class="usage-framework" aria-label="데이터 활용 기준">
-      <div class="usage-head"><div><h2>데이터 활용 기준</h2><p>활용 시점과 의사결정 범위를 현재 수집 계약에 맞춰 구분합니다.</p></div><span class="pill">CURRENT DATA CONTRACT</span></div>
+    <section class="usage-framework" aria-label="핵심 학습 지표">
+      <div class="usage-head"><div><h2>핵심 학습 지표</h2><p>현재 수집되는 실제 VR 이벤트를 기준으로 계산합니다.</p></div><span class="pill">GENERAL USER</span></div>
       <div class="usage-grid">
-        <article class="usage-card"><span class="status">즉시 활용</span><b>세션 종료 직후 · 교육 운영</b><p>과정 완료, 마지막 단계, 필수 PPE 상태를 확인합니다.</p><small>보충교육 대상 후보와 운영 이상 세션 선별</small></article>
-        <article class="usage-card"><span class="status">누적 후 활용</span><b>주간·월간 · 직원 역량 관리</b><p>동일 앱 사용자 ID의 반복 교육 이력을 비교합니다.</p><small>재교육 전후 변화와 취약 PPE 확인</small></article>
-        <article class="usage-card"><span class="status">버전 태깅 후 활용</span><b>업데이트 전후 · 서비스 개선</b><p>동일 지표를 앱·콘텐츠 버전별로 비교합니다.</p><small>현재 버전 값은 미수집 · 전후 수치 임의 생성 안 함</small></article>
-        <article class="usage-card pending"><span class="status">추가 연동 필요</span><b>공식 직원 평가·수료 판정</b><p>사번·소속, Test 결과, 점수·합격 규칙이 현재 연결되지 않았습니다.</p><small>추가 계약 전에는 인사평가 근거로 사용하지 않음</small></article>
+        <article class="usage-card"><span class="status">이수 현황</span><b>모드별 이수율</b><p>교육·훈련·평가 모드의 전체 플레이 대비 완료 비율입니다.</p><small>과정 완료 이벤트가 확인된 세션만 이수로 계산</small></article>
+        <article class="usage-card"><span class="status">이수 현황</span><b>시나리오별 이수율</b><p>밀폐공간·누출 대응 시나리오별 완료 비율입니다.</p><small>시나리오가 기록된 실제 플레이를 기준으로 계산</small></article>
+        <article class="usage-card"><span class="status">학습 지속성</span><b>사용자 반복 수행</b><p>같은 사용자가 같은 모드 또는 시나리오를 다시 실행한 횟수입니다.</p><small>Meta 앱 범위 사용자 ID 기준</small></article>
+        <article class="usage-card"><span class="status">병목 발견</span><b>플레이 구간별 시간</b><p>단계 진입부터 다음 단계 또는 종료까지의 체류시간입니다.</p><small>긴 구간은 원인이 아닌 점검 후보로 표시</small></article>
       </div>
     </section>
     <section class="filters">
@@ -55,10 +55,10 @@
     <section class="view" id="view-content"><div id="scenarioPpeContent"></div></section>
     <section class="view" id="view-attrition"><div id="attritionContent"></div></section>
     <section class="view" id="view-evidence"><div id="evidenceContent"></div></section>
-    <div class="footer">TYCHE PPE · Enterprise Safety Training Analytics · Evidence-based prototype</div>
+    <div class="footer">TYCHE SAFETY VR · Learning Analytics · Evidence-based dashboard</div>
   </main>
 </div>
-<script src="dashboard.js?v=20260911-1"></script>
+<script src="dashboard.js?v=20260911-2"></script>
 <script src="/server/dashboard-switcher.js?v=20260911-1"></script>
 </body>
 </html>
