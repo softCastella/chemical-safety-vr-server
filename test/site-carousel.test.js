@@ -332,7 +332,7 @@ test('서버 어드민 로그인과 대시보드는 새 원형 파비콘을 사�
   ]);
 
   for (const html of [login, dashboard]) {
-    assert.match(html, /<link rel="icon" type="image\/svg\+xml" href="\/server-status\/favicon\.svg\?v=4">/);
+    assert.match(html, /<link rel="icon" type="image\/svg\+xml" href="\/server\/favicon\.svg\?v=4">/);
   }
 });
 

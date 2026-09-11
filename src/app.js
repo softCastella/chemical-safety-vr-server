@@ -39,6 +39,14 @@ const chemicalSafetyTrainingRoot = path.join(
 const serverStatusRoot = path.join(publicRoot, "server-status");
 const telemetryIngestTestRoot = path.join(publicRoot, "telemetry-ingest-test");
 const starlightAnalyticsRoot = path.join(publicRoot, "starlight-analytics");
+const serverDashboardPath = "/server";
+const starlightDashboardPath = "/starlight-sudoku";
+const chemicalSafetyVrDashboardPath = "/chemical-safety-training-vr";
+
+const redirectToTrailingSlash = (target) => (request, response, next) => {
+  if (request.path.endsWith("/")) return next();
+  return response.redirect(308, `${target}/`);
+};
 
 export function createApp({
   userRepository,
@@ -219,15 +227,23 @@ export function createApp({
         requireAdmin,
       }),
     );
-    app.get("/server-status/login", (_request, response) => response.sendFile(path.join(serverStatusRoot, "login.html")));
-    app.get("/server-status/login.html", (_request, response) => response.redirect(308, "/server-status/login"));
+    app.get(`${serverDashboardPath}/login`, (_request, response) => response.sendFile(path.join(serverStatusRoot, "login.html")));
+    app.get(`${serverDashboardPath}/login.html`, (_request, response) => response.redirect(308, `${serverDashboardPath}/login`));
     for (const asset of ["status.css", "controls.css", "login.js", "dashboard.js", "push-worker.js", "manifest.webmanifest"]) {
-      app.get(`/server-status/${asset}`, (_request, response) => response.sendFile(path.join(serverStatusRoot, asset)));
+      app.get(`${serverDashboardPath}/${asset}`, (_request, response) => response.sendFile(path.join(serverStatusRoot, asset)));
     }
-    app.get("/server-status/favicon.svg", (_request, response) => response.sendFile(path.join(siteRoot, "assets", "Immersa", "Chemical Safety Training VR", "favicon_round_crop.svg")));
-    app.get(["/server-status", "/server-status/"], requireAdmin, (_request, response) => response.sendFile(path.join(serverStatusRoot, "index.html")));
-    app.get(["/starlight-analytics", "/starlight-analytics/"], requireAdmin, (_request, response) => response.sendFile(path.join(starlightAnalyticsRoot, "index.html")));
-    app.use("/starlight-analytics", requireAdmin, express.static(starlightAnalyticsRoot, { index: false }));
+    app.get(`${serverDashboardPath}/favicon.svg`, (_request, response) => response.sendFile(path.join(siteRoot, "assets", "Immersa", "Chemical Safety Training VR", "favicon_round_crop.svg")));
+    app.get(serverDashboardPath, redirectToTrailingSlash(serverDashboardPath));
+    app.get(`${serverDashboardPath}/`, requireAdmin, (_request, response) => response.sendFile(path.join(serverStatusRoot, "index.html")));
+    app.get(starlightDashboardPath, redirectToTrailingSlash(starlightDashboardPath));
+    app.get(`${starlightDashboardPath}/`, requireAdmin, (_request, response) => response.sendFile(path.join(starlightAnalyticsRoot, "index.html")));
+    app.use(starlightDashboardPath, requireAdmin, express.static(starlightAnalyticsRoot, { index: false }));
+    app.get(chemicalSafetyVrDashboardPath, redirectToTrailingSlash(chemicalSafetyVrDashboardPath));
+    app.get(`${chemicalSafetyVrDashboardPath}/`, requireAdmin, (_request, response) => response.sendFile(path.join(dashboardRoot, "index.html")));
+
+    app.get(["/server-status/login", "/server-status/login.html"], (_request, response) => response.redirect(308, `${serverDashboardPath}/login`));
+    app.get(["/server-status", "/server-status/"], (_request, response) => response.redirect(308, `${serverDashboardPath}/`));
+    app.get(["/starlight-analytics", "/starlight-analytics/"], (_request, response) => response.redirect(308, `${starlightDashboardPath}/`));
   }
 
   app.use("/dashboard", express.static(dashboardRoot));

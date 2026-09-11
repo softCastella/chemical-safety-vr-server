@@ -114,7 +114,7 @@ test("대시보드 푸시 마이그레이션과 휴대폰 구독 UI가 함께 �
   assert.match(migrations, /CREATE TABLE IF NOT EXISTS server_admin_alert_monitor_state/);
   assert.match(html, /data-push-toggle/);
   assert.match(html, /manifest\.webmanifest/);
-  assert.match(dashboard, /serviceWorker\.register\("\/server-status\/push-worker\.js"/);
+  assert.match(dashboard, /serviceWorker\.register\("\/server\/push-worker\.js"/);
   assert.match(dashboard, /\/api\/server-status\/alerts\/acknowledge/);
   assert.match(worker, /notificationclick/);
 });

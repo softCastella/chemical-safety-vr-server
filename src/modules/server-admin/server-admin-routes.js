@@ -109,7 +109,7 @@ export function createServerAdminRouter({ repository, countryLookupService, push
         title: "서버 알림 연결 완료",
         body: "새로운 서버 이상 상태와 비정상 접속만 이 휴대폰으로 알려드립니다.",
         tag: "server-admin-push-test",
-        url: "/server-status",
+        url: "/server",
       });
       response.status(204).end();
     } catch (error) { next(error); }

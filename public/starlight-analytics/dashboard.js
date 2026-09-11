@@ -52,7 +52,7 @@
     let data;
     try{
       const response=await fetch(`/api/starlight-analytics/dashboard?${params}`,{credentials:"same-origin"});
-      if(response.status===401){location.assign("/server-status/login");return;}
+      if(response.status===401){location.assign("/server/login");return;}
       if(!response.ok)throw new Error(`dashboard ${response.status}`);
       const live=await response.json();
       data=live.meta?.has_any_data?live:window.STARLIGHT_SAMPLE_DASHBOARD;

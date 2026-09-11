@@ -186,11 +186,20 @@ test("별빛 대시보드 화면과 조회 API는 기존 관리자 세션으로 
   await new Promise((resolve) => protectedServer.once("listening", resolve));
   const url = `http://127.0.0.1:${protectedServer.address().port}`;
   try {
-    assert.equal((await fetch(`${url}/starlight-analytics/`)).status, 401);
-    assert.equal((await fetch(`${url}/starlight-analytics/dashboard.js`)).status, 401);
+    assert.equal((await fetch(`${url}/server/`)).status, 401);
+    assert.equal((await fetch(`${url}/starlight-sudoku/`)).status, 401);
+    assert.equal((await fetch(`${url}/starlight-sudoku/dashboard.js`)).status, 401);
+    assert.equal((await fetch(`${url}/chemical-safety-training-vr/`)).status, 401);
     const headers = { cookie: "tyche_admin_session=valid-session" };
-    assert.equal((await fetch(`${url}/starlight-analytics/`, { headers })).status, 200);
-    assert.equal((await fetch(`${url}/starlight-analytics/dashboard.js`, { headers })).status, 200);
+    assert.equal((await fetch(`${url}/server/`, { headers })).status, 200);
+    assert.equal((await fetch(`${url}/starlight-sudoku/`, { headers })).status, 200);
+    assert.equal((await fetch(`${url}/starlight-sudoku/dashboard.js`, { headers })).status, 200);
+    assert.equal((await fetch(`${url}/chemical-safety-training-vr/`, { headers })).status, 200);
+    assert.equal((await fetch(`${url}/server`, { redirect: "manual" })).headers.get("location"), "/server/");
+    assert.equal((await fetch(`${url}/starlight-sudoku`, { redirect: "manual" })).headers.get("location"), "/starlight-sudoku/");
+    assert.equal((await fetch(`${url}/chemical-safety-training-vr`, { redirect: "manual" })).headers.get("location"), "/chemical-safety-training-vr/");
+    assert.equal((await fetch(`${url}/server-status/`, { redirect: "manual" })).headers.get("location"), "/server/");
+    assert.equal((await fetch(`${url}/starlight-analytics/`, { redirect: "manual" })).headers.get("location"), "/starlight-sudoku/");
     assert.equal((await fetch(`${url}/api/starlight-analytics/dashboard?from=2026-09-01&to=2026-09-30`)).status, 401);
     const response = await fetch(`${url}/api/starlight-analytics/dashboard?from=2026-09-01&to=2026-09-30`, { headers });
     assert.equal(response.status, 200);

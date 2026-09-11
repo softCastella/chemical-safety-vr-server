@@ -343,8 +343,11 @@ VR 사용자 데이터는 서버 상태 대시보드에 섞어 표시하지 않�
 
 ## 서버 상태 대시보드 운영 상태
 
-- 로그인 URL: `https://admin.tycheworks.com/server-status/login`
-- 상태 화면: `https://admin.tycheworks.com/server-status/`
+- 로그인 URL: `https://admin.tycheworks.com/server/login`
+- 서버 상태 화면: `https://admin.tycheworks.com/server`
+- 별빛 스도쿠 분석 화면: `https://admin.tycheworks.com/starlight-sudoku`
+- 화학 안전 VR 분석 화면: `https://admin.tycheworks.com/chemical-safety-training-vr`
+- 이전 `/server-status`, `/starlight-analytics` 화면 경로는 새 경로로 `308` 이동
 - API: `/api/server-status`
 - 세션 유효시간: 8시간
 - 세션 저장: DB, 토큰은 SHA-256 해시로 저장
@@ -371,7 +374,7 @@ VR 사용자 데이터는 서버 상태 대시보드에 섞어 표시하지 않�
   DB 이벤트 ID, 서버 이상은 메모리·디스크·서비스·부하별 고정 ID와 발생 세대로 구분한다. 확인 상태는
   관리자 계정별 DB 기록으로 저장하므로 로그아웃·재접속 뒤에도 같은 건을 다시 알리지 않는다. 서버
   이상이 정상으로 복구된 뒤 같은 원인이 재발하면 발생 세대가 증가해 새 경고로 처리한다.
-- 서버 관리자 화면의 파비콘은 `/server-status/favicon.svg?v=2` 절대 경로로 제공해 상대 경로와 기존 브라우저 캐시 영향을 줄였다.
+- 서버 관리자 화면의 파비콘은 `/server/favicon.svg?v=4` 절대 경로로 제공해 상대 경로와 기존 브라우저 캐시 영향을 줄였다.
 - Vultr Account API 연결은 운영 서버 공인 IP `158.247.238.180/32`만 허용하고, API 키는 운영 `.env`에서만 읽는다.
 
 ### 근본 원인과 영향 범위

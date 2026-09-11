@@ -14,7 +14,7 @@ form?.addEventListener("submit", async (event) => {
       body: JSON.stringify(Object.fromEntries(new FormData(form))),
     });
     if (!response.ok) throw new Error("관리자 ID 또는 비밀번호를 확인해주세요.");
-    window.location.assign("/server-status/");
+    window.location.assign("/server/");
   } catch (error) {
     errorBox.textContent = error.message;
     errorBox.hidden = false;
