@@ -134,7 +134,7 @@ STARLIGHT_ANALYTICS_RATE_LIMIT_PER_HOUR=1200
 - `STARLIGHT_ANALYTICS_ALLOWED_ORIGINS`: 쉼표로 구분한 정확한 Origin 목록이다. 랜딩과 `/play/`의 운영 Origin만 허용한다.
 - `STARLIGHT_ANALYTICS_RATE_LIMIT_PER_HOUR`: 프록시를 통해 확인한 IP 기준 프로세스 내 시간당 제한이다.
 
-랜딩과 WebDemo의 `analytics-config.js`에는 collector URL, GA Measurement ID, enabled/debug 값이 있다. 두 화면은 같은 Origin의 상대 경로 `/api/starlight-analytics/events/batch`를 사용한다. 다만 랜딩에서는 `analytics-consent.css`와 `analytics-consent.js`를 로드하지 않으므로 분석 런타임이 기본 거부 상태가 되어 이벤트를 전송하지 않는다. WebDemo의 동의 위치와 수집 시점은 마지막 모달 통합 구현 전에 별도로 확정한다. 실제 API 활성 여부는 서버의 `ENABLE_STARLIGHT_ANALYTICS_INGEST`가 결정하며 GA ID와 운영 자격 증명은 코드에 하드코딩하지 않는다.
+랜딩과 WebDemo의 `analytics-config.js`에는 collector URL, GA Measurement ID, enabled/debug 값이 있다. 두 화면은 같은 Origin의 상대 경로 `/api/starlight-analytics/events/batch`를 사용하지만, 마지막 모달 동의 흐름을 구현하고 검증하기 전까지 정적 `enabled`를 `false`로 유지한다. 랜딩과 WebDemo 진입 HTML은 `analytics-consent.css`와 `analytics-consent.js`를 로드하지 않는다. 실제 API 활성 여부는 서버의 `ENABLE_STARLIGHT_ANALYTICS_INGEST`가 별도로 결정하며, 현재는 서버 수집 플래그도 비활성화해야 한다. GA ID와 운영 자격 증명은 코드에 하드코딩하지 않는다.
 
 ## 9. 로컬 검증
 
@@ -306,3 +306,13 @@ Google Play 사전등록 페이지를 아직 제공할 수 없고 웹 체험판�
 - 서버 상태: PM2 `tyche-safety-training-server` `online`, `https://tycheworks.com/api/health` HTTP `200`
 
 운영 체크아웃은 `aad625a84e6d066c622c0ddde3bc9d84a794e9de`로 로컬 `main`보다 여러 커밋 뒤에 있어 전체 fast-forward를 수행하지 않았다. 요청 범위 밖의 서버·대시보드·DB 변경을 함께 배포하지 않기 위해 위 정적 파일만 교체했으며, 운영 체크아웃에는 해당 파일이 수정 상태로 남는다. PM2 재시작, Nginx reload, DB migration과 운영 데이터 변경은 수행하지 않았다.
+
+## 18. WebDemo 분석 동의 UI와 수집 일시 중지
+
+랜딩 배너만 제거하면 `/play/` WebDemo의 진입 화면에서 같은 `익명 이용 분석` 배너가 다시 표시된다. 동의 위치를 마지막 완료 모달로 통합하기 전에 진입 배너를 유지하거나 동의 없이 수집을 계속해서는 안 되므로 다음 세 계층을 함께 비활성화한다.
+
+- `/play/index.html`과 `/play/landing/index.html`에서 `analytics-consent.css`와 `analytics-consent.js` 로드 제거
+- 랜딩과 WebDemo의 `analytics-config.js`에서 `enabled: false`
+- 운영 서버의 `ENABLE_STARLIGHT_ANALYTICS_INGEST=false`
+
+이 상태에서는 WebDemo 계측 코드와 DB·대시보드 구현이 저장소에 남아 있더라도 브라우저가 분석 이벤트를 전송하지 않고 서버 수집 API도 요청을 받지 않는다. 마지막 완료 모달에서 명시적 분석 동의를 받는 UI, 동의 전 이벤트 처리 원칙과 철회 방법을 구현하고 실제 브라우저에서 검증하기 전에는 세 계층을 다시 활성화하지 않는다.

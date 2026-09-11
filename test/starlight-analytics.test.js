@@ -127,7 +127,7 @@ test("랜딩은 분석 동의 UI 없이 UTM을 WebDemo로 전달한다", async (
   assert.match(analytics, /starlightAnalyticsConsent/);
   assert.match(analytics, /consent\.onGranted\(activate\)/);
   assert.match(config, /collectorUrl: "\/api\/starlight-analytics\/events\/batch"/);
-  assert.match(config, /enabled: true/);
+  assert.match(config, /enabled: false/);
 });
 
 test("별빛 익명 분석 이벤트는 90일 보유기간 기준으로 주기 삭제한다", async () => {
@@ -187,9 +187,10 @@ test("같은 Origin의 /play/ 산출물은 랜딩 식별자와 UTM을 이어받�
   assert.match(playAnalytics, /utm_source/);
   assert.match(playAnalytics, /starlightAnalyticsConsent/);
   assert.match(playAnalytics, /consent\.onGranted\(activate\)/);
-  assert.match(playIndex, /\/analytics-consent\.js/);
+  assert.doesNotMatch(playIndex, /analytics-consent\.css/);
+  assert.doesNotMatch(playIndex, /analytics-consent\.js/);
   assert.match(playConfig, /collectorUrl: "\/api\/starlight-analytics\/events\/batch"/);
-  assert.match(playConfig, /enabled: true/);
+  assert.match(playConfig, /enabled: false/);
 });
 
 test("별빛 대시보드는 실제 화면 카탈로그와 앱 No Data 탭을 제공한다", async () => {
