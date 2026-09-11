@@ -253,11 +253,15 @@ test("별빛 대시보드 화면과 조회 API는 기존 관리자 세션으로 
     assert.equal((await fetch(`${url}/server/login.css`)).status, 200);
     assert.equal((await fetch(`${url}/server/dashboard-switcher.js`)).status, 200);
     assert.equal((await fetch(`${url}/starlight-sudoku/dashboard.js`)).status, 401);
+    assert.equal((await fetch(`${url}/chemical-safety-training-vr/dashboard.css`)).status, 401);
+    assert.equal((await fetch(`${url}/chemical-safety-training-vr/dashboard.js`)).status, 401);
     const headers = { cookie: "tyche_admin_session=valid-session" };
     assert.equal((await fetch(`${url}/server/`, { headers })).status, 200);
     assert.equal((await fetch(`${url}/starlight-sudoku/`, { headers })).status, 200);
     assert.equal((await fetch(`${url}/starlight-sudoku/dashboard.js`, { headers })).status, 200);
     assert.equal((await fetch(`${url}/chemical-safety-training-vr/`, { headers })).status, 200);
+    assert.equal((await fetch(`${url}/chemical-safety-training-vr/dashboard.css`, { headers })).status, 200);
+    assert.equal((await fetch(`${url}/chemical-safety-training-vr/dashboard.js`, { headers })).status, 200);
     assert.equal((await fetch(`${url}/server`, { redirect: "manual" })).headers.get("location"), "/server/");
     assert.equal((await fetch(`${url}/starlight-sudoku`, { redirect: "manual" })).headers.get("location"), "/starlight-sudoku/");
     assert.equal((await fetch(`${url}/chemical-safety-training-vr`, { redirect: "manual" })).headers.get("location"), "/chemical-safety-training-vr/");
@@ -310,6 +314,10 @@ test("세 관리자 대시보드는 공용 전환 메뉴와 로그아웃을 제�
     assert.match(html, /dashboard-switcher\.css\?v=20260911-1/);
     assert.match(html, /dashboard-switcher\.js\?v=20260911-1/);
   }
+  assert.match(vrHtml, /href="dashboard\.css\?v=20260911-1"/);
+  assert.match(vrHtml, /src="dashboard\.js\?v=20260911-1"/);
+  assert.doesNotMatch(vrHtml, /<style>/);
+  assert.doesNotMatch(vrHtml, /<script>\s*[\s\S]+?<\/script>/);
   for (const destination of [
     "/server/",
     "/starlight-sudoku/",

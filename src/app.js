@@ -250,6 +250,7 @@ export function createApp({
     app.use(starlightDashboardPath, requireAdmin, express.static(starlightAnalyticsRoot, { index: false }));
     app.get(chemicalSafetyVrDashboardPath, redirectToTrailingSlash(chemicalSafetyVrDashboardPath));
     app.get(`${chemicalSafetyVrDashboardPath}/`, requireAdminPage(`${chemicalSafetyVrDashboardPath}/`), (_request, response) => response.sendFile(path.join(dashboardRoot, "index.html")));
+    app.use(chemicalSafetyVrDashboardPath, requireAdmin, express.static(dashboardRoot, { index: false }));
 
     app.get(["/server-status/login", "/server-status/login.html"], (_request, response) => response.redirect(308, `${serverDashboardPath}/login`));
     app.get(["/server-status", "/server-status/"], (_request, response) => response.redirect(308, `${serverDashboardPath}/`));
