@@ -1,0 +1,9 @@
+.dashboard-switcher{display:flex;align-items:center;gap:8px;min-width:0}
+.dashboard-switcher__select,.dashboard-switcher__logout{min-height:38px;border:1px solid rgba(255,255,255,.2);border-radius:9px;background:#20242a;color:#f7f8fa;font:700 12px/1.2 Inter,Pretendard,"Noto Sans KR",system-ui,sans-serif;cursor:pointer}
+.dashboard-switcher__select{width:auto;min-width:150px;padding:0 30px 0 11px;color-scheme:dark}
+.dashboard-switcher__logout{padding:0 12px}
+.dashboard-switcher__select:hover,.dashboard-switcher__select:focus-visible,.dashboard-switcher__logout:hover,.dashboard-switcher__logout:focus-visible{border-color:#ff7b24;outline:none}
+.dashboard-switcher__logout:disabled{cursor:wait;opacity:.55}
+.dashboard-topbar{height:auto!important;min-height:72px;flex-wrap:wrap;padding-top:10px!important;padding-bottom:10px!important}
+.dashboard-topbar .top-actions,.dashboard-actions{flex-wrap:wrap;justify-content:flex-end}
+@media(max-width:760px){.dashboard-switcher{width:100%}.dashboard-switcher__select{flex:1;min-width:0}.dashboard-switcher__logout{flex:0 0 auto}.dashboard-topbar .top-actions,.dashboard-actions{width:100%}}

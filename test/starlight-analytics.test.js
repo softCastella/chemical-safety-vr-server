@@ -242,6 +242,7 @@ test("별빛 대시보드 화면과 조회 API는 기존 관리자 세션으로 
   try {
     assert.equal((await fetch(`${url}/server/`)).status, 401);
     assert.equal((await fetch(`${url}/server/login.css`)).status, 200);
+    assert.equal((await fetch(`${url}/server/dashboard-switcher.js`)).status, 200);
     assert.equal((await fetch(`${url}/starlight-sudoku/`)).status, 401);
     assert.equal((await fetch(`${url}/starlight-sudoku/dashboard.js`)).status, 401);
     assert.equal((await fetch(`${url}/chemical-safety-training-vr/`)).status, 401);
@@ -286,4 +287,30 @@ test("공용 관리자 로그인은 세 대시보드 중 하나를 선택해 이
   assert.match(script, /JSON\.stringify\(\{[\s\S]*username:[\s\S]*password:/);
   assert.match(script, /window\.location\.assign\(destination\)/);
   assert.doesNotMatch(script, /Object\.fromEntries/);
+});
+
+test("세 관리자 대시보드는 공용 전환 메뉴와 로그아웃을 제공한다", async () => {
+  const [serverHtml, starlightHtml, vrHtml, switcherScript, switcherCss] = await Promise.all([
+    readFile(new URL("../public/server-status/index.html", import.meta.url), "utf8"),
+    readFile(new URL("../public/starlight-analytics/index.html", import.meta.url), "utf8"),
+    readFile(new URL("../public/dashboard/index.html", import.meta.url), "utf8"),
+    readFile(new URL("../public/server-status/dashboard-switcher.js", import.meta.url), "utf8"),
+    readFile(new URL("../public/server-status/dashboard-switcher.css", import.meta.url), "utf8"),
+  ]);
+
+  for (const html of [serverHtml, starlightHtml, vrHtml]) {
+    assert.match(html, /data-dashboard-switcher/);
+    assert.match(html, /dashboard-switcher\.css\?v=20260911-1/);
+    assert.match(html, /dashboard-switcher\.js\?v=20260911-1/);
+  }
+  for (const destination of [
+    "/server/",
+    "/starlight-sudoku/",
+    "/chemical-safety-training-vr/",
+  ]) {
+    assert.match(switcherScript, new RegExp(destination.replaceAll("/", "\\/")));
+  }
+  assert.match(switcherScript, /\/api\/server-status\/logout/);
+  assert.match(switcherScript, /window\.location\.assign\("\/server\/login"\)/);
+  assert.match(switcherCss, /@media\(max-width:760px\)/);
 });

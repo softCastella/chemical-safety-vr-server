@@ -229,7 +229,17 @@ export function createApp({
     );
     app.get(`${serverDashboardPath}/login`, (_request, response) => response.sendFile(path.join(serverStatusRoot, "login.html")));
     app.get(`${serverDashboardPath}/login.html`, (_request, response) => response.redirect(308, `${serverDashboardPath}/login`));
-    for (const asset of ["status.css", "controls.css", "login.css", "login.js", "dashboard.js", "push-worker.js", "manifest.webmanifest"]) {
+    for (const asset of [
+      "status.css",
+      "controls.css",
+      "login.css",
+      "login.js",
+      "dashboard.js",
+      "dashboard-switcher.css",
+      "dashboard-switcher.js",
+      "push-worker.js",
+      "manifest.webmanifest",
+    ]) {
       app.get(`${serverDashboardPath}/${asset}`, (_request, response) => response.sendFile(path.join(serverStatusRoot, asset)));
     }
     app.get(`${serverDashboardPath}/favicon.svg`, (_request, response) => response.sendFile(path.join(siteRoot, "assets", "Immersa", "Chemical Safety Training VR", "favicon_round_crop.svg")));

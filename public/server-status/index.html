@@ -12,11 +12,12 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="stylesheet" href="./status.css">
   <link rel="stylesheet" href="./controls.css">
+  <link rel="stylesheet" href="./dashboard-switcher.css?v=20260911-1">
 </head>
 <body>
-  <header class="topbar">
+  <header class="topbar dashboard-topbar">
     <a class="wordmark" href="/server/" aria-label="서버 관리자 대시보드 홈"><span>T</span> TYCHE WORKS SERVER ADMIN</a>
-    <div class="top-actions"><span class="account-role" data-account-role></span><span class="sync-state"><i></i><b data-sync-state>연결 대기</b></span><button class="ghost" type="button" data-push-toggle>이 기기 알림 켜기</button><button class="ghost" type="button" data-refresh>새로고침</button><button class="ghost" type="button" data-logout>로그아웃</button></div>
+    <div class="top-actions"><span class="account-role" data-account-role></span><span class="sync-state"><i></i><b data-sync-state>연결 대기</b></span><button class="ghost" type="button" data-push-toggle>이 기기 알림 켜기</button><button class="ghost" type="button" data-refresh>새로고침</button><div data-dashboard-switcher></div></div>
   </header>
 
   <main class="dashboard-shell">
@@ -88,5 +89,6 @@
     </section>
   </main>
   <script src="./dashboard.js" defer></script>
+  <script src="./dashboard-switcher.js?v=20260911-1" defer></script>
 </body>
 </html>
