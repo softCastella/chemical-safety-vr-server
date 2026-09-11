@@ -73,6 +73,7 @@ test("Nginx 배포 초안은 공개 호스트 보안과 이전 경로 정책을 
   const hardening = await readFile(new URL("tycheworks-public-hardening.conf", nginxRoot), "utf8");
   const legacyRoutes = await readFile(new URL("tycheworks-legacy-routes.conf", nginxRoot), "utf8");
   const starlight = await readFile(new URL("tycheworks-starlight-sudoku.conf", nginxRoot), "utf8");
+  const admin = await readFile(new URL("tycheworks-admin.conf", nginxRoot), "utf8");
   const starlightPlayPages = await Promise.all([
     readFile(new URL("starlight-sudoku-landing/play/index.html", siteRoot), "utf8"),
     readFile(new URL("starlight-sudoku-landing/play/landing/index.html", siteRoot), "utf8"),
@@ -102,6 +103,11 @@ test("Nginx 배포 초안은 공개 호스트 보안과 이전 경로 정책을 
   assert.match(starlight, /location = \/api\/starlight-analytics\/events\/batch/);
   assert.match(starlight, /client_max_body_size 256k;/);
   assert.match(starlight, /proxy_pass http:\/\/127\.0\.0\.1:3000;/);
+  assert.match(admin, /server_name admin\.tycheworks\.com;/);
+  assert.match(admin, /location = \/ \{ return 302 \/server\/login; \}/);
+  assert.match(admin, /location \/api\/starlight-analytics\//);
+  assert.match(admin, /server\|starlight-sudoku\|chemical-safety-training-vr\|server-status\|starlight-analytics/);
+  assert.match(admin, /location \/ \{ return 404; \}/);
   assert.match(immersaTrainingTelemetry, /location \^~ \/api\/training-telemetry\//);
   assert.match(immersaTrainingTelemetry, /limit_except POST \{ deny all; \}/);
   assert.match(immersaTrainingTelemetry, /limit_req zone=public_site burst=20 nodelay;/);
