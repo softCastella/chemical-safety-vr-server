@@ -30,15 +30,22 @@ test('모든 사이트 페이지는 공용 또는 프로젝트 전용 파비콘�
     'assets/Spark/Starlight%20Sudoku/Icon_Starlight_Sudoku_v4.png',
     siteRoot,
   );
+  const starlightPlayFaviconUrl = new URL('starlight-sudoku-landing/play/favicon.png', siteRoot);
   const htmlFiles = await findHtmlFiles(siteRoot);
   const faviconSvg = await readFile(immersaFaviconUrl, 'utf8');
 
-  await Promise.all([access(immersaFaviconUrl), access(sparkFaviconUrl), access(vrFaviconUrl), access(starlightFaviconUrl)]);
+  await Promise.all([
+    access(immersaFaviconUrl),
+    access(sparkFaviconUrl),
+    access(vrFaviconUrl),
+    access(starlightFaviconUrl),
+    access(starlightPlayFaviconUrl),
+  ]);
   assert.match(faviconSvg, /<clipPath id="round-crop">/);
   assert.match(faviconSvg, /<circle cx="627" cy="627" r="627"\/>/);
   assert.match(faviconSvg, /clip-path="url\(#round-crop\)"/);
   assert.match(faviconSvg, /href="data:image\/png;base64,/);
-  assert.equal(htmlFiles.length, 20);
+  assert.equal(htmlFiles.length, 23);
 
   for (const htmlFile of htmlFiles) {
     const html = await readFile(htmlFile, 'utf8');
@@ -47,8 +54,17 @@ test('모든 사이트 페이지는 공용 또는 프로젝트 전용 파비콘�
     assert.equal(faviconLinks.length, 1, `${htmlFile.pathname} favicon link count`);
     const href = faviconLinks[0].match(/\bhref="([^"]+)"/)?.[1];
     assert.ok(href, `${htmlFile.pathname} favicon href`);
+    const faviconUrl = new URL(href, htmlFile);
+    faviconUrl.search = '';
+    faviconUrl.hash = '';
     assert.ok(
-      [immersaFaviconUrl.href, sparkFaviconUrl.href, vrFaviconUrl.href, starlightFaviconUrl.href].includes(new URL(href, htmlFile).href),
+      [
+        immersaFaviconUrl.href,
+        sparkFaviconUrl.href,
+        vrFaviconUrl.href,
+        starlightFaviconUrl.href,
+        starlightPlayFaviconUrl.href,
+      ].includes(faviconUrl.href),
       `${htmlFile.pathname} favicon asset`,
     );
   }

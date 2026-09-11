@@ -4,14 +4,15 @@
 
 별빛 스도쿠 랜딩과 웹 체험판의 익명 이용 흐름, 퍼즐 행동, 화면별 포인터 좌표를 한곳에서 분석하기 위한 1차 구현이다. 서버의 기존 Express 5, MySQL migration, 서버 관리자 세션 구조를 그대로 사용하고 별도 대형 프레임워크는 추가하지 않았다.
 
-2026-09-10 현재 상태는 다음과 같다.
+현재 저장소 상태는 다음과 같다.
 
 - 서버 수집 API, MySQL 저장소, 집계 계층과 관리자용 대시보드는 구현되었다.
 - 대시보드는 실데이터가 한 건도 없을 때만 `샘플 데이터`를 명시해 표시한다. 실데이터가 존재한 뒤 선택한 필터 결과가 비어 있으면 샘플로 대체하지 않는다.
 - 사용자가 제공한 웹 체험판 실제 화면 16장을 화면 순서와 상태별로 배치하고 Canvas 밀도 히트맵 배경으로 사용한다.
 - Android는 화면과 필터 자리만 준비하고 `데이터 없음`으로 표시한다.
-- 서버 랜딩은 Threads 등에서 들어온 UTM을 웹 체험판 링크까지 전달한다.
-- 수집 기능은 기본 비활성화 상태다. migration 적용, 운영 환경 설정, 도메인/Nginx 결정과 배포는 수행하지 않았다.
+- 서버 랜딩은 Threads 등에서 들어온 UTM과 현재 언어를 같은 Origin의 `/play/`까지 전달한다.
+- `Starlight-Sudoku-WebDemo` `main@ed51273041e907dceb4a24eeb014d5333364ffd1`을 `WEB_DEMO=true`, base href `/play/`로 빌드한 정적 산출물을 랜딩 하위에 포함했다. Flutter 제목·버튼·핵심 게임 루프와 Play Store용 문구는 수정하지 않았다.
+- 수집 API와 Nginx 프록시 경계, 두 화면의 같은 Origin collector 경로는 준비했지만 정적 `enabled`와 서버 기능 플래그 기본값은 모두 비활성이다. 개인정보처리방침 개정, migration 적용, 운영 환경 설정과 실제 배포는 수행하지 않았다.
 
 ## 2. 분석한 기존 구조
 
@@ -124,15 +125,15 @@
 
 ```dotenv
 ENABLE_STARLIGHT_ANALYTICS_INGEST=false
-STARLIGHT_ANALYTICS_ALLOWED_ORIGINS=https://softcastella.github.io
+STARLIGHT_ANALYTICS_ALLOWED_ORIGINS=https://starlight-sudoku.tycheworks.com
 STARLIGHT_ANALYTICS_RATE_LIMIT_PER_HOUR=1200
 ```
 
 - `ENABLE_STARLIGHT_ANALYTICS_INGEST`: 공개 수집 라우트 활성화. 기본값은 `false`다.
-- `STARLIGHT_ANALYTICS_ALLOWED_ORIGINS`: 쉼표로 구분한 정확한 Origin 목록이다. 최종 랜딩/게임 호스트 결정 후 갱신한다.
+- `STARLIGHT_ANALYTICS_ALLOWED_ORIGINS`: 쉼표로 구분한 정확한 Origin 목록이다. 랜딩과 `/play/`의 운영 Origin만 허용한다.
 - `STARLIGHT_ANALYTICS_RATE_LIMIT_PER_HOUR`: 프록시를 통해 확인한 IP 기준 프로세스 내 시간당 제한이다.
 
-랜딩과 WebDemo의 `analytics-config.js`에는 collector URL, GA Measurement ID, enabled/debug 값이 있다. 현재 저장소의 랜딩 설정은 수집이 꺼져 있고 URL/GA ID가 비어 있다. 운영 값과 식별자를 코드에 하드코딩하지 않는다.
+랜딩과 WebDemo의 `analytics-config.js`에는 collector URL, GA Measurement ID, enabled/debug 값이 있다. 두 화면은 같은 Origin의 상대 경로 `/api/starlight-analytics/events/batch`를 사용하되 개인정보처리방침과 운영 수집 준비가 끝날 때까지 `enabled: false`를 유지한다. 실제 API 활성 여부는 서버의 `ENABLE_STARLIGHT_ANALYTICS_INGEST`가 별도로 결정하며 GA ID와 운영 자격 증명은 코드에 하드코딩하지 않는다.
 
 ## 9. 로컬 검증
 
@@ -142,6 +143,15 @@ npm ci
 npm test
 ```
 
+`/play/` 산출물은 `softCastella/Starlight-Sudoku-WebDemo`의 위 기준 커밋에서 다음 명령으로 생성했다.
+
+```powershell
+flutter test --dart-define=WEB_DEMO=true test/web_bgm_contract_test.dart test/web_sfx_contract_test.dart test/web_audio_gate_harness_test.dart test/web_audio_preference_harness_test.dart test/web_demo_progress_session_test.dart test/trial_end_modal_harness_test.dart
+flutter build web --release --base-href "/play/" --dart-define=WEB_DEMO=true
+```
+
+산출물 위치는 `public/site/starlight-sudoku-landing/play/`이다. 갱신할 때는 생성된 Flutter 파일을 개별 수정해 앱과 다른 UI를 만들지 않고, 검증된 WebDemo 기준 커밋을 다시 빌드한다. 서버 배포용 `analytics-config.js`만 같은 Origin collector 경로로 교체한다.
+
 로컬 DB에 migration을 적용하고 관리자 계정으로 로그인해야 실제 DB 대시보드까지 확인할 수 있다. `npm run db:migrate`는 이 저장소의 미적용 migration 전체에 영향을 줄 수 있으므로 별도 테스트 DB에서 대상 목록을 검토한 뒤 실행한다. 이번 작업에서는 migration과 서버 프로세스를 실행하지 않았다.
 
 ## 10. 확정한 공개 구조
@@ -149,16 +159,16 @@ npm test
 정적 서비스의 목표 주소는 다음과 같다.
 
 ```text
-https://starlight.tycheworks.com/       랜딩
-https://starlight.tycheworks.com/play/  웹 체험판
+https://starlight-sudoku.tycheworks.com/       랜딩
+https://starlight-sudoku.tycheworks.com/play/  웹 체험판
 ```
 
 랜딩과 게임은 같은 프로토콜·호스트·포트를 쓰고 경로만 나눈다. 두 화면이 같은 Origin이 되므로 `localStorage`의 `anonymous_user_id`를 공유할 수 있고, UTM과 익명 사용자 행동을 함께 분석할 수 있다.
 
-정적 파일은 서버 장애와 관계없이 열리도록 GitHub Pages를 계속 사용할 수 있다. 단, 서로 다른 Pages 저장소를 각각 공개하는 방식이 아니라 하나의 배포 산출물에 랜딩 루트와 `/play/` Flutter Web 빌드를 합친다. Tyche 서버는 Analytics collector와 관리자 대시보드만 담당한다.
+운영 `starlight-sudoku.tycheworks.com`의 Nginx document root는 서버 저장소의 랜딩 디렉터리를 사용한다. 같은 디렉터리의 `play/`에 Flutter Web 산출물을 배치해 별도 도메인이나 iframe 없이 같은 Origin으로 제공한다. 기존 GitHub Pages 주소는 WebDemo 독립 배포 확인용으로 남길 수 있지만 캠페인 CTA와 통합 퍼널의 기준 주소로 사용하지 않는다.
 
 ```text
-GitHub Pages 배포 산출물
+Nginx 정적 document root
 ├─ index.html          랜딩
 ├─ 랜딩 정적 자산
 └─ play/
@@ -172,35 +182,32 @@ Tyche 서버
 └─ GET  /starlight-analytics/
 ```
 
-현재 데스크톱 CTA는 게임을 새 창으로 열 수 있다. 같은 Origin이면 익명 사용자 ID는 공유되지만 `sessionStorage` 기반 세션 ID는 새 창에서 새로 생성될 수 있다. 랜딩부터 게임까지 하나의 방문 세션으로 정확히 묶어야 할 때는 CTA를 같은 탭 이동으로 바꾸거나, 서버가 발급하는 짧은 수명의 `journey_id` 쿠키/일회용 token을 추가한다.
+랜딩 CTA는 `/play/`로 같은 탭 이동한다. 현재 언어를 `lang` query로 먼저 붙이고 저장된 다섯 UTM 값을 이어 붙인다. 같은 탭·같은 Origin이므로 랜딩과 게임이 `localStorage` 익명 사용자 ID와 `sessionStorage` 세션 ID를 함께 사용하며, 지속 익명 ID 자체를 URL에 노출하지 않는다.
 
 ## 11. 후속 작업
 
 다음 순서로 진행한다.
 
-1. Pages 배포 workflow가 랜딩과 Flutter Web 빌드를 하나의 산출물로 조립하도록 만든다.
-2. Flutter Web을 `/play/` 기준 경로로 빌드하고 모든 자산·새로고침 경로를 검증한다.
-3. 랜딩 CTA를 `/play/`로 바꾸고 다섯 UTM 값과 익명 사용자 ID 연속성을 자동 테스트한다.
-4. `starlight.tycheworks.com` custom domain과 HTTPS를 Pages 배포에 연결한다.
-5. 개인정보처리방침에 익명 이벤트, 좌표, 보관기간, GA4 사용 여부와 삭제 기준을 반영한다.
-6. 테스트 DB 백업과 migration 목록 확인 후 `017`을 적용한다.
-7. 운영 CORS 허용 Origin, rate limit, 수집 플래그를 설정한다.
-8. 랜딩과 WebDemo의 collector URL을 최종 HTTPS 주소로 지정하고 수집을 켠다.
-9. 관리자 로그인 후 샘플 배지, 실제 전환, 필터, 화면별 히트맵을 검증한다.
-10. Threads 링크는 `utm_source=threads`, `utm_medium=organic_social`, `utm_campaign`, `utm_content`를 게시물별로 다르게 붙인다.
-11. 보관기간/삭제 job, 모니터링과 DB 용량 경고를 추가한 뒤 제한된 트래픽부터 연다.
+1. 저장소 자동 테스트와 로컬 정적 서버에서 랜딩 → `/play/` 이동, `lang`, 다섯 UTM, 익명 사용자·세션 ID 연속성과 Flutter 자산 응답을 검증한다.
+2. 개인정보처리방침에 익명 이벤트, 좌표, 보관기간, GA4 사용 여부와 삭제 기준을 반영한다.
+3. 테스트 DB 백업과 migration 목록 확인 후 `017`을 적용한다.
+4. 운영 배포 승인 후 Nginx 설정과 `/play/` 정적 산출물을 반영하고 운영 CORS 허용 Origin, rate limit, 정적 `enabled`와 서버 수집 플래그를 함께 설정한다.
+5. 공개 랜딩과 `/play/`에서 collector 요청·응답, Flutter 화면·오디오·새로고침과 모바일 레이아웃을 확인한다.
+6. 관리자 로그인 후 샘플 배지, 실제 전환, 필터, 화면별 히트맵을 검증한다.
+7. Threads 링크는 `utm_source=threads`, `utm_medium=organic_social`, `utm_campaign`, `utm_content`를 게시물별로 다르게 붙인다.
+8. 보관기간/삭제 job, 모니터링과 DB 용량 경고를 추가한 뒤 제한된 트래픽부터 연다.
 
 ### 반드시 먼저 해결할 식별 연속성
 
-현재 배포된 랜딩은 Tyche 서버, WebDemo는 `softcastella.github.io`로 Origin이 다르다. UTM은 URL로 정상 전달되지만 브라우저의 `localStorage`와 `sessionStorage`는 Origin별로 분리되므로 랜딩의 익명 사용자/세션 ID가 게임의 ID와 자동으로 이어지지 않는다.
+기존 운영 구조는 Tyche 서버의 랜딩과 `softcastella.github.io` WebDemo가 서로 다른 Origin이었다. UTM은 전달됐지만 브라우저의 `localStorage`와 `sessionStorage`가 Origin별로 분리되어 랜딩의 익명 사용자/세션 ID가 게임의 ID와 자동으로 이어지지 않았다.
 
-따라서 지금 상태에서 캠페인별 유입과 각 Origin 내부 행동은 측정할 수 있지만, `landing_view → game_open`을 동일 개인 기준으로 정확히 연결한 전환율과 평균 전환시간은 확정할 수 없다. 후속 Pages 통합 배포에서 두 화면을 `starlight.tycheworks.com`의 루트와 `/play/`로 합쳐 이 문제를 해결한다. 통합 전 기존 주소에서 모인 데이터는 Origin 간 동일 사용자 퍼널로 해석하지 않는다.
+저장소에서는 두 화면을 `starlight-sudoku.tycheworks.com`의 루트와 `/play/`로 합치고 CTA를 같은 탭 이동으로 바꿨다. 실제 운영 배포와 collector 수신 검증이 끝난 뒤부터만 `landing_view → game_open`을 동일 사용자·세션 퍼널로 계산한다. 통합 전 서로 다른 Origin에서 모인 기존 데이터는 같은 사용자 퍼널로 소급 해석하지 않는다.
 
 지속 익명 ID를 URL에 그대로 노출하는 방식은 사용하지 않는다.
 
 ## 12. 이번 1차 범위 밖
 
-- 운영 도메인, Nginx, DNS, TLS와 실제 배포
+- 운영 Nginx 반영, 환경 변수 설정과 실제 배포
 - 운영 DB migration 적용과 기존 데이터 백필
 - Android 앱 수집과 앱 화면 캡처
 - GA4/Clarity 프로젝트 생성 및 Measurement ID 설정
@@ -211,7 +218,11 @@ Tyche 서버
 
 ## 13. 검증 결과
 
-- `npm test`: 101개 통과, 실패 0개
-- 새 수집/집계/랜딩/대시보드 테스트: 8개 통과
-- 새 JavaScript 파일 `node --check`: 통과
+- WebDemo 기준 커밋의 공식 `WEB_DEMO=true` 회귀 테스트: 14개 통과, 실패 0개
+- `/play/` Flutter release 빌드: 통과. 75개 파일, 92,280,340 bytes이며 `<base href="/play/">`를 확인했다.
+- 서버 `npm test`: 102개 통과, 실패 0개
+- 랜딩·WebDemo Analytics와 CTA JavaScript `node --check`: 통과
+- 생성 산출물에서 과거 `/Starlight-Sudoku-WebDemo/` base path와 GitHub Pages CTA 주소가 남아 있지 않음을 확인했다.
+- 로컬 정적 서버에서 랜딩, `/play/`, Flutter bootstrap, `main.dart.js`, CanvasKit Wasm과 AssetManifest가 모두 HTTP `200`으로 응답했다.
+- Edge headless `430x900` 렌더링에서 일본어 `lang=ja`가 적용된 랜딩과 WebDemo 초기 화면을 확인했다. UTM·익명 사용자·세션 ID 연속성은 정적 계약 테스트로 확인했으며 실제 collector 수신은 운영 활성화 후 별도로 검증한다.
 - 실제 MySQL 연결, migration 실행, 운영 collector 전송과 배포: 미수행

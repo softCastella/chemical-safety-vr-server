@@ -1,8 +1,8 @@
 (() => {
-  const playUrl = "https://softcastella.github.io/Starlight-Sudoku-WebDemo/";
+  const playUrl = "/play/";
 
   function localizedPlayUrl() {
-    const url = new URL(playUrl);
+    const url = new URL(playUrl, window.location.origin);
     url.searchParams.set("lang", document.documentElement.lang || "ko");
     return window.starlightAnalytics
       ? window.starlightAnalytics.decorateUrl(url.toString())
@@ -205,27 +205,7 @@
 
     launchTimer = window.setTimeout(() => {
       launchTimer = 0;
-      const launchUrl = localizedPlayUrl();
-      if (window.matchMedia("(max-width: 680px)").matches) {
-        const mobileWindow = window.open(launchUrl, "_blank");
-        if (mobileWindow) mobileWindow.opener = null;
-        else window.location.assign(launchUrl);
-        return;
-      }
-
-      const width = Math.max(360, Math.min(430, window.screen.availWidth - 32));
-      const height = Math.max(480, Math.min(900, window.screen.availHeight - 48));
-      const left = Math.max(0, Math.round((window.screen.availWidth - width) / 2));
-      const top = Math.max(0, Math.round((window.screen.availHeight - height) / 2));
-      const features = `popup=yes,width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`;
-      const gameWindow = window.open(launchUrl, "starlightSudokuMobile", features);
-
-      if (gameWindow) {
-        gameWindow.opener = null;
-        gameWindow.focus();
-      } else {
-        window.location.assign(launchUrl);
-      }
+      window.location.assign(localizedPlayUrl());
     }, 420);
   });
 })();

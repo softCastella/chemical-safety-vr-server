@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
@@ -72,6 +73,10 @@ test("Nginx 배포 초안은 공개 호스트 보안과 이전 경로 정책을 
   const hardening = await readFile(new URL("tycheworks-public-hardening.conf", nginxRoot), "utf8");
   const legacyRoutes = await readFile(new URL("tycheworks-legacy-routes.conf", nginxRoot), "utf8");
   const starlight = await readFile(new URL("tycheworks-starlight-sudoku.conf", nginxRoot), "utf8");
+  const starlightPlayPages = await Promise.all([
+    readFile(new URL("starlight-sudoku-landing/play/index.html", siteRoot), "utf8"),
+    readFile(new URL("starlight-sudoku-landing/play/landing/index.html", siteRoot), "utf8"),
+  ]);
   const immersaKakaoCspPatch = await readFile(new URL("tycheworks-immersa-kakao-share-csp.patch", nginxRoot), "utf8");
   const immersaTrainingTelemetry = await readFile(new URL("tycheworks-immersa-training-telemetry.conf", nginxRoot), "utf8");
   const wwwCanonicalPatch = await readFile(new URL("tycheworks-www-canonical-redirect.patch", nginxRoot), "utf8");
@@ -85,6 +90,18 @@ test("Nginx 배포 초안은 공개 호스트 보안과 이전 경로 정책을 
   assert.match(legacyRoutes, /location \^~ \/app\/ \{ return 301 https:\/\/loop\.tycheworks\.com\//);
   assert.match(legacyRoutes, /location \^~ \/brand-v2\/ \{ return 404; \}/);
   assert.match(starlight, /include .*tycheworks-public-hardening\.conf;/);
+  assert.match(starlight, /script-src 'self' 'wasm-unsafe-eval'/);
+  for (const html of starlightPlayPages) {
+    const inlineScripts = [...html.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/gi)];
+    for (const [, inlineScript] of inlineScripts) {
+      const hash = createHash("sha256").update(inlineScript).digest("base64");
+      assert.ok(starlight.includes(`'sha256-${hash}'`), `missing CSP hash for /play/ inline script: ${hash}`);
+    }
+  }
+  assert.match(starlight, /worker-src 'self'/);
+  assert.match(starlight, /location = \/api\/starlight-analytics\/events\/batch/);
+  assert.match(starlight, /client_max_body_size 256k;/);
+  assert.match(starlight, /proxy_pass http:\/\/127\.0\.0\.1:3000;/);
   assert.match(immersaTrainingTelemetry, /location \^~ \/api\/training-telemetry\//);
   assert.match(immersaTrainingTelemetry, /limit_except POST \{ deny all; \}/);
   assert.match(immersaTrainingTelemetry, /limit_req zone=public_site burst=20 nodelay;/);

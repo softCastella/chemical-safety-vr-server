@@ -1,7 +1,7 @@
-// 운영 도메인과 수집 경로를 확정한 뒤 배포 설정으로 교체한다.
-// 비활성 상태에서도 UTM은 WebDemo 링크까지 유지된다.
+// 수집 API 활성 여부는 서버의 ENABLE_STARLIGHT_ANALYTICS_INGEST가 결정한다.
+// 랜딩과 /play/는 같은 Origin의 상대 경로를 사용한다.
 window.STARLIGHT_ANALYTICS_CONFIG = Object.freeze({
-  collectorUrl: "",
+  collectorUrl: "/api/starlight-analytics/events/batch",
   gaMeasurementId: "",
   enabled: false,
   debug: false,

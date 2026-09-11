@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0E2040">
+  <meta name="description" content="별빛 스도쿠 체험판 - 퍼즐을 풀고 멈춰버린 마을에 아침을 불러오세요.">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="referrer" content="no-referrer">
+  <link rel="canonical" href="https://starlight-sudoku.tycheworks.com/">
+  <title>별빛 스도쿠 체험판</title>
+  <link rel="icon" type="image/png" href="../favicon.png">
+  <style>
+    @font-face {
+      font-family: "StarlightSansCJK";
+      src: url("../assets/assets/fonts/StarlightSansCJK.ttf") format("truetype");
+      font-display: swap;
+    }
+
+    :root {
+      color-scheme: dark;
+      --night: #0e2040;
+      --cta-width: min(280px, 72vw);
+      --cta-height: calc(var(--cta-width) / 3);
+      --cta-lift: calc(var(--cta-height) / 2);
+    }
+
+    * { box-sizing: border-box; }
+
+    html,
+    body {
+      min-height: 100%;
+      margin: 0;
+      background: var(--night);
+    }
+
+    body {
+      display: grid;
+      min-height: 100svh;
+      place-items: center;
+      overflow: hidden;
+      font-family: "StarlightSansCJK", Pretendard, "Noto Sans KR", sans-serif;
+    }
+
+    .landing {
+      position: relative;
+      width: min(390px, 100vw);
+      height: min(844px, 100svh);
+      overflow: hidden;
+      background-color: var(--night);
+      background-image: var(--landing-art, url("../assets/assets/images/Scene/Title_Image_Starlight%2520Sdoku%2520KR.png"));
+      background-position: center top;
+      background-size: cover;
+      box-shadow: 0 0 60px rgba(0, 0, 0, .38);
+      isolation: isolate;
+    }
+
+    .headline {
+      position: absolute;
+      z-index: 2;
+      top: max(34px, calc(env(safe-area-inset-top) + 24px));
+      right: 24px;
+      left: 24px;
+      margin: 0;
+      color: #fff5d5;
+      font-size: clamp(25px, 7.1vw, 32px);
+      font-weight: 800;
+      line-height: 1.22;
+      letter-spacing: -.045em;
+      text-align: center;
+      text-shadow:
+        0 2px 2px rgba(3, 12, 32, .9),
+        0 0 16px rgba(255, 214, 125, .32);
+    }
+
+    .headline span { display: block; }
+
+    .cta-position {
+      position: absolute;
+      z-index: 3;
+      right: 0;
+      bottom: calc(max(34px, env(safe-area-inset-bottom)) + var(--cta-lift));
+      left: 0;
+      display: grid;
+      place-items: center;
+      pointer-events: none;
+    }
+
+    .cta-motion {
+      position: relative;
+      width: var(--cta-width);
+      animation: cta-float 2.8s ease-in-out infinite;
+      pointer-events: auto;
+    }
+
+    .cta-motion::before {
+      position: absolute;
+      z-index: -1;
+      inset: 18% 8%;
+      border-radius: 50%;
+      background: rgba(255, 197, 89, .58);
+      box-shadow:
+        0 0 24px rgba(255, 205, 103, .72),
+        0 0 46px rgba(100, 150, 255, .48);
+      content: "";
+      filter: blur(15px);
+      animation: cta-aura 2.8s ease-in-out infinite;
+    }
+
+    .cta {
+      position: relative;
+      display: grid;
+      width: 100%;
+      aspect-ratio: 3 / 1;
+      place-items: center;
+      overflow: visible;
+      color: #24452d;
+      text-decoration: none;
+      transition: filter .2s ease, transform .2s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .cta__art {
+      position: absolute;
+      z-index: 0;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      filter: drop-shadow(0 10px 10px rgba(3, 12, 32, .46));
+      pointer-events: none;
+    }
+
+    .cta__label {
+      position: relative;
+      z-index: 2;
+      padding: 0 54px;
+      font-size: clamp(15px, 4.4vw, 18px);
+      font-weight: 900;
+      letter-spacing: -.035em;
+      line-height: 1;
+      text-align: center;
+      text-shadow: 0 1px 0 rgba(255, 255, 255, .62);
+    }
+
+    .cta__shine {
+      position: absolute;
+      z-index: 1;
+      inset: 15% 12%;
+      overflow: hidden;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .cta__shine::before {
+      position: absolute;
+      top: -55%;
+      bottom: -55%;
+      left: -34%;
+      width: 22%;
+      rotate: 14deg;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .84), transparent);
+      content: "";
+      filter: blur(2px);
+      animation: cta-shine 3.6s ease-in-out infinite;
+    }
+
+    .spark {
+      position: absolute;
+      z-index: 4;
+      width: 12px;
+      height: 12px;
+      pointer-events: none;
+      animation: sparkle 2.1s ease-in-out infinite;
+    }
+
+    .spark::before,
+    .spark::after {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      border-radius: 999px;
+      background: #fff8ce;
+      box-shadow: 0 0 8px #ffd465;
+      content: "";
+      translate: -50% -50%;
+    }
+
+    .spark::before { width: 2px; height: 100%; }
+    .spark::after { width: 100%; height: 2px; }
+    .spark--one { top: 3px; left: 19%; }
+    .spark--two { right: 16%; bottom: 5px; animation-delay: -.72s; scale: .72; }
+    .spark--three { top: 25%; right: -2px; animation-delay: -1.38s; scale: .55; }
+
+    .cta:hover,
+    .cta:focus-visible {
+      filter: brightness(1.08) saturate(1.08);
+      transform: translateY(-3px) scale(1.025);
+    }
+
+    .cta:active { transform: translateY(0) scale(.97); }
+
+    .cta:focus-visible {
+      border-radius: 999px;
+      outline: 3px solid #bfe7ff;
+      outline-offset: 5px;
+    }
+
+    @keyframes cta-float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
+    }
+
+    @keyframes cta-aura {
+      0%, 100% { opacity: .42; transform: scale(.92); }
+      50% { opacity: .84; transform: scale(1.08); }
+    }
+
+    @keyframes cta-shine {
+      0%, 48% { left: -34%; opacity: 0; }
+      55% { opacity: .9; }
+      72%, 100% { left: 118%; opacity: 0; }
+    }
+
+    @keyframes sparkle {
+      0%, 100% { opacity: .22; transform: scale(.58) rotate(0); }
+      48% { opacity: 1; transform: scale(1.18) rotate(45deg); }
+    }
+
+    @media (max-width: 600px) {
+      .landing {
+        width: 100vw;
+        height: 100svh;
+        box-shadow: none;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .cta-motion,
+      .cta-motion::before,
+      .cta__shine::before,
+      .spark {
+        animation: none;
+      }
+
+      .cta { transition: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="landing" aria-labelledby="landing-headline">
+    <h1 class="headline" id="landing-headline">
+      <span id="landing-line1">멈춰버린 밤에</span>
+      <span id="landing-line2">아침을 불러오세요.</span>
+    </h1>
+
+    <div class="cta-position">
+      <div class="cta-motion">
+        <span class="spark spark--one" aria-hidden="true"></span>
+        <span class="spark spark--two" aria-hidden="true"></span>
+        <span class="spark spark--three" aria-hidden="true"></span>
+        <a class="cta" id="landing-cta" href="../?lang=ko" aria-label="별빛 스도쿠 지금 플레이해 보세요">
+          <img class="cta__art" src="../assets/assets/images/SystemUI/Button.png" alt="">
+          <span class="cta__shine" aria-hidden="true"></span>
+          <span class="cta__label" id="landing-cta-label">지금 플레이해 보세요</span>
+        </a>
+      </div>
+    </div>
+  </main>
+  <script src="../analytics-config.js"></script>
+  <script src="../analytics.js"></script>
+  <script>
+    (function () {
+      var copies = {
+        ko: {
+          htmlLang: "ko",
+          title: "별빛 스도쿠 체험판",
+          description: "별빛 스도쿠 체험판 - 퍼즐을 풀고 멈춰버린 마을에 아침을 불러오세요.",
+          line1: "멈춰버린 밤에",
+          line2: "아침을 불러오세요.",
+          cta: "지금 플레이해 보세요",
+          aria: "별빛 스도쿠 지금 플레이해 보세요",
+          art: "../assets/assets/images/Scene/Title_Image_Starlight%2520Sdoku%2520KR.png"
+        },
+        en: {
+          htmlLang: "en",
+          title: "Starlight Sudoku Trial",
+          description: "Starlight Sudoku Trial — solve puzzles and bring morning back to a village that stopped.",
+          line1: "In a night that stopped",
+          line2: "Call the morning back.",
+          cta: "Play now",
+          aria: "Play Starlight Sudoku now",
+          art: "../assets/assets/images/Scene/Title_Image_Starlight%2520Sdoku%2520EN.png"
+        },
+        ja: {
+          htmlLang: "ja",
+          title: "星明かりの数独 体験版",
+          description: "星明かりの数独 体験版。パズルを解いて、止まった村に朝を呼び戻しましょう。",
+          line1: "止まった夜に",
+          line2: "朝を呼んでください。",
+          cta: "今すぐプレイ",
+          aria: "スターライト数独を今すぐプレイ",
+          art: "../assets/assets/images/Scene/Title_Image_Starlight%2520Sdoku%2520JP.png"
+        },
+        zh: {
+          htmlLang: "zh-CN",
+          title: "星光数独 试玩",
+          description: "星光数独试玩 — 解开谜题，为停住的村庄唤回清晨。",
+          line1: "在停住的夜里",
+          line2: "把清晨唤回来。",
+          cta: "立即试玩",
+          aria: "立即试玩星光数独",
+          art: "../assets/assets/images/Scene/Title_Image_Starlight%2520Sdoku%2520CN.png"
+        },
+        "zh-TW": {
+          htmlLang: "zh-TW",
+          title: "星光數獨 試玩",
+          description: "星光數獨試玩 — 解開謎題，為停住的村莊喚回清晨。",
+          line1: "在停住的夜裡",
+          line2: "把清晨喚回來。",
+          cta: "立即試玩",
+          aria: "立即試玩星光數獨",
+          art: "../assets/assets/images/Scene/Title_Image_Starlight%2520Sdoku%2520TW.png"
+        }
+      };
+
+      function normalizeLang(raw) {
+        var normalized = String(raw || "").replace(/_/g, "-").toLowerCase();
+        if (
+          normalized.indexOf("zh-tw") === 0 ||
+          normalized.indexOf("zh-hant") === 0 ||
+          normalized === "tw" ||
+          normalized.indexOf("zh-hk") === 0 ||
+          normalized.indexOf("zh-mo") === 0
+        ) {
+          return "zh-TW";
+        }
+        if (normalized.indexOf("zh") === 0) return "zh";
+        if (normalized.indexOf("ja") === 0) return "ja";
+        if (normalized.indexOf("en") === 0) return "en";
+        if (normalized.indexOf("ko") === 0) return "ko";
+        return "";
+      }
+
+      function pickLang() {
+        var queryLang = normalizeLang(new URLSearchParams(window.location.search).get("lang"));
+        if (queryLang) return queryLang;
+        var languages = navigator.languages && navigator.languages.length
+          ? navigator.languages
+          : [navigator.language];
+        for (var i = 0; i < languages.length; i += 1) {
+          var matched = normalizeLang(languages[i]);
+          if (matched) return matched;
+        }
+        return "ko";
+      }
+
+      var lang = pickLang();
+      var copy = copies[lang] || copies.ko;
+      var root = document.documentElement;
+      var description = document.querySelector('meta[name="description"]');
+      var line1 = document.getElementById("landing-line1");
+      var line2 = document.getElementById("landing-line2");
+      var cta = document.getElementById("landing-cta");
+      var ctaLabel = document.getElementById("landing-cta-label");
+
+      root.lang = copy.htmlLang;
+      root.style.setProperty("--landing-art", 'url("' + copy.art + '")');
+      document.title = copy.title;
+      if (description) description.setAttribute("content", copy.description);
+      if (line1) line1.textContent = copy.line1;
+      if (line2) line2.textContent = copy.line2;
+      if (ctaLabel) ctaLabel.textContent = copy.cta;
+      if (cta) {
+        var gameUrl = "../?lang=" + encodeURIComponent(lang);
+        cta.setAttribute("href", window.starlightAnalytics
+          ? window.starlightAnalytics.decorateUrl(gameUrl)
+          : gameUrl);
+        cta.setAttribute("aria-label", copy.aria);
+        cta.addEventListener("click", function () {
+          window.starlightAnalytics?.trackJson(JSON.stringify({
+            event_name: "landing_cta_click",
+            screen_id: "landing",
+            target_id: "landing_cta",
+            target_type: "link",
+            is_interactive: true
+          }));
+        });
+      }
+      try {
+        sessionStorage.setItem("starlight_lang", lang);
+      } catch (error) {}
+      window.starlightAnalytics?.setScreen("landing", null, null);
+      window.starlightAnalytics?.trackJson(JSON.stringify({event_name: "landing_view"}));
+    })();
+  </script>
+</body>
+</html>
