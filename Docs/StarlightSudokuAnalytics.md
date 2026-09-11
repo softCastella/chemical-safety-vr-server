@@ -316,3 +316,15 @@ Google Play 사전등록 페이지를 아직 제공할 수 없고 웹 체험판�
 - 운영 서버의 `ENABLE_STARLIGHT_ANALYTICS_INGEST=false`
 
 이 상태에서는 WebDemo 계측 코드와 DB·대시보드 구현이 저장소에 남아 있더라도 브라우저가 분석 이벤트를 전송하지 않고 서버 수집 API도 요청을 받지 않는다. 마지막 완료 모달에서 명시적 분석 동의를 받는 UI, 동의 전 이벤트 처리 원칙과 철회 방법을 구현하고 실제 브라우저에서 검증하기 전에는 세 계층을 다시 활성화하지 않는다.
+
+운영 반영 결과는 다음과 같다.
+
+- 기준 커밋: `main@98fa0f5` (`별빛 웹 체험판 분석 수집을 중지`)
+- 공개 랜딩, `/play/`, `/play/landing/`: HTTP `200`, 응답 HTML에 `analytics-consent` 참조 없음
+- `/analytics-config.js`, `/play/analytics-config.js`: `enabled: false`
+- `POST /api/starlight-analytics/events/batch`: HTTP `503` 비활성 응답
+- PM2 `tyche-safety-training-server`: 환경 갱신 재시작 후 `online`
+- `https://tycheworks.com/api/health`: HTTP `200`
+- 운영 환경 백업: `/home/linuxuser/.config/tycheworks/env-backups/chemical-safety-vr.env.before-98fa0f5-analytics-disable`
+- 정적 파일 백업: `/home/linuxuser/.config/tycheworks/static-backups/`의 `before-98fa0f5` 파일 네 개
+- 미수행: DB migration, 기존 분석 원본 변경·삭제, FCM 기능 활성화
