@@ -345,6 +345,7 @@ test("VR 대시보드는 일반 사용자 학습 지표와 업무용 시각 체�
   assert.match(script, /동일 사용자의 두 번째 이후 플레이 수/);
   assert.match(script, /function learningGroups\(items,kind\)/);
   assert.match(script, /function stageAggregates\(items\)/);
+  assert.doesNotMatch(script, /metaAgeCategory|연령 범주/);
   assert.match(script, /앱 사용자 \$\{String\(value\)\.slice\(0,8\)\}/);
   assert.match(css, /--bg:#f3f6fa/);
   assert.match(css, /background:#102a43/);

@@ -17,7 +17,6 @@ function mapIdentity(row) {
     id: String(row.id),
     provider: row.provider,
     providerUserId: row.provider_user_id,
-    ageGroup: row.age_group,
     lastVerifiedAt: row.last_verified_at,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -47,7 +46,6 @@ async function selectIdentities(executor, userId) {
         id,
         provider,
         provider_user_id,
-        age_group,
         last_verified_at,
         created_at,
         updated_at
@@ -121,7 +119,6 @@ export function createUserRepository(pool) {
       id,
       participantCode,
       metaUserId,
-      ageGroup,
       controllerGuideVersionCompleted,
     }) {
       const connection = await pool.getConnection();
@@ -143,11 +140,10 @@ export function createUserRepository(pool) {
             INSERT INTO external_identities (
               user_id,
               provider,
-              provider_user_id,
-              age_group
-            ) VALUES (?, 'meta', ?, ?)
+              provider_user_id
+            ) VALUES (?, 'meta', ?)
           `,
-          [id, metaUserId, ageGroup],
+          [id, metaUserId],
         );
         await connection.commit();
         return await selectUserById(connection, id);
@@ -186,28 +182,6 @@ export function createUserRepository(pool) {
           if (result.affectedRows === 0) {
             await connection.rollback();
             return null;
-          }
-        }
-
-        if (Object.hasOwn(changes, "ageGroup")) {
-          const [result] = await connection.execute(
-            `
-              UPDATE external_identities AS identity
-              INNER JOIN users AS u ON u.id = identity.user_id
-              SET identity.age_group = ?
-              WHERE identity.user_id = ?
-                AND identity.provider = 'meta'
-                AND u.deleted_at IS NULL
-            `,
-            [changes.ageGroup, userId],
-          );
-
-          if (result.affectedRows === 0) {
-            const current = await selectUserById(connection, userId);
-            if (!current) {
-              await connection.rollback();
-              return null;
-            }
           }
         }
 

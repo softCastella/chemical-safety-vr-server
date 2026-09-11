@@ -6,12 +6,10 @@ const uuidPattern =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const createFields = new Set([
   "metaUserId",
-  "ageGroup",
   "controllerGuideVersionCompleted",
 ]);
 const updateFields = new Set([
   "status",
-  "ageGroup",
   "controllerGuideVersionCompleted",
 ]);
 
@@ -41,22 +39,6 @@ function readMetaUserId(value) {
   const normalized = value.trim();
   if (normalized.length < 1 || normalized.length > 128) {
     throw badRequest("metaUserId must contain between 1 and 128 characters.");
-  }
-
-  return normalized;
-}
-
-function readAgeGroup(value) {
-  if (value === undefined || value === null || value === "") {
-    return null;
-  }
-  if (typeof value !== "string") {
-    throw badRequest("ageGroup must be a string or null.");
-  }
-
-  const normalized = value.trim();
-  if (normalized.length < 1 || normalized.length > 32) {
-    throw badRequest("ageGroup must contain between 1 and 32 characters.");
   }
 
   return normalized;
@@ -126,7 +108,6 @@ export function createUserService({ repository, idFactory = randomUUID }) {
         id,
         participantCode: createParticipantCode(id),
         metaUserId,
-        ageGroup: readAgeGroup(payload.ageGroup),
         controllerGuideVersionCompleted: readGuideVersion(
           payload.controllerGuideVersionCompleted,
         ),
@@ -168,9 +149,6 @@ export function createUserService({ repository, idFactory = randomUUID }) {
       const changes = {};
       if (Object.hasOwn(payload, "status")) {
         changes.status = readStatus(payload.status);
-      }
-      if (Object.hasOwn(payload, "ageGroup")) {
-        changes.ageGroup = readAgeGroup(payload.ageGroup);
       }
       if (Object.hasOwn(payload, "controllerGuideVersionCompleted")) {
         changes.controllerGuideVersionCompleted = readGuideVersion(

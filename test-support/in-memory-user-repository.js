@@ -41,7 +41,6 @@ export function createInMemoryUserRepository() {
       id,
       participantCode,
       metaUserId,
-      ageGroup,
       controllerGuideVersionCompleted,
     }) {
       const timestamp = new Date().toISOString();
@@ -60,7 +59,6 @@ export function createInMemoryUserRepository() {
             id: String(++identitySequence),
             provider: "meta",
             providerUserId: metaUserId,
-            ageGroup,
             lastVerifiedAt: null,
             createdAt: timestamp,
             updatedAt: timestamp,
@@ -85,10 +83,6 @@ export function createInMemoryUserRepository() {
       if (Object.hasOwn(changes, "controllerGuideVersionCompleted")) {
         user.controllerGuideVersionCompleted =
           changes.controllerGuideVersionCompleted;
-      }
-      if (Object.hasOwn(changes, "ageGroup")) {
-        user.identities[0].ageGroup = changes.ageGroup;
-        user.identities[0].updatedAt = new Date().toISOString();
       }
       user.updatedAt = new Date().toISOString();
 
