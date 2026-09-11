@@ -1277,3 +1277,89 @@ Quest APK 한 세션의 용량이나 운영 사용량으로 확대하지 않는�
 사용자에게 운영 배포 승인을 먼저 확인한다. 승인받으면 서버 `0ef1619…`을 운영에 반영한 뒤, 이미 완료된
 세션의 정확히 같은 이벤트 재전송은 `200`과 `duplicates`로 응답하고 새 이벤트는 계속 `409`인지 확인한다.
 그 결과가 PASS인 뒤에만 Quest에서 연속 모드 두 회차와 정상 완료 후 `Welcome_Old`를 검증한다.
+
+## 2026-09-11 Build 8 Alpha 배포와 중도 퇴장 확인
+
+### 오늘 적용한 변경
+
+- 로딩 씬의 `progressFillDuration`을 8초로 조정했다.
+- Android 앱 버전을 정식 릴리즈 표기 `1.0.0`, `versionCode=8`로 맞춰 Build 8을 생성했다.
+- 이전 APK와 동일하게 Unity Player Settings의 Custom Keystore, alias, 비밀번호를 직접 사용하는 방식으로
+  되돌렸다. 별도 `.meta-quest-signing.local` 주입과 ProjectSettings 격리 검증은 제거했다.
+- 현재 씬 구조에 존재하지 않는 `PartnerLogos` 블록을 강제하던 Scene Dependency 검증을 제거하고,
+  로딩 시간 검증 기준을 8초로 갱신했다.
+
+### 실행 및 배포 확인
+
+- Build 8 APK가 Meta Horizon Alpha 채널에 업로드됐고, 처리 완료 후 Quest에서 자동 업데이트됐다.
+- Quest에서 앱 실행과 중도 퇴장·`종료하기` 흐름을 수행했으며, 종료 후 Quest 라이브러리로 복귀하는 동작을
+  확인했다.
+- Unity AI Assistant의 `generators.ai.unity.com` 접속 오류 로그는 프로젝트 컴파일 오류가 아닌 별도 서비스
+  로그로 분류했다.
+
+### 후속 작업
+
+1. 운영 조회용 토큰을 서버 환경에 설정한 뒤, 이번 Build 8 세션의 `sessionId`와 `EXIT Point 중도 중단`,
+   종료 이벤트 및 서버 `completed` 상태를 운영 조회 API에서 대조한다.
+2. `종료하기`에 의한 `application_quitting`과 `EXIT Point 중도 중단` 이벤트를 서로 구분해 결과를 기록한다.
+3. 정상 모드 완료 1회와 동일 앱 실행 중 다른 모드 1회를 추가로 수행해 별도 `modeSessionId`와
+   `mode_session_completed`가 생성되는지 확인한다.
+4. 이번 변경으로 제거한 `PartnerLogos` 검증이 실제 제품 요구사항과 일치하는지 다음 씬 정리 작업에서
+   재검토한다. 현재 확인은 Build 8 배포·실행 수준이며 양안 렌더링과 전체 교육 회귀 검증은 미완료다.
+
+## 2026-09-11 학원 Quest 2 Build 8 연속 실행·종료 통합 검증
+
+### 실행 기준
+
+- 클라이언트 저장소는 `main@dbb2e8f7d9babaa0f039812bdcf679b6163c19c6`, 서버 저장소와 운영 checkout은
+  `main@094524ec1db797a7c8c497086a868a7b0f4fb19e`을 기준으로 확인했다. 서버 checkout은
+  `0ef1619c70d1fbfa9d448463da3d0244ad9724ab`의 완료 세션 중복 재전송 수정도 포함한다.
+- 학원 Quest 2의 설치본은 Meta 설치 관리자 `com.oculus.ocms`를 통한 package
+  `com.tycheworks.immersa.safetyvr`, `versionCode=8`, `versionName=1.0.0`이다.
+- 이번 원본 앱 세션은 `0ec97178…`이며 개인 Meta ID 원문은 문서에 기록하지 않는다.
+
+### EXIT Point와 연속 모드 결과
+
+- 첫 `Education/LeakResponse` 회차 `4a221555…`는 `mode_session_started` 뒤 EXIT Point로 복귀했다.
+  동일 `modeSessionId`의 `mode_session_completed`는 없고, 앱의 `session_ended/application_quitting`도
+  기록되지 않았다. 따라서 정상 완료나 앱 종료로 오기록되지 않았음을 확인했다.
+- 현재 JSONL에는 EXIT Point 전용 이벤트가 없다. 중도 복귀는 `PpeArea → PpeEducationSelected` 상태 전이와
+  해당 `modeSessionId`의 완료 이벤트 부재로만 확인된다. 이 근거만으로 대시보드에서 중도 퇴장 원인을
+  확정하지 않는다.
+- 같은 앱 실행에서 `Training/LeakResponse` 회차 `ca2ae94dd…`와 `Test/LeakResponse` 회차
+  `2ddf9b94…`를 정상 완료했다. 두 회차는 서로 다른 `modeSessionId`를 사용하고 각각 정확히 한 개의
+  `mode_session_completed`로 닫혔다.
+- Training은 `modeElapsedSec=96.15`, Test는 `modeElapsedSec=151.52`였고 두 회차 모두 퀴즈 5/5,
+  `ppeWrongCount=0`으로 기록됐다.
+
+### 종료·서버 대조와 기존 사용자 판정
+
+- 앱 내부 `종료하기` 직후 Quest 앱 PID가 사라졌다. 앱을 다시 실행하기 전에 로컬 JSONL과 업로드 ACK는
+  이벤트 302개, 마지막 `sequence=302`, `completed=true`로 일치했다.
+- 운영 MySQL을 서버 저장소의 읽기 전용 repository 경로로 조회한 결과 같은 세션은 이벤트 302개,
+  마지막 `sequence=302`, `status=completed`, `endReason=application_quitting`으로 일치했다. 다음 실행의
+  durable recovery를 기다리지 않고 종료 ACK가 완료됐다.
+- 오늘 최초 Build 8 실행의 원본은 `metaProbeState=Completed`, `metaWelcomeState=Returning`을 기록했고
+  `VO_PPE_INTRO_002_Welcome_Old`가 시작·종료됐다. 사용자는 최초 실행과 이후 재실행 화면에서 모두 기존
+  사용자 안내를 확인했다. 재실행 관찰은 사용자 실기 증거이며 별도 새 JSONL 세션으로 계측하지 않았다.
+
+### 검증 수준과 남은 항목
+
+- **Quest/OpenXR 확인:** Meta Alpha Build 8 설치, EXIT Point 복귀, Training·Test 정상 완료, 결과 화면
+  복귀, 앱 내부 종료와 기존 사용자 안내를 실제 HMD에서 확인했다.
+- **서버 통합 확인:** Quest 원본과 운영 DB의 세션 ID, 이벤트 수, 마지막 sequence, 두 완료
+  `modeSessionId`, 앱 종료 상태가 일치했다.
+- **후속 Education 확인:** 별도 앱 세션 `9db5c193…`에서 `LeakResponse/Education` 회차
+  `99727875…`를 정상 완료했다. `mode_session_started(sequence=19)`와
+  `mode_session_completed(sequence=186)`가 같은 `modeSessionId`로 연결됐고, 퀴즈 5/5,
+  `ppeWrongCount=0`, `modeElapsedSec=97.32`로 기록됐다. 음성 안내는 사용자 합의에 따라 스킵했으므로
+  이 회차를 음성 품질 검증 근거로 사용하지 않는다.
+- **후속 종료·서버 대조:** 결과 모달 복귀 후 앱 내부 `종료하기`를 사용했다. Quest PID가 사라졌고 로컬
+  JSONL과 업로드 ACK는 이벤트 195개, 마지막 `sequence=195`, `completed=true`로 일치했다. 운영 MySQL도
+  같은 세션을 이벤트 195개, 마지막 `sequence=195`, `status=completed`,
+  `endReason=application_quitting`, `appVersion=1.0.0`으로 저장했다.
+- **미완료:** EXIT Point 전용 원본 이벤트, 운영 조회용 HTTP token과 조회 API, Quest 양안·거울 시각 품질,
+  스킵하지 않은 음성 품질과 성능 체감은 이번 계측으로 확정하지 않았다.
+- **문서 검증:** `git diff --check`에서 이번 문서 변경의 공백 오류는 없었다. Unity
+  `DocumentationPolicyHarness.Validate`는 학원 PC의 `No valid Unity Editor license found`로 종료 코드
+  `198`을 반환해 실행되지 않았으며, 문서 정책 실패로 해석하지 않는다.
