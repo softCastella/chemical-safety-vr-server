@@ -3,7 +3,7 @@
   const config=global.STARLIGHT_ANALYTICS_CONFIG||{};
   const consent=global.starlightAnalyticsConsent||{isGranted:()=>false,isDenied:()=>true,onGranted:()=>{},prompt:()=>{}};
   const utmKeys=['utm_source','utm_medium','utm_campaign','utm_content','utm_term'];
-  const majorGaEvents=new Set(['landing_view','landing_cta_click','game_open','game_ready','puzzle_start','stage_1_clear','stage_2_clear','stage_3_clear','stage_4_clear','stage_5_clear','demo_complete','store_cta_click','screen_view','session_end']);
+  const majorGaEvents=new Set(['landing_view','landing_cta_click','game_open','game_ready','puzzle_start','stage_1_clear','stage_2_clear','stage_3_clear','stage_4_clear','stage_5_clear','demo_complete','store_cta_click','release_notify_open','release_notify_success','screen_view','session_end']);
   const queue=[],pendingConsent=[];let flushTimer=null,pendingPointer=null,currentScreen='unknown',overlayId=null,stageId=null,anonymousUserId=null,sessionId=null,listenersActive=false,gaInitialized=false;
   const now=()=>new Date().toISOString();
   const randomId=prefix=>`${prefix}-${Date.now().toString(36)}-${crypto.getRandomValues(new Uint32Array(2)).join('')}`;

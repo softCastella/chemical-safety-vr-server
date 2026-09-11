@@ -91,7 +91,7 @@ test("Nginx 배포 초안은 공개 호스트 보안과 이전 경로 정책을 
   assert.match(legacyRoutes, /location \^~ \/app\/ \{ return 301 https:\/\/loop\.tycheworks\.com\//);
   assert.match(legacyRoutes, /location \^~ \/brand-v2\/ \{ return 404; \}/);
   assert.match(starlight, /include .*tycheworks-public-hardening\.conf;/);
-  assert.match(starlight, /script-src 'self' 'wasm-unsafe-eval'/);
+  assert.match(starlight, /script-src 'self' https:\/\/www\.gstatic\.com 'wasm-unsafe-eval'/);
   for (const html of starlightPlayPages) {
     const inlineScripts = [...html.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/gi)];
     for (const [, inlineScript] of inlineScripts) {
@@ -103,6 +103,11 @@ test("Nginx 배포 초안은 공개 호스트 보안과 이전 경로 정책을 
   assert.match(starlight, /location = \/yt \{\s*return 302 \/\?utm_source=youtube&utm_medium=shorts&utm_campaign=starlight_gameplay_trailer&utm_content=trailer_v1;\s*\}/);
   assert.match(starlight, /location = \/threads \{\s*return 302 \/\?utm_source=threads&utm_medium=social&utm_campaign=starlight_gameplay_trailer&utm_content=post_v1;\s*\}/);
   assert.match(starlight, /location = \/api\/starlight-analytics\/events\/batch/);
+  assert.match(starlight, /location = \/api\/starlight-release-push\/subscriptions/);
+  assert.match(starlight, /location = \/store \{\s*return 302 https:\/\/play\.google\.com\/store\/apps\/details\?id=com\.tychespark\.starlightsudoku/);
+  assert.match(starlight, /https:\/\/www\.gstatic\.com/);
+  assert.match(starlight, /https:\/\/firebaseinstallations\.googleapis\.com/);
+  assert.match(starlight, /https:\/\/fcmregistrations\.googleapis\.com/);
   assert.match(starlight, /client_max_body_size 256k;/);
   assert.match(starlight, /proxy_pass http:\/\/127\.0\.0\.1:3000;/);
   assert.match(admin, /server_name admin\.tycheworks\.com;/);

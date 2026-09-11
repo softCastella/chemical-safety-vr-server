@@ -95,7 +95,7 @@ test("별빛 스도쿠 개인정보처리방침은 앱·웹 데이터 처리와 
   assert.match(html, /data-detail-link/);
   assert.match(script, /starlight-sudoku-locale/);
   assert.match(html, /privacy\.css\?v=20260909-1/);
-  assert.match(html, /privacy-i18n\.js\?v=20260911-2/);
+  assert.match(html, /privacy-i18n\.js\?v=20260911-4/);
   for (const locale of ["ko", "en", "ja", "zh-CN", "zh-TW"]) {
     assert.match(html, new RegExp(`data-locale="${locale}"`));
     assert.match(script, new RegExp(`(?:^|[\\s"'])${locale.replace("-", "\\-")}(?:[":])`, "m"));
@@ -108,7 +108,11 @@ test("별빛 스도쿠 개인정보처리방침은 앱·웹 데이터 처리와 
   assert.match(script, /수집 후 90일/);
   assert.match(script, /광고·분석 사업자에게 제공하지 않습니다/);
   assert.match(script, /Google Play 인앱 리뷰 흐름을 요청/);
-  assert.match(script, /전송 시 암호화/);
+  assert.match(script, /출시 푸시 1회 발송/);
+  assert.match(script, /이메일·전화번호·이름은 수집하지 않고/);
+  assert.match(script, /알림 발송 후 30일/);
+  assert.match(script, /Google LLC의 Firebase Cloud Messaging/);
+  assert.match(script, /Firebase Cloud Messaging이 만든 설치 식별값/);
   assert.match(script, /연령에 따라 이용을 제한하지 않는 퍼즐 게임/);
   assert.match(script, /만 14세 미만 아동을 주요 대상으로 기획하거나 홍보하는 서비스는 아니며/);
   assert.match(script, /プライバシーポリシー \| 星明かりの数独/);

@@ -11,8 +11,8 @@
 - 사용자가 제공한 웹 체험판 실제 화면 16장을 화면 순서와 상태별로 배치하고 Canvas 밀도 히트맵 배경으로 사용한다.
 - Android는 화면과 필터 자리만 준비하고 `데이터 없음`으로 표시한다.
 - 서버 랜딩은 Threads 등에서 들어온 UTM과 현재 언어를 같은 Origin의 `/play/`까지 전달한다.
-- `Starlight-Sudoku-WebDemo` `main@ed51273041e907dceb4a24eeb014d5333364ffd1`을 `WEB_DEMO=true`, base href `/play/`로 빌드한 정적 산출물을 랜딩 하위에 포함했다. Flutter 제목·버튼·핵심 게임 루프와 Play Store용 문구는 수정하지 않았다.
-- 수집 API와 Nginx 프록시 경계, 두 화면의 같은 Origin collector 경로는 준비했지만 정적 `enabled`와 서버 기능 플래그 기본값은 모두 비활성이다. 개인정보처리방침 개정, migration 적용, 운영 환경 설정과 실제 배포는 수행하지 않았다.
+- `Starlight-Sudoku-WebDemo` `main@de5115e3a281068de1b998deccfba4b14b8deac2`의 체험 종료 화면에 출시 알림 신청을 추가하고, `WEB_DEMO=true`, base href `/play/`로 만든 정적 산출물을 랜딩 하위에 포함했다.
+- 익명 분석과 출시 알림 신청 API, Nginx 프록시 경계, 개인정보처리방침 개정은 코드에 반영했다. migration 적용, 운영 환경 설정, 실제 배포와 실기기 수신 검증은 수행하지 않았다.
 
 ## 2. 분석한 기존 구조
 
@@ -150,7 +150,7 @@ flutter test --dart-define=WEB_DEMO=true test/web_bgm_contract_test.dart test/we
 flutter build web --release --base-href "/play/" --dart-define=WEB_DEMO=true
 ```
 
-산출물 위치는 `public/site/starlight-sudoku-landing/play/`이다. 갱신할 때는 생성된 Flutter 파일을 개별 수정해 앱과 다른 UI를 만들지 않고, 검증된 WebDemo 기준 커밋을 다시 빌드한다. 서버 배포용 `analytics-config.js`만 같은 Origin collector 경로로 교체한다.
+산출물 위치는 `public/site/starlight-sudoku-landing/play/`이다. 갱신할 때는 생성된 Flutter 파일을 개별 수정해 앱과 다른 UI를 만들지 않고, 검증된 WebDemo 기준 커밋을 다시 빌드한다. 서버 배포용 `analytics-config.js`와 `release-push-config.js`는 같은 Origin API 및 정확한 운영 공개 키를 사용하도록 설정한다.
 
 로컬 DB에 migration을 적용하고 관리자 계정으로 로그인해야 실제 DB 대시보드까지 확인할 수 있다. `npm run db:migrate`는 이 저장소의 미적용 migration 전체에 영향을 줄 수 있으므로 별도 테스트 DB에서 대상 목록을 검토한 뒤 실행한다. 이번 작업에서는 migration과 서버 프로세스를 실행하지 않았다.
 
@@ -182,7 +182,7 @@ Tyche 서버
 └─ GET  /starlight-analytics/
 ```
 
-랜딩 CTA는 `/play/`로 같은 탭 이동한다. 현재 언어를 `lang` query로 먼저 붙이고 저장된 다섯 UTM 값을 이어 붙인다. 같은 탭·같은 Origin이므로 랜딩과 게임이 `localStorage` 익명 사용자 ID와 `sessionStorage` 세션 ID를 함께 사용하며, 지속 익명 ID 자체를 URL에 노출하지 않는다.
+랜딩 CTA는 데스크톱에서 모바일 세로 비율의 새 창으로 `/play/`를 연다. 현재 언어를 `lang` query로 먼저 붙이고 저장된 다섯 UTM 값을 이어 붙인다. 같은 Origin이므로 랜딩과 게임이 `localStorage` 익명 사용자 ID를 공유하고, 새 창 생성 시 복사되는 `sessionStorage`와 query로 세션·유입 문맥을 이어 간다. 지속 익명 ID 자체는 URL에 노출하지 않는다.
 
 ## 11. 후속 작업
 
@@ -201,7 +201,7 @@ Tyche 서버
 
 기존 운영 구조는 Tyche 서버의 랜딩과 `softcastella.github.io` WebDemo가 서로 다른 Origin이었다. UTM은 전달됐지만 브라우저의 `localStorage`와 `sessionStorage`가 Origin별로 분리되어 랜딩의 익명 사용자/세션 ID가 게임의 ID와 자동으로 이어지지 않았다.
 
-저장소에서는 두 화면을 `starlight-sudoku.tycheworks.com`의 루트와 `/play/`로 합치고 CTA를 같은 탭 이동으로 바꿨다. 실제 운영 배포와 collector 수신 검증이 끝난 뒤부터만 `landing_view → game_open`을 동일 사용자·세션 퍼널로 계산한다. 통합 전 서로 다른 Origin에서 모인 기존 데이터는 같은 사용자 퍼널로 소급 해석하지 않는다.
+저장소에서는 두 화면을 `starlight-sudoku.tycheworks.com`의 루트와 `/play/`로 합치고 CTA가 같은 Origin의 새 창을 열도록 바꿨다. 실제 운영 배포와 collector 수신 검증이 끝난 뒤부터만 `landing_view → game_open`을 동일 사용자·세션 퍼널로 계산한다. 통합 전 서로 다른 Origin에서 모인 기존 데이터는 같은 사용자 퍼널로 소급 해석하지 않는다.
 
 지속 익명 ID를 URL에 그대로 노출하는 방식은 사용하지 않는다.
 
@@ -226,3 +226,27 @@ Tyche 서버
 - 로컬 정적 서버에서 랜딩, `/play/`, Flutter bootstrap, `main.dart.js`, CanvasKit Wasm과 AssetManifest가 모두 HTTP `200`으로 응답했다.
 - Edge headless `430x900` 렌더링에서 일본어 `lang=ja`가 적용된 랜딩과 WebDemo 초기 화면을 확인했다. UTM·익명 사용자·세션 ID 연속성은 정적 계약 테스트로 확인했으며 실제 collector 수신은 운영 활성화 후 별도로 검증한다.
 - 실제 MySQL 연결, migration 실행, 운영 collector 전송과 배포: 미수행
+
+## 14. FCM 출시 알림 구현 상태
+
+체험 종료 화면의 선택 버튼은 이메일이나 전화번호를 받지 않고 브라우저 알림 권한을 요청한다. 동의한 브라우저의 Firebase Installation ID와 언어·UTM source/medium/campaign을 `POST /api/starlight-release-push/subscriptions`로 보내며, 서버는 ID 원문과 SHA-256 해시를 분리해 `starlight_release_push_subscriptions`에 저장한다. 관리자 화면은 등록 수와 유입 경로를 표시하지만 Installation ID 원문은 응답하지 않는다.
+
+- Firebase 프로젝트: `starlight-sudoku`, 웹 앱: `starlight-sudoku-web`
+- WebDemo 기준: `softCastella/Starlight-Sudoku-WebDemo` `main@de5115e3a281068de1b998deccfba4b14b8deac2`
+- 신규 migration: `018_create_starlight_release_push_subscriptions.sql`
+- 서버 기능 플래그: `ENABLE_STARLIGHT_RELEASE_PUSH=false`
+- 웹 공개 설정: `play/release-push-config.js`; Firebase 공개 웹 설정만 저장하고 VAPID 공개 키는 아직 비워 둔다.
+- 클릭 이동: 서비스 워커가 알림 클릭 시 같은 Origin의 `/store`를 열고 Nginx가 Google Play 주소로 전환한다.
+- 개인정보 범위: FCM 설치 식별값, 언어와 UTM 유입 정보이며 이메일·전화번호·이름은 수집하지 않는다. 출시 알림 발송 후 30일 보관 기준을 방침에 반영했다.
+
+현재 검증 단계는 `코드에 존재함`과 자동 테스트까지다. 운영 DB 적재, 실제 Android 브라우저 등록, FCM 발송·수신, 알림 클릭 후 Google Play 이동은 아직 검증하지 않았으므로 운영 완료로 표시하지 않는다.
+
+## 15. 출시 알림 후속 작업
+
+1. Firebase Console에서 웹 푸시 공개 키를 텍스트로 다시 복사해 `release-push-config.js`의 `vapidKey`에 넣는다. 현재 스크린샷에서 판독한 문자열은 P-256 공개 키 검증을 통과하지 않아 사용하지 않는다.
+2. 운영 DB 백업과 대상 migration 목록을 확인한 뒤 `018`을 적용한다.
+3. 운영 환경에서 `ENABLE_STARLIGHT_RELEASE_PUSH=true`와 요청 제한을 설정하고 Nginx 정적 파일·프록시·CSP를 반영한다.
+4. 실제 Android 브라우저에서 동의 → Installation ID 저장 → 관리자 집계 표시를 확인한다.
+5. Firebase 서비스 계정 자격 증명을 저장소 밖에 준비하고, 출시 시 한 번 전송하는 서버 작업 또는 Firebase Console 발송 절차를 확정한다.
+6. 테스트 푸시의 수신과 클릭 시 `/store` → Google Play 이동을 확인한다.
+7. 만료·해지된 식별값 상태 갱신과 출시 발송 30일 뒤 삭제 작업을 구현한다.

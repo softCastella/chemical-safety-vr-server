@@ -23,8 +23,9 @@
         <button class="nav-item" data-view="heatmap">사용성 히트맵</button>
         <button class="nav-item" data-view="retention">재방문율</button>
         <button class="nav-item" data-view="platforms">웹 / 안드로이드 비교</button>
+        <button class="nav-item" data-view="release">출시 푸시 신청</button>
       </nav>
-      <div class="privacy-note">익명 식별자만 수집<br>입력 텍스트·IP 저장 안 함</div>
+      <div class="privacy-note">이용 분석은 익명 수집<br>출시 푸시는 FCM·브라우저 권한 기반</div>
     </aside>
 
     <main>
@@ -57,8 +58,9 @@
 
       <section class="view" id="view-retention"><article class="panel"><div class="panel-head"><h2>재방문 사용자군</h2><span>첫 방문일 기준</span></div><div class="table-wrap"><table><thead><tr><th>첫 방문일</th><th>사용자</th><th>1일 후</th><th>7일 후</th><th>30일 후</th></tr></thead><tbody id="retention-table"></tbody></table></div></article></section>
       <section class="view" id="view-platforms"><div class="platform-grid" id="platform-grid"></div><article class="panel android-note"><h2>안드로이드 준비 상태</h2><p>앱 데이터는 아직 수집하지 않습니다. 동일한 이벤트 규격과 영역만 준비되어 있습니다.</p></article></section>
+      <section class="view" id="view-release"><div class="kpi-grid"><article class="kpi"><span>전체 신청</span><strong id="release-total">0</strong><small>중복 FCM 설치 식별값 제외</small></article><article class="kpi"><span>알림 대기</span><strong id="release-active">0</strong><small>출시 푸시 발송 전</small></article></div><article class="panel"><div class="panel-head"><h2>출시 푸시 신청</h2><span>FCM·휴대폰 브라우저 알림 권한 기반 · 이메일·전화번호 없음</span></div><div class="table-wrap"><table><thead><tr><th>언어</th><th>유입 경로 / 매체</th><th>캠페인</th><th>동의 시각</th><th>최근 성공</th><th>상태</th></tr></thead><tbody id="release-table"></tbody></table></div></article></section>
     </main>
   </div>
-  <script src="heatmap.js?v=20260910server1"></script><script src="sample-dashboard.js?v=20260910server1"></script><script src="screen-catalog.js?v=20260910server1"></script><script src="dashboard.js?v=20260910server1"></script><script src="/server/dashboard-switcher.js?v=20260911-1"></script>
+  <script src="heatmap.js?v=20260910server1"></script><script src="sample-dashboard.js?v=20260910server1"></script><script src="screen-catalog.js?v=20260910server1"></script><script src="dashboard.js?v=20260911release1"></script><script src="/server/dashboard-switcher.js?v=20260911-1"></script>
 </body>
 </html>

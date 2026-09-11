@@ -6,7 +6,7 @@ const fixedEventNames = new Set([
   "game_exit", "pointer_tap", "cell_select", "number_input", "wrong_input", "erase",
   "memo_toggle", "memo_input", "hint_open", "hint_used", "restart", "pause", "resume",
   "settings_open", "language_open", "language_change", "home_click", "next_stage_click",
-  "village_click",
+  "village_click", "release_notify_open", "release_notify_success", "release_notify_failed",
 ]);
 const stageEvent = /^stage_[1-5]_(?:start|clear)$/;
 const identifier = /^[A-Za-z0-9._:-]+$/;

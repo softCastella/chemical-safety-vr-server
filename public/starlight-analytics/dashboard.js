@@ -1,12 +1,13 @@
 (function(){
   "use strict";
   const $=(selector)=>document.querySelector(selector),$$=(selector)=>[...document.querySelectorAll(selector)];
-  const state={data:null,days:7,heatmap:null,heatmapView:null,miniHeatmaps:[]};
+  const state={data:null,subscriptions:{data:[],meta:{total:0,active:0}},days:7,heatmap:null,heatmapView:null,miniHeatmaps:[]};
   const labels={
     landing_view:"랜딩 조회",landing_cta_click:"랜딩 CTA",game_open:"게임 열기",game_ready:"게임 준비",puzzle_start:"퍼즐 시작",
     demo_complete:"데모 완료",store_cta_click:"스토어 이동",cell_select:"셀 선택",number_input:"숫자 입력",wrong_input:"오답",
     erase:"삭제",memo_toggle:"메모 전환",memo_input:"메모 입력",hint_open:"힌트 열기",hint_used:"힌트 사용",restart:"다시 풀기",
     pause:"일시정지",resume:"계속 풀기",settings_open:"설정",language_open:"언어 열기",language_change:"언어 변경",
+    release_notify_open:"출시 알림 열기",release_notify_success:"출시 알림 신청",release_notify_failed:"출시 알림 실패",
     home_click:"나가기",next_stage_click:"다음 단계",village_click:"마을 보기",web:"웹",android:"안드로이드",
     session_duration:"세션 시간",active_engagement_time:"활성 이용 시간",game_screen_time:"게임 화면 체류",
     active_play_time:"실제 플레이 시간",puzzle_clear_time:"퍼즐 완료 시간",time_to_first_action:"첫 조작까지",
@@ -51,11 +52,15 @@
     });
     let data;
     try{
-      const response=await fetch(`/api/starlight-analytics/dashboard?${params}`,{credentials:"same-origin"});
+      const [response,releaseResponse]=await Promise.all([
+        fetch(`/api/starlight-analytics/dashboard?${params}`,{credentials:"same-origin"}),
+        fetch("/api/starlight-release-push/subscriptions",{credentials:"same-origin"}),
+      ]);
       if(response.status===401){location.assign("/server/login");return;}
       if(!response.ok)throw new Error(`dashboard ${response.status}`);
       const live=await response.json();
       data=live.meta?.has_any_data?live:window.STARLIGHT_SAMPLE_DASHBOARD;
+      if(releaseResponse.ok)state.subscriptions=await releaseResponse.json();
     }catch(error){console.warn("Starlight dashboard API unavailable; showing sample data.",error);data=window.STARLIGHT_SAMPLE_DASHBOARD;}
     state.data=data;render(data);
   }
@@ -68,7 +73,7 @@
     fillSelect("#filter-locale",data.filters?.locales,"전체 언어");fillSelect("#filter-source",data.filters?.sources,"전체 유입 경로");
     fillSelect("#filter-campaign",data.filters?.campaigns,"전체 캠페인");fillSelect("#filter-stage",data.filters?.stages,"전체 단계");
     renderOverview(data);renderAcquisition(data.acquisition||[]);renderFunnel(data.funnel||[]);renderPlay(data.play||[]);
-    renderStages(data.stages||[]);renderInteractions(data);renderRetention(data.retention||[]);renderPlatforms(data.platforms||[]);renderHeatmapOptions();
+    renderStages(data.stages||[]);renderInteractions(data);renderRetention(data.retention||[]);renderPlatforms(data.platforms||[]);renderRelease();renderHeatmapOptions();
   }
 
   function fillSelect(selector,values,allLabel){const select=$(selector),prior=select.value;select.innerHTML=`<option value="all">${escapeHtml(allLabel)}</option>`+(values||[]).map((item)=>`<option value="${escapeHtml(item)}">${escapeHtml(item)}</option>`).join("");if([...select.options].some((option)=>option.value===prior))select.value=prior;}
@@ -82,6 +87,7 @@
   function renderInteractions(data){$("#interaction-table").innerHTML=(data.interactions||[]).map((row)=>`<tr><td>${escapeHtml(title(row.event))}</td><td>${integer(row.count)}</td><td>${integer(row.users)}</td><td>${row.per_user}</td></tr>`).join("")||emptyRow(4);$("#expectation-list").innerHTML=(data.expectation||[]).map((row)=>`<div class="expectation-row"><b>${escapeHtml(title(row.screen_id))}</b><p>비기능 클릭 ${percent(row.non_interactive_click_rate)} · 사용자 ${integer(row.unique_users)}명 · 반복 ${integer(row.repeat_users)}명</p><small>${(row.top_targets||[]).map((item)=>`${escapeHtml(title(item.target))} ${integer(item.count)}회`).join(" · ")||"비기능 클릭 없음"}</small></div>`).join("")||emptyState();}
   function renderRetention(rows){$("#retention-table").innerHTML=rows.map((row)=>`<tr><td>${escapeHtml(row.cohort)}</td><td>${integer(row.users)}</td><td>${percent(row.d1)}</td><td>${percent(row.d7)}</td><td>${percent(row.d30)}</td></tr>`).join("")||emptyRow(5);}
   function renderPlatforms(rows){$("#platform-grid").innerHTML=rows.map((row)=>`<article class="platform-card ${row.state==="no_data"?"no-data":""}"><span>${row.state==="no_data"?"준비됨 · 데이터 없음":"실시간 데이터"}</span><h3>${escapeHtml(title(row.platform))}</h3><div class="platform-stats"><div><b>${integer(row.users)}</b><small> 사용자</small></div><div><b>${integer(row.sessions)}</b><small> 세션</small></div><div><b>${integer(row.starts)}</b><small> 시작</small></div><div><b>${integer(row.completes)}</b><small> 완료</small></div></div></article>`).join("");}
+  function renderRelease(){const result=state.subscriptions||{},rows=result.data||[],meta=result.meta||{};$("#release-total").textContent=integer(meta.total);$("#release-active").textContent=integer(meta.active);$("#release-table").innerHTML=rows.map((row)=>`<tr><td>${escapeHtml(row.locale)}</td><td>${escapeHtml(row.source)} / ${escapeHtml(row.medium)}</td><td>${escapeHtml(row.campaign)}</td><td>${escapeHtml(dateTime(row.consented_at))}</td><td>${escapeHtml(dateTime(row.last_success_at))}</td><td>${escapeHtml(releaseStatus(row.status))}</td></tr>`).join("")||emptyRow(6);}
 
   function bindHeatmap(){["heatmap-type","heatmap-stage"].forEach((id)=>$("#"+id).addEventListener("change",renderHeatmap));$$("[data-heatmap-platform]").forEach((button)=>button.addEventListener("click",()=>setHeatmapPlatform(button.dataset.heatmapPlatform)));}
   function setHeatmapPlatform(platform){$$("[data-heatmap-platform]").forEach((button)=>{const active=button.dataset.heatmapPlatform===platform;button.classList.toggle("active",active);button.setAttribute("aria-selected",String(active));});$("#heatmap-web-content").classList.toggle("hidden",platform!=="web");$("#heatmap-app-content").classList.toggle("hidden",platform!=="android");if(platform==="web")requestAnimationFrame(()=>{renderHeatmap();state.heatmap.resize();state.miniHeatmaps.forEach((entry)=>entry.map.resize());});}
@@ -98,6 +104,8 @@
   function integer(value){return Math.round(Number(value)||0).toLocaleString("ko-KR");}
   function percent(value){return `${round((Number(value)||0)*100,1)}%`;}
   function duration(value){if(value===null||value===undefined||!Number.isFinite(Number(value)))return"-";const seconds=Math.round(Number(value));return seconds>=60?`${Math.floor(seconds/60)}분 ${seconds%60}초`:`${seconds}초`;}
+  function dateTime(value){if(!value)return"-";const date=new Date(value);return Number.isNaN(date.valueOf())?"-":date.toLocaleString("ko-KR");}
+  function releaseStatus(value){return {active:"알림 대기",notified:"발송 완료",expired:"만료"}[value]||value||"-";}
   function round(value,digits){return Number(value.toFixed(digits));}
   function escapeHtml(value){return String(value??"").replace(/[&<>"']/g,(char)=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"})[char]);}
   function emptyRow(columns){return `<tr><td colspan="${columns}" class="empty-state">선택 조건에 해당하는 데이터가 없습니다.</td></tr>`;}

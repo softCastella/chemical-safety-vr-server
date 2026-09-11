@@ -133,6 +133,18 @@ export const env = Object.freeze({
     300,
     86400,
   ),
+  enableStarlightReleasePush: readBoolean(
+    "ENABLE_STARLIGHT_RELEASE_PUSH",
+    false,
+  ),
+  starlightReleasePush: Object.freeze({
+    rateLimitPerHour: readInteger(
+      "STARLIGHT_RELEASE_PUSH_RATE_LIMIT_PER_HOUR",
+      20,
+      1,
+      1000,
+    ),
+  }),
   kakaoJavaScriptKey: process.env.KAKAO_JAVASCRIPT_KEY ?? "",
   contact: Object.freeze({
     resendApiKey: process.env.RESEND_API_KEY ?? "",

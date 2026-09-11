@@ -27,6 +27,8 @@ import { createContactRouter } from "./modules/contact/contact-routes.js";
 import { createResendContactMailer } from "./modules/contact/resend-contact-mailer.js";
 import { createStarlightAnalyticsRepository } from "./modules/starlight-analytics/starlight-analytics-repository.js";
 import { createStarlightAnalyticsRouter } from "./modules/starlight-analytics/starlight-analytics-routes.js";
+import { createStarlightReleasePushRepository } from "./modules/starlight-release-push/starlight-release-push-repository.js";
+import { createStarlightReleasePushRouter } from "./modules/starlight-release-push/starlight-release-push-routes.js";
 
 const publicRoot = fileURLToPath(new URL("../public/", import.meta.url));
 const dashboardRoot = path.join(publicRoot, "dashboard");
@@ -75,6 +77,9 @@ export function createApp({
   enableStarlightAnalyticsIngest = env.enableStarlightAnalyticsIngest,
   starlightAnalyticsAllowedOrigins = env.starlightAnalyticsAllowedOrigins,
   starlightAnalyticsRateLimitPerHour = env.starlightAnalyticsRateLimitPerHour,
+  starlightReleasePushRepository,
+  enableStarlightReleasePush = env.enableStarlightReleasePush,
+  starlightReleasePushRateLimitPerHour = env.starlightReleasePush.rateLimitPerHour,
   kakaoJavaScriptKey = env.kakaoJavaScriptKey,
 } = {}) {
   const app = express();
@@ -119,6 +124,22 @@ export function createApp({
         allowedOrigins: starlightAnalyticsAllowedOrigins,
         rateLimitPerHour: starlightAnalyticsRateLimitPerHour,
         requireAdmin: null,
+      }),
+    );
+  }
+
+  const starlightReleasePushEnabled = enableStarlightReleasePush || enableServerAdmin;
+  const resolvedStarlightReleasePushRepository = starlightReleasePushEnabled
+    ? starlightReleasePushRepository ?? createStarlightReleasePushRepository(databasePool)
+    : null;
+  if (enableStarlightReleasePush) {
+    app.use(
+      "/api/starlight-release-push",
+      createStarlightReleasePushRouter({
+        repository: resolvedStarlightReleasePushRepository,
+        subscribeEnabled: true,
+        allowedOrigins: starlightAnalyticsAllowedOrigins,
+        rateLimitPerHour: starlightReleasePushRateLimitPerHour,
       }),
     );
   }
@@ -224,6 +245,13 @@ export function createApp({
         ingestEnabled: false,
         allowedOrigins: starlightAnalyticsAllowedOrigins,
         rateLimitPerHour: starlightAnalyticsRateLimitPerHour,
+        requireAdmin,
+      }),
+    );
+    app.use(
+      "/api/starlight-release-push",
+      createStarlightReleasePushRouter({
+        repository: resolvedStarlightReleasePushRepository,
         requireAdmin,
       }),
     );

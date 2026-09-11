@@ -6,6 +6,7 @@ import { createServerAdminPushService } from "./modules/server-admin/server-admi
 import { createServerAlertMonitor } from "./modules/server-admin/server-alert-monitor.js";
 import { createStarlightAnalyticsRepository } from "./modules/starlight-analytics/starlight-analytics-repository.js";
 import { createStarlightAnalyticsRetentionMonitor } from "./modules/starlight-analytics/starlight-analytics-retention.js";
+import { createStarlightReleasePushRepository } from "./modules/starlight-release-push/starlight-release-push-repository.js";
 
 const serverAdminRepository = env.enableServerAdmin
   ? createServerAdminRepository(databasePool)
@@ -30,11 +31,15 @@ const starlightAnalyticsRetentionMonitor = env.enableStarlightAnalyticsIngest
       intervalMs: env.starlightAnalyticsCleanupIntervalSeconds * 1000,
     })
   : undefined;
+const starlightReleasePushRepository = env.enableStarlightReleasePush || env.enableServerAdmin
+  ? createStarlightReleasePushRepository(databasePool)
+  : undefined;
 
 const app = createApp({
   serverAdminRepository,
   serverAdminPushService,
   starlightAnalyticsRepository,
+  starlightReleasePushRepository,
 });
 
 const server = app.listen(env.port, () => {

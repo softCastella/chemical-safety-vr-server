@@ -1,0 +1,20 @@
+CREATE TABLE IF NOT EXISTS starlight_release_push_subscriptions (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  installation_id_hash CHAR(64) NOT NULL,
+  installation_id VARCHAR(512) NOT NULL,
+  locale VARCHAR(16) NOT NULL DEFAULT 'ko',
+  source VARCHAR(160) NOT NULL DEFAULT 'direct',
+  medium VARCHAR(160) NOT NULL DEFAULT 'none',
+  campaign VARCHAR(160) NOT NULL DEFAULT '(none)',
+  consent_version VARCHAR(32) NOT NULL,
+  consented_at DATETIME(3) NOT NULL,
+  status ENUM('active', 'notified', 'expired') NOT NULL DEFAULT 'active',
+  last_success_at DATETIME(3) NULL,
+  expired_at DATETIME(3) NULL,
+  created_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  updated_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_starlight_release_push_installation_id_hash (installation_id_hash),
+  KEY idx_starlight_release_push_status_consent (status, consented_at),
+  KEY idx_starlight_release_push_campaign (source, medium, campaign)
+);
