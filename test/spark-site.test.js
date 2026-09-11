@@ -93,9 +93,9 @@ test("별빛 스도쿠 개인정보처리방침은 앱·웹 데이터 처리와 
   ]);
 
   assert.match(html, /data-detail-link/);
-  assert.match(html, /starlight-sudoku-locale/);
+  assert.match(script, /starlight-sudoku-locale/);
   assert.match(html, /privacy\.css\?v=20260909-1/);
-  assert.match(html, /privacy-i18n\.js\?v=20260904-1/);
+  assert.match(html, /privacy-i18n\.js\?v=20260911-2/);
   for (const locale of ["ko", "en", "ja", "zh-CN", "zh-TW"]) {
     assert.match(html, new RegExp(`data-locale="${locale}"`));
     assert.match(script, new RegExp(`(?:^|[\\s"'])${locale.replace("-", "\\-")}(?:[":])`, "m"));
@@ -104,6 +104,9 @@ test("별빛 스도쿠 개인정보처리방침은 앱·웹 데이터 처리와 
   assert.match(script, /com\.tychespark\.starlightsudoku/);
   assert.match(script, /Firebase Analytics와 AdMob도 사용하지 않습니다/);
   assert.match(script, /SS- 형식의 익명 사용자 ID/);
+  assert.match(script, /익명 이용 분석을 허용하면/);
+  assert.match(script, /수집 후 90일/);
+  assert.match(script, /광고·분석 사업자에게 제공하지 않습니다/);
   assert.match(script, /Google Play 인앱 리뷰 흐름을 요청/);
   assert.match(script, /전송 시 암호화/);
   assert.match(script, /연령에 따라 이용을 제한하지 않는 퍼즐 게임/);
@@ -149,7 +152,10 @@ test("별빛 스도쿠 랜딩은 모바일 크기 웹 체험판을 연결한다"
   assert.doesNotMatch(html, /id="play-demo"|data-start-game|landing-game\.js/);
   assert.match(html, /landing\.css\?v=20260908-107/);
   assert.match(html, /landing-i18n\.js\?v=20260908-37/);
-  assert.match(html, /analytics-config\.js\?v=20260911-2/);
+  assert.match(html, /analytics-consent\.css\?v=20260911-1/);
+  assert.match(html, /analytics-consent\.js\?v=20260911-1/);
+  assert.match(html, /analytics-config\.js\?v=20260911-3/);
+  assert.match(html, /analytics\.js\?v=20260911-2/);
   assert.match(html, /landing-launch\.js\?v=20260911-46/);
   assert.match(html, /data-i18n="title">퍼즐을 풀어<br>별빛을 모으고,<br><strong>멈춰버린 밤에<br>아침을 불러오세요\.<\/strong>/);
   assert.match(script, /title: "퍼즐을 풀어<br>별빛을 모으고,<br><strong>멈춰버린 밤에<br>아침을 불러오세요\.<\/strong>"/);

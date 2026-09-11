@@ -51,6 +51,14 @@ export function createStarlightAnalyticsRepository(pool) {
       return Boolean(rows[0]?.present);
     },
 
+    async deleteEventsBefore(cutoff) {
+      const [result] = await pool.execute(
+        "DELETE FROM starlight_analytics_events WHERE received_at < ?",
+        [cutoff],
+      );
+      return Number(result.affectedRows ?? 0);
+    },
+
     async listEvents({ dateFrom, dateTo, platform, locale, source, campaign, stageId }) {
       const where = ["occurred_at >= ?", "occurred_at < DATE_ADD(?, INTERVAL 1 DAY)"];
       const params = [dateFrom, dateTo];

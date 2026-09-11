@@ -3,6 +3,6 @@
 window.STARLIGHT_ANALYTICS_CONFIG = Object.freeze({
   collectorUrl: "/api/starlight-analytics/events/batch",
   gaMeasurementId: "",
-  enabled: false,
+  enabled: true,
   debug: false
 });

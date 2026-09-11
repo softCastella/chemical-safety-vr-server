@@ -5,6 +5,7 @@ import { after, before, test } from "node:test";
 import { createApp } from "../src/app.js";
 import { aggregateStarlightEvents } from "../src/modules/starlight-analytics/starlight-analytics-aggregation.js";
 import { sanitizeStarlightEvent } from "../src/modules/starlight-analytics/starlight-analytics-contract.js";
+import { createStarlightAnalyticsRetentionMonitor } from "../src/modules/starlight-analytics/starlight-analytics-retention.js";
 import { createInMemoryStarlightAnalyticsRepository } from "../test-support/in-memory-starlight-analytics-repository.js";
 
 let server;
@@ -104,14 +105,17 @@ test("집계는 Threads 유입과 Android No Data를 구분한다", () => {
   assert.equal(result.funnel[0].avg_time_to_next, 2);
 });
 
-test("랜딩은 Analytics를 로드하고 UTM을 WebDemo로 전달한다", async () => {
+test("랜딩은 동의 후 Analytics를 로드하고 UTM을 WebDemo로 전달한다", async () => {
   const root = new URL("../public/site/starlight-sudoku-landing/", import.meta.url);
-  const [html, launch, analytics, config] = await Promise.all([
+  const [html, launch, analytics, config, consent] = await Promise.all([
     readFile(new URL("index.html", root), "utf8"),
     readFile(new URL("landing-launch.js", root), "utf8"),
     readFile(new URL("analytics.js", root), "utf8"),
     readFile(new URL("analytics-config.js", root), "utf8"),
+    readFile(new URL("analytics-consent.js", root), "utf8"),
   ]);
+  assert.match(html, /analytics-consent\.css/);
+  assert.match(html, /analytics-consent\.js/);
   assert.match(html, /analytics-config\.js/);
   assert.match(html, /analytics\.js/);
   assert.match(launch, /decorateUrl/);
@@ -120,8 +124,46 @@ test("랜딩은 Analytics를 로드하고 UTM을 WebDemo로 전달한다", async
   assert.match(analytics, /utm_source/);
   assert.match(analytics, /sessionStorage\.setItem\('starlight_utm_v1'/);
   assert.match(analytics, /return url\.href/);
+  assert.match(analytics, /starlightAnalyticsConsent/);
+  assert.match(analytics, /consent\.onGranted\(activate\)/);
+  assert.match(consent, /starlight_analytics_consent_v1/);
+  assert.match(consent, /https:\/\/spark\.tycheworks\.com\/starlight-sudoku\/privacy\//);
+  for (const locale of ["ko", "en", "ja", "zh-CN", "zh-TW"]) {
+    assert.match(consent, new RegExp(`(?:^|[\\s"'])${locale.replace("-", "\\-")}(?:[":])`, "m"));
+  }
   assert.match(config, /collectorUrl: "\/api\/starlight-analytics\/events\/batch"/);
-  assert.match(config, /enabled: false/);
+  assert.match(config, /enabled: true/);
+});
+
+test("별빛 익명 분석 이벤트는 90일 보유기간 기준으로 주기 삭제한다", async () => {
+  const cutoffs = [];
+  let scheduledCallback;
+  let cancelled = false;
+  const timer = { unref() {} };
+  const monitor = createStarlightAnalyticsRetentionMonitor({
+    repository: {
+      async deleteEventsBefore(cutoff) { cutoffs.push(cutoff.toISOString()); },
+    },
+    retentionDays: 90,
+    intervalMs: 21600000,
+    now: () => Date.parse("2026-09-11T00:00:00.000Z"),
+    schedule(callback, interval) {
+      assert.equal(interval, 21600000);
+      scheduledCallback = callback;
+      return timer;
+    },
+    cancel(value) {
+      assert.equal(value, timer);
+      cancelled = true;
+    },
+  });
+
+  await monitor.start();
+  assert.deepEqual(cutoffs, ["2026-06-13T00:00:00.000Z"]);
+  await scheduledCallback();
+  assert.equal(cutoffs.length, 2);
+  monitor.stop();
+  assert.equal(cancelled, true);
 });
 
 test("같은 Origin의 /play/ 산출물은 랜딩 식별자와 UTM을 이어받는다", async () => {
@@ -148,8 +190,11 @@ test("같은 Origin의 /play/ 산출물은 랜딩 식별자와 UTM을 이어받�
   assert.match(playAnalytics, /starlight_anonymous_user_id_v1/);
   assert.match(playAnalytics, /starlight_analytics_session_id_v1/);
   assert.match(playAnalytics, /utm_source/);
+  assert.match(playAnalytics, /starlightAnalyticsConsent/);
+  assert.match(playAnalytics, /consent\.onGranted\(activate\)/);
+  assert.match(playIndex, /\/analytics-consent\.js/);
   assert.match(playConfig, /collectorUrl: "\/api\/starlight-analytics\/events\/batch"/);
-  assert.match(playConfig, /enabled: false/);
+  assert.match(playConfig, /enabled: true/);
 });
 
 test("별빛 대시보드는 실제 화면 카탈로그와 앱 No Data 탭을 제공한다", async () => {
@@ -173,6 +218,8 @@ test("별빛 Analytics는 새 마이그레이션과 기본 비활성 환경값�
   assert.match(migration, /UNIQUE KEY uq_starlight_analytics_event_id/);
   assert.match(migration, /CHECK \(x_ratio IS NULL OR x_ratio BETWEEN 0 AND 1\)/);
   assert.match(example, /ENABLE_STARLIGHT_ANALYTICS_INGEST=false/);
+  assert.match(example, /STARLIGHT_ANALYTICS_RETENTION_DAYS=90/);
+  assert.match(example, /STARLIGHT_ANALYTICS_CLEANUP_INTERVAL_SECONDS=21600/);
 });
 
 test("별빛 대시보드 화면과 조회 API는 기존 관리자 세션으로 보호한다", async () => {

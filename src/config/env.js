@@ -121,6 +121,18 @@ export const env = Object.freeze({
     10,
     100000,
   ),
+  starlightAnalyticsRetentionDays: readInteger(
+    "STARLIGHT_ANALYTICS_RETENTION_DAYS",
+    90,
+    1,
+    365,
+  ),
+  starlightAnalyticsCleanupIntervalSeconds: readInteger(
+    "STARLIGHT_ANALYTICS_CLEANUP_INTERVAL_SECONDS",
+    21600,
+    300,
+    86400,
+  ),
   kakaoJavaScriptKey: process.env.KAKAO_JAVASCRIPT_KEY ?? "",
   contact: Object.freeze({
     resendApiKey: process.env.RESEND_API_KEY ?? "",
