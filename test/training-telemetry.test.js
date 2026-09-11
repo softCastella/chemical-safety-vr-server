@@ -85,6 +85,7 @@ test("수집 기능을 켤 때 업로드 토큰이 없으면 설정명을 포함
   assert.throws(
     () => createApp({
       enableTrainingTelemetryIngest: true,
+      enableMetaTrainingTelemetryAuth: false,
       trainingTelemetryUploadToken: "",
       trainingTelemetryRepository: createInMemoryTrainingTelemetryRepository(),
     }),
