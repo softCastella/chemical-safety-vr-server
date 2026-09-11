@@ -5,7 +5,7 @@ const translations = {
     navOverview: "소개", navGameplay: "플레이", navWorld: "세계", navInfo: "정보",
     heroTitle: "퍼즐을 풀어 별빛을 모으고,<br>멈춰버린 마을의 아침을 되찾는 스도쿠.",
     heroBody: "클래식 스도쿠의 논리적인 재미에 작은 판타지 세계와 마을 복원이라는 목표를 더한 감성 퍼즐 게임입니다.",
-    storeStatus: "입점 예정", storeBody: "출시를 준비하고 있습니다",
+    storeStatus: "입점 예정", storeBody: "출시를 준비하고 있습니다", heroLandingCta: "별빛 스도쿠 체험하기",
     overviewTitle: "숫자를 맞추는 것에서 끝나지 않는<br>작은 이야기형 퍼즐 경험.",
     overviewBody: "별빛 스도쿠에서 스도쿠는 마을을 되살리는 행동과 연결됩니다. 문제 하나를 완성할 때마다 별빛이 모이고, 그 빛은 어둠 속에 멈춘 마을을 조금씩 변화시킵니다.",
     genreValue: "스토리형 스도쿠 퍼즐", coreValue: "집중 · 수집 · 마을 복원", moodValue: "별빛 · 밤마을 · 잔잔한 판타지",
@@ -28,7 +28,7 @@ const translations = {
     pageTitle: "星光数独 | TYCHE SPARK", pageDescription: "完成数独，收集星光，唤回停驻小镇清晨的剧情式手机数独游戏。",
     navOverview: "简介", navGameplay: "玩法", navWorld: "世界", navInfo: "信息",
     heroTitle: "解开谜题，收集星光，<br>用数独唤回停驻小镇的清晨。", heroBody: "一款将经典数独的逻辑乐趣，与小小幻想世界和小镇复兴目标相结合的治愈系益智游戏。",
-    storeStatus: "即将上线", storeBody: "正在准备发布",
+    storeStatus: "即将上线", storeBody: "正在准备发布", heroLandingCta: "体验星光数独",
     overviewTitle: "不止于填对数字的<br>小小故事型解谜体验。", overviewBody: "在《星光数独》中，解数独就是让小镇重获生机。每完成一道题，星光便会汇聚，让停在黑夜中的小镇一点点发生变化。",
     genreValue: "剧情式数独解谜", coreValue: "专注 · 收集 · 小镇复兴", moodValue: "星光 · 夜之小镇 · 温柔幻想",
     loopTitle: "解题、收集、点亮。", loopIntro: "从熟悉的规则出发，分三步见证世界的变化。",
@@ -50,7 +50,7 @@ const translations = {
     pageTitle: "星光數獨 | TYCHE SPARK", pageDescription: "解開數獨、收集星光，喚回停駐小鎮清晨的劇情式手機數獨遊戲。",
     navOverview: "介紹", navGameplay: "玩法", navWorld: "世界", navInfo: "資訊",
     heroTitle: "解開謎題，收集星光，<br>用數獨喚回停駐小鎮的清晨。", heroBody: "一款將經典數獨的邏輯樂趣，與小小奇幻世界和小鎮復興目標結合的療癒系益智遊戲。",
-    storeStatus: "即將推出", storeBody: "正在準備上線",
+    storeStatus: "即將推出", storeBody: "正在準備上線", heroLandingCta: "體驗星光數獨",
     overviewTitle: "不只填對數字的<br>小小故事型解謎體驗。", overviewBody: "在《星光數獨》中，解數獨就是讓小鎮重獲生機。每完成一道題，星光便會匯聚，讓停在黑夜中的小鎮一點點發生變化。",
     genreValue: "劇情式數獨解謎", coreValue: "專注 · 收集 · 小鎮復興", moodValue: "星光 · 夜之小鎮 · 溫柔奇幻",
     loopTitle: "解題、收集、點亮。", loopIntro: "從熟悉的規則出發，以三個步驟見證世界的變化。",
@@ -72,7 +72,7 @@ const translations = {
     pageTitle: "星明かりの数独 | TYCHE SPARK", pageDescription: "数独を解いて星の光を集め、時が止まった村に朝を取り戻す物語型モバイル数独ゲームです。",
     navOverview: "概要", navGameplay: "遊び方", navWorld: "世界", navInfo: "情報",
     heroTitle: "パズルを解いて星の光を集め、<br>時が止まった村に朝を取り戻す数独。", heroBody: "クラシック数独の論理的な楽しさに、小さなファンタジー世界と村の復興という目標を加えた心温まるパズルゲームです。",
-    storeStatus: "配信予定", storeBody: "リリース準備中です",
+    storeStatus: "配信予定", storeBody: "リリース準備中です", heroLandingCta: "星明かりの数独を体験する",
     overviewTitle: "数字を合わせるだけでは終わらない<br>小さな物語のパズル体験。", overviewBody: "『星明かりの数独』では、数独を解くことが村をよみがえらせる行動につながります。問題を一つ完成するたびに星の光が集まり、夜に止まった村が少しずつ変わります。",
     genreValue: "物語型数独パズル", coreValue: "集中 · 収集 · 村の復興", moodValue: "星明かり · 夜の村 · 穏やかな幻想",
     loopTitle: "解く、集める、照らす。", loopIntro: "おなじみのルールから世界の変化へつながる、3ステップのプレイ。",
@@ -94,7 +94,7 @@ const translations = {
     pageTitle: "Starlight Sudoku | TYCHE SPARK", pageDescription: "Solve Sudoku, gather starlight, and bring morning back to a village frozen in time.",
     navOverview: "Overview", navGameplay: "Gameplay", navWorld: "World", navInfo: "Info",
     heroTitle: "Solve puzzles, gather starlight,<br>and bring morning back to a village frozen in time.", heroBody: "A heartfelt puzzle game that blends the logical pleasure of classic Sudoku with a gentle fantasy world and the goal of restoring a village.",
-    storeStatus: "Coming soon", storeBody: "Preparing for release",
+    storeStatus: "Coming soon", storeBody: "Preparing for release", heroLandingCta: "Try Starlight Sudoku",
     overviewTitle: "A small story-driven puzzle experience<br>that goes beyond filling in numbers.", overviewBody: "In Starlight Sudoku, every puzzle helps bring the village back to life. Complete a board to gather starlight and watch the village slowly change from a world paused in darkness.",
     genreValue: "Story-driven Sudoku puzzle", coreValue: "Focus · Collect · Restore", moodValue: "Starlight · Night village · Gentle fantasy",
     loopTitle: "Solve. Collect. Illuminate.", loopIntro: "Three clear steps connect familiar rules to a changing world.",
@@ -134,7 +134,7 @@ const supportedLocales = Object.keys(translations);
 const localeButtons = document.querySelectorAll("[data-locale]");
 const titleImage = document.querySelector("[data-localized-title]");
 const descriptionMeta = document.querySelector('meta[name="description"]');
-const landingLink = document.querySelector("[data-landing-link]");
+const landingLinks = document.querySelectorAll("[data-landing-link]");
 const privacyLink = document.querySelector("[data-privacy-link]");
 
 function localizedPageUrl(locale) {
@@ -204,10 +204,10 @@ function applyLocale(locale, updateUrl = true) {
     button.setAttribute("aria-pressed", String(button.dataset.locale === resolvedLocale));
   });
 
-  if (landingLink) {
-    const landingBase = "https://starlight-sudoku.tycheworks.com/";
+  const landingBase = "https://starlight-sudoku.tycheworks.com/";
+  landingLinks.forEach((landingLink) => {
     landingLink.href = resolvedLocale === "ko" ? landingBase : `${landingBase}?lang=${encodeURIComponent(resolvedLocale)}`;
-  }
+  });
   if (privacyLink) privacyLink.href = resolvedLocale === "ko" ? "privacy/" : `privacy/?lang=${encodeURIComponent(resolvedLocale)}`;
 
   try { localStorage.setItem("starlight-sudoku-locale", resolvedLocale); } catch {}

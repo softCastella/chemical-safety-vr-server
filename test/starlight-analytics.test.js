@@ -126,9 +126,11 @@ test("랜딩은 Analytics를 로드하고 UTM을 WebDemo로 전달한다", async
 
 test("같은 Origin의 /play/ 산출물은 랜딩 식별자와 UTM을 이어받는다", async () => {
   const root = new URL("../public/site/starlight-sudoku-landing/", import.meta.url);
-  const [landingLaunch, playIndex, playAnalytics, playConfig] = await Promise.all([
+  const [landingIndex, landingLaunch, playIndex, playBootstrap, playAnalytics, playConfig] = await Promise.all([
+    readFile(new URL("index.html", root), "utf8"),
     readFile(new URL("landing-launch.js", root), "utf8"),
     readFile(new URL("play/index.html", root), "utf8"),
+    readFile(new URL("play/flutter_bootstrap.js", root), "utf8"),
     readFile(new URL("play/analytics.js", root), "utf8"),
     readFile(new URL("play/analytics-config.js", root), "utf8"),
   ]);
@@ -136,8 +138,10 @@ test("같은 Origin의 /play/ 산출물은 랜딩 식별자와 UTM을 이어받�
   assert.match(landingLaunch, /const playUrl = "\/play\/"/);
   assert.match(landingLaunch, /url\.searchParams\.set\("lang"/);
   assert.match(landingLaunch, /decorateUrl/);
-  assert.match(landingLaunch, /window\.location\.assign\(localizedPlayUrl\(\)\)/);
+  assert.match(landingIndex, /target="_blank" rel="noopener noreferrer" data-play-launch/);
+  assert.doesNotMatch(landingLaunch, /window\.location\.assign|window\.open/);
   assert.match(playIndex, /<base href="\/play\/">/);
+  assert.match(playBootstrap, /"useLocalCanvasKit":true/);
   assert.match(playAnalytics, /starlight_anonymous_user_id_v1/);
   assert.match(playAnalytics, /starlight_analytics_session_id_v1/);
   assert.match(playAnalytics, /utm_source/);

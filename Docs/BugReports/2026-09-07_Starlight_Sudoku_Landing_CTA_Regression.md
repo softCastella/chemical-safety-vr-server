@@ -252,3 +252,32 @@
 ## 영향 범위
 
 현재 확인된 영향은 별빛 스도쿠 정적 랜딩과 해당 정적 테스트에 한정된다. API, DB, 텔레메트리, PM2와 운영 배포는 변경하지 않았다.
+
+## 2026-09-11 `/play` 운영 후속 조치
+
+### 적용 변경
+
+- 랜딩 CTA를 같은 탭 강제 이동에서 표준 링크 `target="_blank"`와 `rel="noopener noreferrer"`로 변경했다.
+- 선택 언어와 UTM을 포함한 `/play/` URL 생성은 유지하고, 브라우저 기본 링크 동작으로 새 탭을 열도록 했다.
+- WebDemo `origin/main`의 `ed51273041e907dceb4a24eeb014d5333364ffd1`을 `--no-web-resources-cdn` 옵션으로 다시 빌드했다.
+- SPARK 별빛 스도쿠 상세 페이지의 Google Play 상태 영역 아래에 전용 랜딩 CTA를 추가하고 5개 언어 링크를 함께 적용했다.
+
+### 근본 원인
+
+- 기존 운영 빌드의 `flutter_bootstrap.js`에는 `useLocalCanvasKit` 설정이 없었다.
+- Flutter 런타임이 `www.gstatic.com/flutter-canvaskit`의 JS와 WASM을 요청했지만 운영 CSP의 `script-src 'self'`, `connect-src 'self'`에 의해 차단됐다.
+- 그 결과 `flutter-first-frame`이 발생하지 않아 단색 시작 배경만 남았다.
+
+### 완료 검증
+
+- Chrome DevTools Protocol에서 수정 전 CSP 차단과 `Failed to fetch dynamically imported module`을 재현했다.
+- 수정 빌드는 CanvasKit JS와 WASM을 `/play/canvaskit/chromium/`에서 불러온다.
+- 로컬 Chrome에서 일본어 쿼리로 `flutter-view`와 `flt-glass-pane` 생성, 시작 스플래시 제거, 일본어 문서 제목을 확인했다.
+- 서버 저장소 `npm test`: 102개 통과, 실패 0개.
+- WebDemo 웹 관련 선별 테스트: 20개 통과, 1개 skip, 실패 0개.
+
+### 남은 확인
+
+- WebDemo 전체 테스트에는 이번 웹 배포와 무관한 Credits/Tuner 계약 3건의 기존 실패가 있다.
+- 운영 반영 후 CSP 오류가 사라지고 첫 프레임이 표시되는지 Chrome으로 다시 확인한다.
+- SPARK 상세 상단 CTA의 데스크톱·모바일 최종 배치를 운영 화면에서 확인한다.

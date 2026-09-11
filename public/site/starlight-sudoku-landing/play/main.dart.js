@@ -27528,7 +27528,7 @@ $iLt:1}
 A.auQ.prototype={
 $1(a){var s=A.cL().b
 s=s==null?null:s.canvasKitBaseUrl
-return(s==null?"https://www.gstatic.com/flutter-canvaskit/a804b261645ef8c13eb3d5c44a5c2fb0340c5539/":s)+a},
+return(s==null?"canvaskit/":s)+a},
 $S:29}
 A.LM.prototype={
 gt(a){var s=this.a
