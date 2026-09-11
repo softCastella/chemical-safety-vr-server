@@ -35,14 +35,23 @@ function readAlertOccurrences(keys) {
 
 export function createServerAdminRouter({ repository, countryLookupService, pushService }) {
   const router = express.Router();
-  const requireAdmin = async (request, response, next) => {
+  const authenticate = async (request, response, next, loginDestination = null) => {
     try {
       const session = await repository.findSession(cookies(request.headers.cookie)[COOKIE]);
-      if (!session) return response.status(401).json({ error: "Authentication required." });
+      if (!session) {
+        if (loginDestination) {
+          return response.redirect(302, `/server/login?next=${encodeURIComponent(loginDestination)}`);
+        }
+        return response.status(401).json({ error: "Authentication required." });
+      }
       request.serverAdmin = session;
       next();
     } catch (error) { next(error); }
   };
+  const requireAdmin = (request, response, next) => authenticate(request, response, next);
+  const requireAdminPage = (destination) => (request, response, next) => (
+    authenticate(request, response, next, destination)
+  );
   const requireWriteAdmin = (request, response, next) => request.serverAdmin.role === "admin" ? next() : response.status(403).json({ error: "Read-only account." });
 
   router.post("/login", async (request, response, next) => {
@@ -174,5 +183,5 @@ export function createServerAdminRouter({ repository, countryLookupService, push
     try { const removed = await repository.removeTrustedIp(Number(request.params.id)); response.status(removed ? 204 : 409).end(); }
     catch (error) { next(error); }
   });
-  return { router, requireAdmin };
+  return { router, requireAdmin, requireAdminPage };
 }

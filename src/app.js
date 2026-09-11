@@ -211,7 +211,7 @@ export function createApp({
     const resolvedCountryLookupService = serverAdminCountryLookupService
       ?? createServerAdminCountryLookup(env.serverAdminCountryLookup);
     const resolvedPushService = serverAdminPushService ?? createServerAdminPushService(env.serverAdminPush);
-    const { router, requireAdmin } = createServerAdminRouter({
+    const { router, requireAdmin, requireAdminPage } = createServerAdminRouter({
       repository: resolvedAdminRepository,
       countryLookupService: resolvedCountryLookupService,
       pushService: resolvedPushService,
@@ -244,12 +244,12 @@ export function createApp({
     }
     app.get(`${serverDashboardPath}/favicon.svg`, (_request, response) => response.sendFile(path.join(siteRoot, "assets", "Immersa", "Chemical Safety Training VR", "favicon_round_crop.svg")));
     app.get(serverDashboardPath, redirectToTrailingSlash(serverDashboardPath));
-    app.get(`${serverDashboardPath}/`, requireAdmin, (_request, response) => response.sendFile(path.join(serverStatusRoot, "index.html")));
+    app.get(`${serverDashboardPath}/`, requireAdminPage(`${serverDashboardPath}/`), (_request, response) => response.sendFile(path.join(serverStatusRoot, "index.html")));
     app.get(starlightDashboardPath, redirectToTrailingSlash(starlightDashboardPath));
-    app.get(`${starlightDashboardPath}/`, requireAdmin, (_request, response) => response.sendFile(path.join(starlightAnalyticsRoot, "index.html")));
+    app.get(`${starlightDashboardPath}/`, requireAdminPage(`${starlightDashboardPath}/`), (_request, response) => response.sendFile(path.join(starlightAnalyticsRoot, "index.html")));
     app.use(starlightDashboardPath, requireAdmin, express.static(starlightAnalyticsRoot, { index: false }));
     app.get(chemicalSafetyVrDashboardPath, redirectToTrailingSlash(chemicalSafetyVrDashboardPath));
-    app.get(`${chemicalSafetyVrDashboardPath}/`, requireAdmin, (_request, response) => response.sendFile(path.join(dashboardRoot, "index.html")));
+    app.get(`${chemicalSafetyVrDashboardPath}/`, requireAdminPage(`${chemicalSafetyVrDashboardPath}/`), (_request, response) => response.sendFile(path.join(dashboardRoot, "index.html")));
 
     app.get(["/server-status/login", "/server-status/login.html"], (_request, response) => response.redirect(308, `${serverDashboardPath}/login`));
     app.get(["/server-status", "/server-status/"], (_request, response) => response.redirect(308, `${serverDashboardPath}/`));

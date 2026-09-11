@@ -240,12 +240,19 @@ test("별빛 대시보드 화면과 조회 API는 기존 관리자 세션으로 
   await new Promise((resolve) => protectedServer.once("listening", resolve));
   const url = `http://127.0.0.1:${protectedServer.address().port}`;
   try {
-    assert.equal((await fetch(`${url}/server/`)).status, 401);
+    const unauthenticatedPages = [
+      ["/server/", "/server/login?next=%2Fserver%2F"],
+      ["/starlight-sudoku/", "/server/login?next=%2Fstarlight-sudoku%2F"],
+      ["/chemical-safety-training-vr/", "/server/login?next=%2Fchemical-safety-training-vr%2F"],
+    ];
+    for (const [path, location] of unauthenticatedPages) {
+      const response = await fetch(`${url}${path}`, { redirect: "manual" });
+      assert.equal(response.status, 302);
+      assert.equal(response.headers.get("location"), location);
+    }
     assert.equal((await fetch(`${url}/server/login.css`)).status, 200);
     assert.equal((await fetch(`${url}/server/dashboard-switcher.js`)).status, 200);
-    assert.equal((await fetch(`${url}/starlight-sudoku/`)).status, 401);
     assert.equal((await fetch(`${url}/starlight-sudoku/dashboard.js`)).status, 401);
-    assert.equal((await fetch(`${url}/chemical-safety-training-vr/`)).status, 401);
     const headers = { cookie: "tyche_admin_session=valid-session" };
     assert.equal((await fetch(`${url}/server/`, { headers })).status, 200);
     assert.equal((await fetch(`${url}/starlight-sudoku/`, { headers })).status, 200);
