@@ -292,3 +292,17 @@ Google Play 사전등록 페이지를 아직 제공할 수 없고 웹 체험판�
 - Google Play 사전등록이 공개되면 신규 FCM 신청보다 Play 사전등록을 우선 CTA로 사용한다. 기존 FCM 구독은 약속한 출시 알림과 보유기간 정책에 따라 처리한다.
 - 현재는 FCM 등록 코드와 서버 저장 계약이 코드에 존재하는 단계다. PC QR, `/play/notify/`, 최소 수집 계약 변경은 아직 구현하지 않았다.
 - `ENABLE_STARLIGHT_RELEASE_PUSH`는 기본 비활성이고 VAPID 공개 키는 비어 있으며 migration `018`, 운영 배포, 실제 구독·발송·수신 검증도 수행하지 않았다. 이 결정 기록만으로 운영 완료로 표시하지 않는다.
+
+## 17. 운영 반영: 랜딩 분석 동의 배너 제거
+
+별빛 스도쿠 랜딩에서는 `analytics-consent.css`와 `analytics-consent.js`를 더 이상 로드하지 않는다. 따라서 랜딩에 `익명 이용 분석` 배너가 표시되지 않으며, 동의 객체가 없는 랜딩 분석 런타임은 기본 거부 상태로 동작해 랜딩 이벤트를 전송하지 않는다. URL에 포함된 UTM은 저장하지 않고 WebDemo `/play/` 링크에만 전달한다.
+
+- 기준 커밋: `main@8638d25` (`별빛 랜딩 분석 동의 배너를 제거`)
+- 로컬 검증: `npm test` 113개 통과, `git diff --check` 통과
+- 운영 반영 범위: `public/site/starlight-sudoku-landing/index.html` 한 파일
+- 운영 백업: `/home/linuxuser/.config/tycheworks/static-backups/starlight-index-20260912-before-analytics-banner-removal.html`
+- 운영 파일 SHA-256: `8152dc87d776d52f9c0f08c252bb70b9b764eda7c73cd0e0f02241b7fc084d1d`
+- 공개 검증: `https://starlight-sudoku.tycheworks.com/` HTTP `200`, 응답 HTML에서 `analytics-consent.css`와 `analytics-consent.js` 참조 없음
+- 서버 상태: PM2 `tyche-safety-training-server` `online`, `https://tycheworks.com/api/health` HTTP `200`
+
+운영 체크아웃은 `aad625a84e6d066c622c0ddde3bc9d84a794e9de`로 로컬 `main`보다 여러 커밋 뒤에 있어 전체 fast-forward를 수행하지 않았다. 요청 범위 밖의 서버·대시보드·DB 변경을 함께 배포하지 않기 위해 위 정적 파일만 교체했으며, 운영 체크아웃에는 해당 파일이 수정 상태로 남는다. PM2 재시작, Nginx reload, DB migration과 운영 데이터 변경은 수행하지 않았다.
