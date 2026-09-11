@@ -194,6 +194,7 @@ test("별빛 대시보드 화면과 조회 API는 기존 관리자 세션으로 
   const url = `http://127.0.0.1:${protectedServer.address().port}`;
   try {
     assert.equal((await fetch(`${url}/server/`)).status, 401);
+    assert.equal((await fetch(`${url}/server/login.css`)).status, 200);
     assert.equal((await fetch(`${url}/starlight-sudoku/`)).status, 401);
     assert.equal((await fetch(`${url}/starlight-sudoku/dashboard.js`)).status, 401);
     assert.equal((await fetch(`${url}/chemical-safety-training-vr/`)).status, 401);
@@ -214,4 +215,28 @@ test("별빛 대시보드 화면과 조회 API는 기존 관리자 세션으로 
   } finally {
     await new Promise((resolve, reject) => protectedServer.close((error) => error ? reject(error) : resolve()));
   }
+});
+
+test("공용 관리자 로그인은 세 대시보드 중 하나를 선택해 이동한다", async () => {
+  const root = new URL("../public/server-status/", import.meta.url);
+  const [html, script] = await Promise.all([
+    readFile(new URL("login.html", root), "utf8"),
+    readFile(new URL("login.js", root), "utf8"),
+  ]);
+
+  assert.match(html, /<h1 id="login-title">관리자 대시보드<\/h1>/);
+  assert.equal((html.match(/name="destination"/g) || []).length, 3);
+  for (const destination of [
+    "/server/",
+    "/starlight-sudoku/",
+    "/chemical-safety-training-vr/",
+  ]) {
+    assert.match(html, new RegExp(`value="${destination.replaceAll("/", "\\/")}"`));
+    assert.match(script, new RegExp(`"${destination.replaceAll("/", "\\/")}"`));
+  }
+  assert.match(script, /new URLSearchParams\(window\.location\.search\)\.get\("next"\)/);
+  assert.match(script, /dashboardDestinations\.has\(requested\)/);
+  assert.match(script, /JSON\.stringify\(\{[\s\S]*username:[\s\S]*password:/);
+  assert.match(script, /window\.location\.assign\(destination\)/);
+  assert.doesNotMatch(script, /Object\.fromEntries/);
 });

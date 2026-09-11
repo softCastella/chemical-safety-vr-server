@@ -4,18 +4,45 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex,nofollow,noarchive">
-  <title>Tyche Works Server Admin · Login</title>
+  <title>Tyche Works Admin · Login</title>
   <link rel="icon" type="image/svg+xml" href="/server/favicon.svg?v=4">
   <link rel="stylesheet" href="./status.css">
+  <link rel="stylesheet" href="./login.css">
 </head>
 <body class="login-page">
   <main class="login-shell">
     <section class="login-card" aria-labelledby="login-title">
       <div class="brand-mark" aria-hidden="true">T</div>
       <p class="eyebrow">TYCHE WORKS</p>
-      <h1 id="login-title">Server Admin</h1>
-      <p class="muted">관리자 계정으로 로그인하세요.</p>
+      <h1 id="login-title">관리자 대시보드</h1>
+      <p class="muted">접속할 대시보드를 선택한 뒤 공용 관리자 계정으로 로그인하세요.</p>
       <form class="login-form" action="/api/server-status/login" method="post">
+        <fieldset class="dashboard-selector">
+          <legend>접속할 대시보드</legend>
+          <div class="dashboard-options">
+            <label class="dashboard-option">
+              <input type="radio" name="destination" value="/server/" checked>
+              <span class="dashboard-option-card">
+                <strong>서버 관리</strong>
+                <small>인프라·서비스 상태</small>
+              </span>
+            </label>
+            <label class="dashboard-option">
+              <input type="radio" name="destination" value="/starlight-sudoku/">
+              <span class="dashboard-option-card">
+                <strong>별빛 스도쿠</strong>
+                <small>유입·플레이 분석</small>
+              </span>
+            </label>
+            <label class="dashboard-option">
+              <input type="radio" name="destination" value="/chemical-safety-training-vr/">
+              <span class="dashboard-option-card">
+                <strong>화학 안전 교육 VR</strong>
+                <small>훈련 데이터 분석</small>
+              </span>
+            </label>
+          </div>
+        </fieldset>
         <label for="admin-id">관리자 ID</label>
         <input id="admin-id" name="username" type="text" autocomplete="username" required maxlength="64">
         <label for="admin-password">비밀번호</label>
