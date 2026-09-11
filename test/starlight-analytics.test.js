@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { after, before, test } from "node:test";
+import vm from "node:vm";
 
 import { createApp } from "../src/app.js";
 import { aggregateStarlightEvents } from "../src/modules/starlight-analytics/starlight-analytics-aggregation.js";
@@ -314,8 +315,8 @@ test("세 관리자 대시보드는 공용 전환 메뉴와 로그아웃을 제�
     assert.match(html, /dashboard-switcher\.css\?v=20260911-1/);
     assert.match(html, /dashboard-switcher\.js\?v=20260911-1/);
   }
-  assert.match(vrHtml, /href="dashboard\.css\?v=20260911-1"/);
-  assert.match(vrHtml, /src="dashboard\.js\?v=20260911-1"/);
+  assert.match(vrHtml, /href="dashboard\.css\?v=20260911-2"/);
+  assert.match(vrHtml, /src="dashboard\.js\?v=20260911-2"/);
   assert.doesNotMatch(vrHtml, /<style>/);
   assert.doesNotMatch(vrHtml, /<script>\s*[\s\S]+?<\/script>/);
   for (const destination of [
@@ -328,4 +329,42 @@ test("세 관리자 대시보드는 공용 전환 메뉴와 로그아웃을 제�
   assert.match(switcherScript, /\/api\/server-status\/logout/);
   assert.match(switcherScript, /window\.location\.assign\("\/server\/login"\)/);
   assert.match(switcherCss, /@media\(max-width:760px\)/);
+});
+
+test("VR 대시보드는 일반 사용자 학습 지표와 업무용 시각 체계를 제공한다", async () => {
+  const [html, script, css] = await Promise.all([
+    readFile(new URL("../public/dashboard/index.html", import.meta.url), "utf8"),
+    readFile(new URL("../public/dashboard/dashboard.js", import.meta.url), "utf8"),
+    readFile(new URL("../public/dashboard/dashboard.css", import.meta.url), "utf8"),
+  ]);
+
+  for (const label of ["학습 현황", "모드·시나리오", "사용자별 반복", "구간별 병목", "플레이 상세"]) {
+    assert.match(html, new RegExp(label));
+  }
+  assert.match(script, /완료 플레이 수 ÷ 해당 항목 플레이 수|과정 완료 세션 ÷ 해당 항목 플레이 수/);
+  assert.match(script, /동일 사용자의 두 번째 이후 플레이 수/);
+  assert.match(script, /function learningGroups\(items,kind\)/);
+  assert.match(script, /function stageAggregates\(items\)/);
+  assert.match(script, /앱 사용자 \$\{String\(value\)\.slice\(0,8\)\}/);
+  assert.match(css, /--bg:#f3f6fa/);
+  assert.match(css, /background:#102a43/);
+  assert.match(css, /color-scheme:light/);
+
+  const dashboardWithoutStartup = script.split('document.querySelectorAll("#desktopNav button")')[0];
+  const context = { window: { location: { protocol: "https:" } }, result: null };
+  const sessions = [
+    { summary: { metaUserId: "user-a", modes: ["Education"], workPlans: ["ConfinedSpace"], courseCompleted: true } },
+    { summary: { metaUserId: "user-a", modes: ["Education"], workPlans: ["ConfinedSpace"], courseCompleted: false } },
+    { summary: { metaUserId: "user-b", modes: ["Education"], workPlans: ["LeakResponse"], courseCompleted: true } },
+  ];
+  vm.runInNewContext(
+    `${dashboardWithoutStartup}\nresult = learningGroups(${JSON.stringify(sessions)}, "mode");`,
+    context,
+  );
+  assert.equal(context.result.length, 1);
+  assert.equal(context.result[0].plays, 3);
+  assert.equal(context.result[0].completed, 2);
+  assert.equal(context.result[0].users, 2);
+  assert.equal(context.result[0].repeats, 1);
+  assert.ok(Math.abs(context.result[0].rate - (2 / 3) * 100) < 0.0001);
 });
