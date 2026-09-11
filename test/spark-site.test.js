@@ -156,8 +156,8 @@ test("별빛 스도쿠 랜딩은 모바일 크기 웹 체험판을 연결한다"
   assert.doesNotMatch(html, /id="play-demo"|data-start-game|landing-game\.js/);
   assert.match(html, /landing\.css\?v=20260908-107/);
   assert.match(html, /landing-i18n\.js\?v=20260908-37/);
-  assert.match(html, /analytics-consent\.css\?v=20260911-1/);
-  assert.match(html, /analytics-consent\.js\?v=20260911-1/);
+  assert.doesNotMatch(html, /analytics-consent\.css/);
+  assert.doesNotMatch(html, /analytics-consent\.js/);
   assert.match(html, /analytics-config\.js\?v=20260911-3/);
   assert.match(html, /analytics\.js\?v=20260911-2/);
   assert.match(html, /landing-launch\.js\?v=20260911-46/);

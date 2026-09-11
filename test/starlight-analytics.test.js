@@ -106,17 +106,16 @@ test("집계는 Threads 유입과 Android No Data를 구분한다", () => {
   assert.equal(result.funnel[0].avg_time_to_next, 2);
 });
 
-test("랜딩은 동의 후 Analytics를 로드하고 UTM을 WebDemo로 전달한다", async () => {
+test("랜딩은 분석 동의 UI 없이 UTM을 WebDemo로 전달한다", async () => {
   const root = new URL("../public/site/starlight-sudoku-landing/", import.meta.url);
-  const [html, launch, analytics, config, consent] = await Promise.all([
+  const [html, launch, analytics, config] = await Promise.all([
     readFile(new URL("index.html", root), "utf8"),
     readFile(new URL("landing-launch.js", root), "utf8"),
     readFile(new URL("analytics.js", root), "utf8"),
     readFile(new URL("analytics-config.js", root), "utf8"),
-    readFile(new URL("analytics-consent.js", root), "utf8"),
   ]);
-  assert.match(html, /analytics-consent\.css/);
-  assert.match(html, /analytics-consent\.js/);
+  assert.doesNotMatch(html, /analytics-consent\.css/);
+  assert.doesNotMatch(html, /analytics-consent\.js/);
   assert.match(html, /analytics-config\.js/);
   assert.match(html, /analytics\.js/);
   assert.match(launch, /decorateUrl/);
@@ -127,11 +126,6 @@ test("랜딩은 동의 후 Analytics를 로드하고 UTM을 WebDemo로 전달한
   assert.match(analytics, /return url\.href/);
   assert.match(analytics, /starlightAnalyticsConsent/);
   assert.match(analytics, /consent\.onGranted\(activate\)/);
-  assert.match(consent, /starlight_analytics_consent_v1/);
-  assert.match(consent, /https:\/\/spark\.tycheworks\.com\/starlight-sudoku\/privacy\//);
-  for (const locale of ["ko", "en", "ja", "zh-CN", "zh-TW"]) {
-    assert.match(consent, new RegExp(`(?:^|[\\s"'])${locale.replace("-", "\\-")}(?:[":])`, "m"));
-  }
   assert.match(config, /collectorUrl: "\/api\/starlight-analytics\/events\/batch"/);
   assert.match(config, /enabled: true/);
 });
