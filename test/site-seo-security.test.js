@@ -100,6 +100,7 @@ test("Nginx 배포 초안은 공개 호스트 보안과 이전 경로 정책을 
     }
   }
   assert.match(starlight, /worker-src 'self'/);
+  assert.match(starlight, /location = \/yt \{\s*return 302 \/\?utm_source=youtube&utm_medium=shorts&utm_campaign=starlight_gameplay_trailer&utm_content=trailer_v1;\s*\}/);
   assert.match(starlight, /location = \/api\/starlight-analytics\/events\/batch/);
   assert.match(starlight, /client_max_body_size 256k;/);
   assert.match(starlight, /proxy_pass http:\/\/127\.0\.0\.1:3000;/);
