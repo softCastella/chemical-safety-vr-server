@@ -1,7 +1,7 @@
-// Keep collection disabled until the final-modal consent flow is implemented and verified.
+// Anonymous product analytics runs without an in-page consent prompt and remains separate from FCM consent.
 window.STARLIGHT_ANALYTICS_CONFIG = Object.freeze({
   collectorUrl: "/api/starlight-analytics/events/batch",
   gaMeasurementId: "",
-  enabled: false,
+  enabled: true,
   debug: false
 });

@@ -11,7 +11,7 @@
 - 사용자가 제공한 웹 체험판 실제 화면 16장을 화면 순서와 상태별로 배치하고 Canvas 밀도 히트맵 배경으로 사용한다.
 - Android는 화면과 필터 자리만 준비하고 `데이터 없음`으로 표시한다.
 - 서버 랜딩은 Threads 등에서 들어온 UTM과 현재 언어를 같은 Origin의 `/play/`까지 전달한다.
-- 랜딩 페이지는 익명 이용 분석 동의 배너를 표시하지 않는다. 랜딩의 분석 런타임은 동의 객체가 없을 때 기본 거부 상태로 동작하므로 랜딩 이벤트를 전송하지 않고, URL에 들어온 UTM만 저장 없이 `/play/`에 전달한다.
+- 랜딩과 WebDemo는 익명 제품 분석을 위한 별도 화면 내 동의 배너를 표시하지 않고 분석 이벤트를 전송한다. FCM 출시 알림 동의는 이 분석과 분리한다.
 - `Starlight-Sudoku-WebDemo` `main@de5115e3a281068de1b998deccfba4b14b8deac2`의 체험 종료 화면에 출시 알림 신청을 추가하고, `WEB_DEMO=true`, base href `/play/`로 만든 정적 산출물을 랜딩 하위에 포함했다.
 - 익명 분석과 출시 알림 신청 API, Nginx 프록시 경계, 개인정보처리방침 개정은 코드에 반영했다. migration 적용, 운영 환경 설정, 실제 배포와 실기기 수신 검증은 수행하지 않았다.
 
@@ -134,7 +134,7 @@ STARLIGHT_ANALYTICS_RATE_LIMIT_PER_HOUR=1200
 - `STARLIGHT_ANALYTICS_ALLOWED_ORIGINS`: 쉼표로 구분한 정확한 Origin 목록이다. 랜딩과 `/play/`의 운영 Origin만 허용한다.
 - `STARLIGHT_ANALYTICS_RATE_LIMIT_PER_HOUR`: 프록시를 통해 확인한 IP 기준 프로세스 내 시간당 제한이다.
 
-랜딩과 WebDemo의 `analytics-config.js`에는 collector URL, GA Measurement ID, enabled/debug 값이 있다. 두 화면은 같은 Origin의 상대 경로 `/api/starlight-analytics/events/batch`를 사용하지만, 마지막 모달 동의 흐름을 구현하고 검증하기 전까지 정적 `enabled`를 `false`로 유지한다. 랜딩과 WebDemo 진입 HTML은 `analytics-consent.css`와 `analytics-consent.js`를 로드하지 않는다. 실제 API 활성 여부는 서버의 `ENABLE_STARLIGHT_ANALYTICS_INGEST`가 별도로 결정하며, 현재는 서버 수집 플래그도 비활성화해야 한다. GA ID와 운영 자격 증명은 코드에 하드코딩하지 않는다.
+랜딩과 WebDemo의 `analytics-config.js`에는 collector URL, GA Measurement ID, enabled/debug 값이 있다. 두 화면은 같은 Origin의 상대 경로 `/api/starlight-analytics/events/batch`를 사용하고 운영 정적 설정의 `enabled`는 `true`다. 랜딩과 WebDemo 진입 HTML은 `analytics-consent.css`와 `analytics-consent.js`를 로드하지 않으며, 별도 동의 객체가 없을 때 익명 분석 런타임이 바로 활성화된다. 실제 API 활성 여부는 서버의 `ENABLE_STARLIGHT_ANALYTICS_INGEST`가 별도로 결정하며 운영값은 `true`다. GA ID와 운영 자격 증명은 코드에 하드코딩하지 않는다.
 
 ## 9. 로컬 검증
 
@@ -278,7 +278,7 @@ Google Play 사전등록 페이지를 아직 제공할 수 없고 웹 체험판�
 - 직접 신청 지원 브라우저: `체험판 완료 안내` → `출시 알림 설명` → `출시 알림 정보 수집·이용 동의 체크박스와 개인정보처리방침 링크` → `이 기기에서 알림 받기 / 다른 휴대폰에서 받기 / 닫기`
 - 직접 신청 미지원 브라우저: `체험판 완료 안내` → `현재 브라우저 미지원 안내` → `다른 휴대폰에서 받기 QR` → `닫기`
 - 기존 완료 모달의 Google Play 이동 버튼은 사전등록 또는 공개 스토어 목적지가 실제로 준비됐을 때만 표시한다. 현재처럼 Google Play 사전등록을 제공하지 않는 단계에서는 출시 알림 신청보다 우선 CTA로 두지 않는다.
-- 출시 알림 동의와 익명 이용 분석 동의는 목적과 저장 데이터가 다르므로 하나의 체크박스로 합치지 않는다. 이 절의 체크박스는 FCM 출시 알림 신청에만 적용한다.
+- 출시 알림 동의와 익명 제품 분석은 목적과 저장 데이터가 다르므로 하나의 체크박스로 합치지 않는다. 이 절의 체크박스는 FCM 출시 알림 신청에만 적용하며, 익명 제품 분석에는 별도 화면 내 동의 UI를 표시하지 않는다.
 
 ### 최소 수집과 개인정보 경계
 
@@ -307,7 +307,7 @@ Google Play 사전등록 페이지를 아직 제공할 수 없고 웹 체험판�
 
 운영 체크아웃은 `aad625a84e6d066c622c0ddde3bc9d84a794e9de`로 로컬 `main`보다 여러 커밋 뒤에 있어 전체 fast-forward를 수행하지 않았다. 요청 범위 밖의 서버·대시보드·DB 변경을 함께 배포하지 않기 위해 위 정적 파일만 교체했으며, 운영 체크아웃에는 해당 파일이 수정 상태로 남는다. PM2 재시작, Nginx reload, DB migration과 운영 데이터 변경은 수행하지 않았다.
 
-## 18. WebDemo 분석 동의 UI와 수집 일시 중지
+## 18. WebDemo 분석 동의 UI와 수집 일시 중지 기록
 
 랜딩 배너만 제거하면 `/play/` WebDemo의 진입 화면에서 같은 `익명 이용 분석` 배너가 다시 표시된다. 동의 위치를 마지막 완료 모달로 통합하기 전에 진입 배너를 유지하거나 동의 없이 수집을 계속해서는 안 되므로 다음 세 계층을 함께 비활성화한다.
 
@@ -328,3 +328,33 @@ Google Play 사전등록 페이지를 아직 제공할 수 없고 웹 체험판�
 - 운영 환경 백업: `/home/linuxuser/.config/tycheworks/env-backups/chemical-safety-vr.env.before-98fa0f5-analytics-disable`
 - 정적 파일 백업: `/home/linuxuser/.config/tycheworks/static-backups/`의 `before-98fa0f5` 파일 네 개
 - 미수행: DB migration, 기존 분석 원본 변경·삭제, FCM 기능 활성화
+
+이 절은 동의 정책을 다시 구분하기 전의 일시 중지 기록이다. 현재 운영 상태는 아래 19절을 기준으로 한다.
+
+## 19. 익명 제품 분석 운영 활성화와 실브라우저 검증
+
+웹사이트 클릭 위치와 게임 사용 흐름을 측정하는 익명 제품 분석은 랜딩과 WebDemo에서 별도 화면 내 동의 UI 없이 수집한다. FCM 출시 알림은 브라우저 설치 식별값을 저장하는 별도 기능이므로 마지막 모달의 명시적 동의와 브라우저 알림 권한을 계속 요구한다.
+
+적용 내용은 다음과 같다.
+
+- 랜딩과 WebDemo `analytics-config.js`: `enabled: true`
+- 별도 동의 객체가 없는 익명 분석 런타임: 즉시 활성화
+- 랜딩, `/play/`, `/play/landing/`: `analytics-consent.css`와 `analytics-consent.js` 미로드 유지
+- 운영 서버: `ENABLE_STARLIGHT_ANALYTICS_INGEST=true`
+- 캐시 갱신: 랜딩과 WebDemo의 분석 설정·런타임 참조 버전을 `20260912-1`로 변경
+- 히트맵 원본: `pointer_tap`의 `x_ratio`, `y_ratio`, `viewport_width`, `viewport_height`, `screen_id`, `overlay_id`, `stage_id`, 대상 정보
+
+운영 반영 전 `npm test -- --test-reporter=spec`에서 113개 테스트가 모두 통과했다. 운영 정적 파일 일곱 개와 환경 파일을 백업한 뒤 정적 파일을 교체하고 PM2를 `--update-env`로 재시작했다. 공개 설정 두 곳은 `enabled: true`, 상태 API는 HTTP `200`, 수집 API는 빈 요청에 비활성 `503`이 아닌 계약 검증 `400`을 반환했다.
+
+실제 브라우저에서 랜딩을 거쳐 WebDemo를 조작한 검증 결과는 다음과 같다.
+
+- DB 기준값: 이벤트 0건, 세션 0건, 좌표 클릭 0건
+- 종료 후 안정값: 이벤트 124건, 익명 사용자 1명, 세션 1개
+- 흐름: `landing_view`, `landing_cta_click`, `game_open`, `game_ready`, `puzzle_start`, `stage_1_start` 저장 확인
+- 포인터: `pointer_tap` 51건이며 51건 모두 `x_ratio`와 `y_ratio`를 함께 저장
+- viewport: WebDemo `390x843` 48건, 랜딩 `1920x945` 3건
+- 화면 문맥: 랜딩, 스플래시, 타이틀, 오프닝, 난이도, 단계 선택, 게임, 설정·재시작 오버레이, 마을 화면 구분 확인
+- 대시보드 집계: `data_state=live`, 이벤트 124건, 히트맵 이벤트 합계 51건, 화면·오버레이 조합 13개로 계산됨
+- 미검증: 관리자 브라우저에서 대시보드 화면을 직접 열어 Canvas 히트맵 픽셀을 육안 확인하는 단계
+
+운영 백업은 `/home/linuxuser/.config/tycheworks/env-backups/chemical-safety-vr.env.before-20260912-analytics-enable`과 `/home/linuxuser/.config/tycheworks/static-backups/`의 `before-20260912-analytics-enable` 또는 `before-20260912-enable` 파일 일곱 개다. DB migration, 기존 데이터 수정·삭제와 FCM 활성화는 수행하지 않았다.

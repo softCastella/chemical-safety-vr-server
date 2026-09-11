@@ -158,8 +158,8 @@ test("별빛 스도쿠 랜딩은 모바일 크기 웹 체험판을 연결한다"
   assert.match(html, /landing-i18n\.js\?v=20260908-37/);
   assert.doesNotMatch(html, /analytics-consent\.css/);
   assert.doesNotMatch(html, /analytics-consent\.js/);
-  assert.match(html, /analytics-config\.js\?v=20260911-3/);
-  assert.match(html, /analytics\.js\?v=20260911-2/);
+  assert.match(html, /analytics-config\.js\?v=20260912-1/);
+  assert.match(html, /analytics\.js\?v=20260912-1/);
   assert.match(html, /landing-launch\.js\?v=20260911-46/);
   assert.match(html, /data-i18n="title">퍼즐을 풀어<br>별빛을 모으고,<br><strong>멈춰버린 밤에<br>아침을 불러오세요\.<\/strong>/);
   assert.match(script, /title: "퍼즐을 풀어<br>별빛을 모으고,<br><strong>멈춰버린 밤에<br>아침을 불러오세요\.<\/strong>"/);
