@@ -9,6 +9,22 @@
       : url.toString();
   }
 
+  function playWindowFeatures() {
+    const width = 390;
+    const height = 844;
+    const availableLeft = Number(window.screen.availLeft) || 0;
+    const availableTop = Number(window.screen.availTop) || 0;
+    const left = Math.max(
+      availableLeft,
+      Math.round(availableLeft + (window.screen.availWidth - width) / 2),
+    );
+    const top = Math.max(
+      availableTop,
+      Math.round(availableTop + (window.screen.availHeight - height) / 2),
+    );
+    return `popup=yes,width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`;
+  }
+
   function seededRandom(seed) {
     let state = seed >>> 0;
     return () => {
@@ -190,7 +206,13 @@
 
   playLink.addEventListener("pointerdown", createCtaBurst);
 
-  playLink.addEventListener("click", () => {
+  playLink.addEventListener("click", (event) => {
+    const popup = window.open(localizedPlayUrl(), "_blank", playWindowFeatures());
+    if (popup) {
+      event.preventDefault();
+      popup.opener = null;
+      popup.focus();
+    }
     window.starlightAnalytics?.trackJson(JSON.stringify({
       event_name: "landing_cta_click",
       screen_id: "landing",

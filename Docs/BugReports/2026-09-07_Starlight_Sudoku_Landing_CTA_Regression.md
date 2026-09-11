@@ -258,6 +258,7 @@
 ### 적용 변경
 
 - 랜딩 CTA를 같은 탭 강제 이동에서 표준 링크 `target="_blank"`와 `rel="noopener noreferrer"`로 변경했다.
+- 데스크톱에서는 CTA 클릭 시 브라우저 자체를 `390×844` 크기의 중앙 팝업으로 열고, 팝업이 차단되면 표준 새 탭 링크로 대체하도록 보완했다.
 - 선택 언어와 UTM을 포함한 `/play/` URL 생성은 유지하고, 브라우저 기본 링크 동작으로 새 탭을 열도록 했다.
 - WebDemo `origin/main`의 `ed51273041e907dceb4a24eeb014d5333364ffd1`을 `--no-web-resources-cdn` 옵션으로 다시 빌드했다.
 - SPARK 별빛 스도쿠 상세 페이지의 Google Play 상태 영역 아래에 전용 랜딩 CTA를 추가하고 5개 언어 링크를 함께 적용했다.
