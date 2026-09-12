@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#091527">
   <meta name="referrer" content="no-referrer">
   <title>Starlight Sudoku 분석 대시보드</title>
-  <link rel="stylesheet" href="dashboard.css?v=20260910server1">
+  <link rel="stylesheet" href="dashboard.css?v=20260912overview1">
   <link rel="stylesheet" href="/server/dashboard-switcher.css?v=20260911-1">
 </head>
 <body>
@@ -18,7 +18,7 @@
         <button class="nav-item" data-view="acquisition">유입 분석</button>
         <button class="nav-item" data-view="funnel">전환 흐름</button>
         <button class="nav-item" data-view="play">플레이 분석</button>
-        <button class="nav-item" data-view="stages">단계 분석</button>
+        <button class="nav-item" data-view="stages">스테이지 분석</button>
         <button class="nav-item" data-view="interaction">상호작용</button>
         <button class="nav-item" data-view="heatmap">사용성 히트맵</button>
         <button class="nav-item" data-view="retention">재방문율</button>
@@ -35,21 +35,29 @@
         <label class="custom-only hidden">시작일<input type="date" id="date-from"></label><label class="custom-only hidden">종료일<input type="date" id="date-to"></label>
         <label>플랫폼<select id="filter-platform"><option value="all">전체</option><option value="web">웹</option><option value="android">안드로이드</option></select></label>
         <label>언어<select id="filter-locale"><option value="all">전체 언어</option></select></label><label>유입 경로<select id="filter-source"><option value="all">전체 유입 경로</option></select></label>
-        <label>캠페인<select id="filter-campaign"><option value="all">전체 캠페인</option></select></label><label>단계<select id="filter-stage"><option value="all">전체 단계</option></select></label>
+        <label>캠페인<select id="filter-campaign"><option value="all">전체 캠페인</option></select></label><label>스테이지<select id="filter-stage"><option value="all">전체 스테이지</option></select></label>
       </section>
       <p class="range-note" id="range-note"></p>
 
-      <section class="view active" id="view-overview"><div class="kpi-grid" id="overview-kpis"></div><div class="two-col"><article class="panel"><div class="panel-head"><h2>일별 활동</h2><span>사용자와 단계 완료</span></div><div class="chart" id="daily-chart"></div></article><article class="panel"><div class="panel-head"><h2>이용 흐름 상태</h2><span>랜딩 → 데모 완료</span></div><div id="journey-summary"></div></article></div></section>
+      <section class="view active" id="view-overview">
+        <div class="overview-intro"><div><p class="eyebrow">WEB DEMO · 이용 현황</p><h2>별빛 스도쿠, 어디까지 플레이했을까요?</h2><p>현재 웹 체험판은 <b>쉬움 난이도 · 스테이지 1~5</b>로 구성됩니다. 아래 수치는 선택한 기간과 필터의 익명 이벤트 기준입니다.</p></div><span class="overview-scope">웹 체험판</span></div>
+        <div class="kpi-grid" id="overview-kpis"></div>
+        <div class="overview-grid">
+          <article class="panel"><div class="panel-head"><h2>주요 행동별 참여</h2><span>행동별 순 사용자</span></div><p class="panel-note">각 행동의 참여자를 따로 센 값입니다. 막대 길이는 전환율이나 동일 사용자 여정을 뜻하지 않습니다.</p><div id="journey-summary"></div></article>
+          <article class="panel"><div class="panel-head"><h2>쉬움 난이도 · 스테이지 진행</h2><span>시작 / 완료 순 사용자</span></div><div id="overview-stages"></div></article>
+        </div>
+        <article class="panel overview-daily"><div class="panel-head"><h2>일별 활동</h2><span>날짜별 익명 사용자와 스테이지 완료 이벤트</span></div><div class="chart" id="daily-chart"></div><div class="chart-legend"><span><i class="legend-user"></i>익명 사용자</span><span><i class="legend-clear"></i>스테이지 완료 이벤트</span></div></article>
+      </section>
       <section class="view" id="view-acquisition"><article class="panel"><div class="panel-head"><h2>유입 분석</h2><span>UTM 유입 경로 / 매체 / 캠페인</span></div><div class="table-wrap"><table><thead><tr><th>유입 경로 / 매체</th><th>캠페인</th><th>사용자</th><th>시작률</th><th>완료율</th></tr></thead><tbody id="acquisition-table"></tbody></table></div></article></section>
       <section class="view" id="view-funnel"><article class="panel"><div class="panel-head"><h2>전체 데모 전환 흐름</h2><span>각 단계는 독립 이벤트 · 사용자 기준</span></div><div class="table-wrap"><table><thead><tr><th>단계</th><th>사용자</th><th>이전 단계 대비</th><th>랜딩 대비</th><th>이탈 사용자</th><th>이탈률</th><th>다음 단계까지 평균</th></tr></thead><tbody id="funnel-table"></tbody></table></div></article></section>
       <section class="view" id="view-play"><article class="panel"><div class="panel-head"><h2>플레이 시간 분포</h2><span>백그라운드 시간을 제외한 실제 플레이</span></div><div class="metric-grid" id="play-metrics"></div></article></section>
-      <section class="view" id="view-stages"><div id="stage-alerts"></div><article class="panel"><div class="panel-head"><h2>단계별 병목</h2><span>병목 점수는 교체 가능한 독립 공식</span></div><div class="table-wrap"><table><thead><tr><th>단계</th><th>시작</th><th>완료</th><th>이탈</th><th>다시 시작</th><th>완료 시간 평균 / 중앙값 / P90</th><th>실수</th><th>힌트</th><th>메모</th><th>지우기</th><th>시도</th><th>다음 단계 전환</th><th>이탈 시 남은 칸 / 경과</th><th>병목 점수</th></tr></thead><tbody id="stages-table"></tbody></table></div></article></section>
+      <section class="view" id="view-stages"><div id="stage-alerts"></div><article class="panel"><div class="panel-head"><h2>스테이지별 병목</h2><span>병목 점수는 교체 가능한 독립 공식</span></div><div class="table-wrap"><table><thead><tr><th>스테이지</th><th>시작</th><th>완료</th><th>이탈</th><th>다시 시작</th><th>완료 시간 평균 / 중앙값 / P90</th><th>실수</th><th>힌트</th><th>메모</th><th>지우기</th><th>시도</th><th>다음 스테이지 전환</th><th>이탈 시 남은 칸 / 경과</th><th>병목 점수</th></tr></thead><tbody id="stages-table"></tbody></table></div></article></section>
       <section class="view" id="view-interaction"><div class="two-col"><article class="panel"><div class="panel-head"><h2>게임 상호작용</h2><span>자체 분석 데이터 수집</span></div><div class="table-wrap"><table><thead><tr><th>이벤트</th><th>횟수</th><th>사용자</th><th>1인당 횟수</th></tr></thead><tbody id="interaction-table"></tbody></table></div></article><article class="panel"><div class="panel-head"><h2>기대 행동 클릭</h2><span>비기능 요소 클릭</span></div><div id="expectation-list"></div></article></div></section>
 
       <section class="view" id="view-heatmap">
         <div class="heatmap-platform-tabs" role="tablist" aria-label="히트맵 플랫폼"><button type="button" class="heatmap-platform-tab active" data-heatmap-platform="web" role="tab" aria-selected="true">웹</button><button type="button" class="heatmap-platform-tab" data-heatmap-platform="android" role="tab" aria-selected="false">앱 <small>Android</small></button></div>
         <div id="heatmap-web-content" role="tabpanel">
-          <div class="heatmap-controls"><label>유형<select id="heatmap-type"><option value="all">전체 클릭</option><option value="dead">비기능 요소 클릭</option><option value="rage">반복 클릭</option><option value="mistake">실수</option><option value="hint">힌트 관련</option><option value="dwell">오래 머문 뒤 클릭</option></select></label><label id="heatmap-stage-wrap">게임 단계<select id="heatmap-stage"><option value="all">전체</option><option value="1">1단계</option><option value="2">2단계</option><option value="3">3단계</option><option value="4">4단계</option><option value="5">5단계</option></select></label></div>
+          <div class="heatmap-controls"><label>유형<select id="heatmap-type"><option value="all">전체 클릭</option><option value="dead">비기능 요소 클릭</option><option value="rage">반복 클릭</option><option value="mistake">실수</option><option value="hint">힌트 관련</option><option value="dwell">오래 머문 뒤 클릭</option></select></label><label id="heatmap-stage-wrap">게임 스테이지<select id="heatmap-stage"><option value="all">전체</option><option value="1">스테이지 1</option><option value="2">스테이지 2</option><option value="3">스테이지 3</option><option value="4">스테이지 4</option><option value="5">스테이지 5</option></select></label></div>
           <div id="heatmap-catalog" class="heatmap-catalog" aria-label="웹 실제 화면별 히트맵"></div>
           <div class="heatmap-layout"><article class="panel heatmap-panel"><div class="panel-head heatmap-detail-head"><h2 id="heatmap-detail-title">BGM 선택</h2><span>선택 화면 상세</span></div><div class="screen-frame" id="screen-frame"><img id="screen-background" alt="선택한 실제 배포 화면"><canvas id="heatmap-canvas"></canvas></div><div class="heat-legend"><span>낮음</span><i></i><span>높음</span></div></article><aside class="panel hotspot-panel"><div class="panel-head"><h2>밀집 영역</h2><span>히트맵 영역을 선택하세요</span></div><div id="hotspot-detail" class="empty-state">히트맵에서 밀집 영역을 클릭하면 이벤트 수, 사용자, 대상과 경과 시간을 표시합니다.</div></aside></div>
         </div>
@@ -61,6 +69,6 @@
       <section class="view" id="view-release"><div class="kpi-grid"><article class="kpi"><span>전체 신청</span><strong id="release-total">0</strong><small>중복 FCM 설치 식별값 제외</small></article><article class="kpi"><span>알림 대기</span><strong id="release-active">0</strong><small>출시 푸시 발송 전</small></article></div><article class="panel"><div class="panel-head"><h2>출시 푸시 신청</h2><span>FCM·휴대폰 브라우저 알림 권한 기반 · 이메일·전화번호 없음</span></div><div class="table-wrap"><table><thead><tr><th>언어</th><th>유입 경로 / 매체</th><th>캠페인</th><th>동의 시각</th><th>최근 성공</th><th>상태</th></tr></thead><tbody id="release-table"></tbody></table></div></article></section>
     </main>
   </div>
-  <script src="heatmap.js?v=20260910server1"></script><script src="sample-dashboard.js?v=20260910server1"></script><script src="screen-catalog.js?v=20260910server1"></script><script src="dashboard.js?v=20260911release1"></script><script src="/server/dashboard-switcher.js?v=20260911-1"></script>
+  <script src="heatmap.js?v=20260910server1"></script><script src="sample-dashboard.js?v=20260910server1"></script><script src="screen-catalog.js?v=20260910server1"></script><script src="dashboard.js?v=20260912overview1"></script><script src="/server/dashboard-switcher.js?v=20260911-1"></script>
 </body>
 </html>

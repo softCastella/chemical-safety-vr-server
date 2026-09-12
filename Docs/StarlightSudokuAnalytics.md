@@ -144,6 +144,14 @@ npm ci
 npm test
 ```
 
+첫 페이지를 현재 운영 집계로 로컬에서 확인할 때는 SSH 별칭 `tycheworks`가 설정된 개발 PC에서 다음 명령을 실행한다.
+
+```powershell
+node Tools/StarlightDashboardLocalPreview.mjs
+```
+
+주소는 `http://127.0.0.1:3018/starlight-analytics/?local-preview=1`이다. 이 미리보기는 `127.0.0.1`에만 열리고, 운영 서버에서 기존 조회·집계 코드를 읽기 전용으로 실행해 집계 결과만 반환한다. 원본 이벤트를 로컬 파일로 저장하거나 운영 DB·PM2·배포 파일을 변경하지 않는다. 연결 실패는 샘플로 대체하지 않고 화면에 실패 상태를 표시한다. 로컬 DB에서 전체 관리자 인증 흐름을 검증하려면 아래의 별도 DB 준비가 여전히 필요하다.
+
 `/play/` 산출물은 `softCastella/Starlight-Sudoku-WebDemo`의 위 기준 커밋에서 다음 명령으로 생성했다.
 
 ```powershell
@@ -358,3 +366,43 @@ Google Play 사전등록 페이지를 아직 제공할 수 없고 웹 체험판�
 - 미검증: 관리자 브라우저에서 대시보드 화면을 직접 열어 Canvas 히트맵 픽셀을 육안 확인하는 단계
 
 운영 백업은 `/home/linuxuser/.config/tycheworks/env-backups/chemical-safety-vr.env.before-20260912-analytics-enable`과 `/home/linuxuser/.config/tycheworks/static-backups/`의 `before-20260912-analytics-enable` 또는 `before-20260912-enable` 파일 일곱 개다. DB migration, 기존 데이터 수정·삭제와 FCM 활성화는 수행하지 않았다.
+
+## 20. 서버 전용 대시보드 첫 화면과 실데이터 로컬 미리보기
+
+### 적용 범위와 판단 근거
+
+이 절의 변경 대상은 **`softCastella/chemical-safety-vr-server` 저장소만**이다. 작업 전 서버 기준은 `main@79f1ad8c12b65594cbe084b8eb6afc983b5d12a9`, 조회 대상 운영 체크아웃은 `aad625a84e6d066c622c0ddde3bc9d84a794e9de`였다. 게임 구조 확인에 사용한 WebDemo 기준은 `codex/starlight-analytics-dashboard@1af8cd48d6a46bdfb61ddef6da32917c5023c340`, Unity 클라이언트 기준은 `main@0a0e2277000e9033d43d2c453c48f9789e45cd0a`다. 이번 작업에서 WebDemo와 Unity 클라이언트 코드는 수정하지 않았다.
+
+기존 첫 화면은 `stage_1_clear`와 `stage_3_clear`를 `1단계 완료`, `3단계 완료`로 표시해 난이도와 스테이지 관계가 드러나지 않았다. WebDemo의 `GameNotifier.startNewGame`은 난이도와 스테이지 번호를 따로 받아 이벤트에 `difficulty`와 `stage_id`를 기록한다. 현재 웹 체험판 설정은 **쉬움 난이도 스테이지 1~5**이며 보통·어려움 스테이지 수는 0이다. 따라서 첫 화면의 범위를 그 이름으로 명시하고, 임의로 고른 1·3 완료 지표 대신 1~5 스테이지의 시작·완료를 함께 보여 준다.
+
+첫 화면은 익명 사용자, 세션, `game_open`, `puzzle_start`, `demo_complete` 카드와 주요 행동별 참여, 쉬움 스테이지 1~5, 일별 활동으로 구성했다. 다음 표의 수치는 선택한 기간·플랫폼·언어·유입·캠페인·스테이지 필터의 결과다.
+
+| 화면 표시 | 근거와 계산 규칙 | 상세 조회 |
+| --- | --- | --- |
+| 익명 사용자·방문 세션 | 선택된 전체 이벤트의 `anonymous_user_id`·`session_id` 고유값 수 | `GET /api/starlight-analytics/dashboard`의 `overview.users`, `overview.sessions` |
+| 게임 열기·퍼즐 시작·데모 완료 | 각각 `game_open`, `puzzle_start`, `demo_complete` 이벤트 **건수** | 같은 API의 `overview.game_opens`, `puzzle_starts`, `demo_completes` |
+| 주요 행동별 참여 | `landing_view`, `game_open`, `puzzle_start`, `demo_complete` 각 이벤트를 경험한 **순 사용자 수**를 독립 집계 | 같은 API의 `funnel[].users`, 대시보드 `전환 흐름` |
+| 쉬움 스테이지 1~5 | `stage_id`별 `stage_N_start`·`stage_N_clear` 이벤트의 순 사용자 수. 현재 웹 체험판이 쉬움만 열려 있어 쉬움으로 표시 | 같은 API의 `stages[].start_users`, `clear_users`, 대시보드 `스테이지 분석` |
+| 일별 활동 | 발생일별 순 사용자 수와 스테이지 완료 이벤트 건수 | 같은 API의 `daily[]` |
+
+주요 행동 막대는 네 수치 중 최댓값에 대한 **길이 비교**일 뿐 전환율이 아니다. 기존 `aggregateFunnel`은 각 이벤트의 고유 사용자 수를 독립적으로 세므로 동일 사용자의 순차 도달률을 증명하지 않는다. `landing_view`보다 `game_open` 사용자가 많을 수 있으며, 기존 상세 전환 화면의 `이전 단계 대비`·`랜딩 대비` 비율도 순차 퍼널로 해석하면 안 된다. 첫 화면에서는 이 비율을 제거하고 기준을 설명했다. 향후 보통·어려움 난이도를 열면 현재 `aggregateStages`가 난이도를 구분하지 않고 `stage_id`만으로 묶으므로 집계 계약을 변경해야 한다.
+
+### 로컬 연결과 검증 상태
+
+`Tools/StarlightDashboardLocalPreview.mjs`는 기본 3018 포트의 `127.0.0.1`에만 미리보기를 연다. 3017은 다른 로컬 클라이언트가 사용 중이었다. 브라우저의 집계 요청마다 SSH 별칭 `tycheworks`를 통해 운영 체크아웃의 기존 조회·집계 코드를 실행하고, **집계 JSON만** 로컬 화면으로 반환한다. 운영 DB에는 `SELECT`만 수행하며 원본 이벤트, 익명 ID, 자격 증명을 로컬 파일이나 Git에 저장하지 않는다. 로컬 미리보기는 `?local-preview=1`에서 API 오류를 샘플 수치나 0건으로 위장하지 않고 연결 실패를 표시한다. 출시 알림 신청 탭은 이 미리보기 범위에서 제외했다.
+
+조회 시각 `2026-09-13 00:27 KST`, 조회 범위 `2026-09-07`~`2026-09-13`의 집계 API는 HTTP `200`, `meta.data_state=live`, 이벤트 308건, 익명 사용자 9명, 세션 9회, 게임 열기 11건, 퍼즐 시작 3건, 데모 완료 0건을 반환했다. 스테이지 1 시작은 순 사용자 3명, 완료는 0명이다. 이 수치는 그 시각의 실제 저장 이벤트에 대한 조회 결과이며 이후 새로고침 시 바뀔 수 있다. 선택 기간이 비면 샘플이 아닌 데이터 없음으로 표시된다.
+
+- **정적 검증:** `node --check`로 대시보드와 미리보기 스크립트 구문을 확인하고 `git diff --check`를 통과했다.
+- **로컬 검증:** 첫 페이지 HTML·CSS·JS는 각각 HTTP `200`, 집계 API는 실데이터 `200`, 잘못된 날짜 요청은 HTTP `400`을 확인했다. `npm test`는 113개 통과했다.
+- **운영 확인:** 운영 DB의 기존 이벤트를 읽기 전용으로 조회한 결과만 확인했다. 새 첫 화면 코드를 운영 대시보드에 배포하거나 PM2·DB·Nginx를 변경하지 않았다.
+- **미검증:** 브라우저 자동화 연결이 없어 실제 데스크톱·모바일 화면의 배치와 필터 조작, 관리자 인증 화면, Canvas 히트맵 픽셀을 육안 확인하지 못했다.
+
+### 후속 작업
+
+1. 로컬 3018 화면을 데스크톱과 모바일 브라우저에서 열어 숫자·한글·반응형 배치, 기간·필터·새로고침, 데이터 없음·연결 실패 표시를 직접 확인한다.
+2. 순차 퍼널이 필요하면 동일 익명 사용자·세션의 실제 이벤트 순서를 기준으로 집계와 분모를 다시 정의하고, 기존 상세 전환율의 의미를 수정한다. 현재 표본으로 이탈 원인을 확정하지 않는다.
+3. 보통·어려움 난이도 계측을 연결하기 전에 `difficulty × stage_id` 집계와 필터를 추가하고 WebDemo 이벤트·서버 저장·대시보드 결과를 통합 검증한다.
+4. 스테이지 완료, 데모 완료와 D1·D7 재방문 표본이 쌓인 뒤 병목·유지율을 판단한다. 추가 후보인 CTA→게임 준비 시간과 화면별 도달 현황은 원본 이벤트·계산 규칙·상세 조회 경로를 정한 뒤 별도 구현한다.
+5. 기간 조회가 원본 행 전체를 서버 메모리로 가져오는 현재 방식의 비용을 데이터 증가에 맞춰 측정하고, 필요한 경우 집계·캐시 방식을 설계한다. 첫 화면의 운영 배포와 관리자 실화면 검증은 별도 후속 작업이다.
+6. 날짜 버튼은 현재 브라우저의 `toISOString()`으로 UTC 날짜를 만들고 서버도 UTC 날짜 범위로 조회한다. 한국 시간 자정 전후의 `오늘`·`7일` 표시 범위가 운영자의 기대와 맞는지 확인하고, 변경이 필요하면 UI와 API의 날짜 기준을 함께 정의한다.
