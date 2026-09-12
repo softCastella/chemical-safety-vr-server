@@ -160,6 +160,82 @@ function acceptedThrough(rows) {
 
 export function createTrainingTelemetryRepository(pool) {
   return {
+    async getDashboardOverview(days = 30) {
+      const end = new Date();
+      end.setUTCHours(0, 0, 0, 0);
+      end.setUTCDate(end.getUTCDate() + 1);
+      const start = new Date(end);
+      start.setUTCDate(start.getUTCDate() - days);
+
+      const [dailyRows] = await pool.execute(
+        `SELECT DATE_FORMAT(session.started_at, '%Y-%m-%d') AS day,
+                COUNT(DISTINCT session.participant_id) AS active_users,
+                COUNT(DISTINCT CASE WHEN DATE(first_session.first_started_at) = DATE(session.started_at)
+                  THEN session.participant_id END) AS new_users,
+                COUNT(DISTINCT CASE WHEN DATE(first_session.first_started_at) < DATE(session.started_at)
+                  THEN session.participant_id END) AS returning_users,
+                COUNT(*) AS plays
+         FROM training_telemetry_sessions AS session
+         INNER JOIN (
+           SELECT participant_id, MIN(started_at) AS first_started_at
+           FROM training_telemetry_sessions GROUP BY participant_id
+         ) AS first_session ON first_session.participant_id = session.participant_id
+         WHERE session.started_at >= ? AND session.started_at < ?
+         GROUP BY day ORDER BY day`,
+        [start, end],
+      );
+      const [summaryRows] = await pool.execute(
+        `SELECT COUNT(DISTINCT participant_id) AS observed_users, COUNT(*) AS plays
+         FROM training_telemetry_sessions
+         WHERE started_at >= ? AND started_at < ?`,
+        [start, end],
+      );
+      const [modeRows] = await pool.execute(
+        `SELECT JSON_UNQUOTE(JSON_EXTRACT(payload_json, '$.mode')) AS mode,
+                event_type, COUNT(*) AS event_count
+         FROM training_telemetry_events
+         WHERE event_type IN ('mode_session_started', 'mode_session_completed')
+           AND timestamp_utc >= ? AND timestamp_utc < ?
+         GROUP BY mode, event_type`,
+        [start, end],
+      );
+      const [freshnessRows] = await pool.execute(
+        `SELECT MAX(timestamp_utc) AS last_event_at FROM training_telemetry_events`,
+      );
+
+      const byDay = new Map(dailyRows.map((row) => [row.day, row]));
+      const daily = [];
+      for (let date = new Date(start); date < end; date.setUTCDate(date.getUTCDate() + 1)) {
+        const day = date.toISOString().slice(0, 10);
+        const row = byDay.get(day);
+        daily.push({
+          day,
+          activeUsers: Number(row?.active_users ?? 0),
+          newUsers: Number(row?.new_users ?? 0),
+          returningUsers: Number(row?.returning_users ?? 0),
+          plays: Number(row?.plays ?? 0),
+        });
+      }
+      const modes = ["Education", "Training", "Test"].map((mode) => ({
+        mode,
+        started: Number(modeRows.find((row) => row.mode === mode && row.event_type === "mode_session_started")?.event_count ?? 0),
+        completed: Number(modeRows.find((row) => row.mode === mode && row.event_type === "mode_session_completed")?.event_count ?? 0),
+      }));
+      return {
+        startUtc: start.toISOString(),
+        endUtcExclusive: end.toISOString(),
+        days,
+        summary: {
+          observedUsers: Number(summaryRows[0]?.observed_users ?? 0),
+          plays: Number(summaryRows[0]?.plays ?? 0),
+          newUsers: daily.reduce((total, day) => total + day.newUsers, 0),
+          lastEventAtUtc: toIsoString(freshnessRows[0]?.last_event_at),
+        },
+        daily,
+        modes,
+      };
+    },
+
     async assertSessionMetaUserId(sessionId, metaUserId) {
       const [rows] = await pool.execute(
         `

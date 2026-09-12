@@ -62,9 +62,9 @@ test("GET /assets/Immersa/Chemical%20Safety%20Training%20VR/favicon_round_crop.s
   assert.match(body, /href="data:image\/png;base64,/);
 });
 
-test("GET /dashboard/ serves the PPE dashboard", async () => {
+test("GET /dashboard/details.html serves the preserved PPE detail dashboard", async () => {
   const [response, scriptResponse] = await Promise.all([
-    fetch(`${baseUrl}/dashboard/`),
+    fetch(`${baseUrl}/dashboard/details.html`),
     fetch(`${baseUrl}/dashboard/dashboard.js`),
   ]);
   const [body, script] = await Promise.all([response.text(), scriptResponse.text()]);
