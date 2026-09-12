@@ -302,10 +302,11 @@ test("공용 관리자 로그인은 세 대시보드 중 하나를 선택해 이
 });
 
 test("세 관리자 대시보드는 공용 전환 메뉴와 로그아웃을 제공한다", async () => {
-  const [serverHtml, starlightHtml, vrHtml, switcherScript, switcherCss] = await Promise.all([
+  const [serverHtml, starlightHtml, vrHtml, vrDetailHtml, switcherScript, switcherCss] = await Promise.all([
     readFile(new URL("../public/server-status/index.html", import.meta.url), "utf8"),
     readFile(new URL("../public/starlight-analytics/index.html", import.meta.url), "utf8"),
     readFile(new URL("../public/dashboard/index.html", import.meta.url), "utf8"),
+    readFile(new URL("../public/dashboard/details.html", import.meta.url), "utf8"),
     readFile(new URL("../public/server-status/dashboard-switcher.js", import.meta.url), "utf8"),
     readFile(new URL("../public/server-status/dashboard-switcher.css", import.meta.url), "utf8"),
   ]);
@@ -315,8 +316,10 @@ test("세 관리자 대시보드는 공용 전환 메뉴와 로그아웃을 제�
     assert.match(html, /dashboard-switcher\.css\?v=20260911-1/);
     assert.match(html, /dashboard-switcher\.js\?v=20260911-1/);
   }
-  assert.match(vrHtml, /href="dashboard\.css\?v=20260911-2"/);
-  assert.match(vrHtml, /src="dashboard\.js\?v=20260911-2"/);
+  assert.match(vrHtml, /href="overview\.css\?v=20260912-1"/);
+  assert.match(vrHtml, /src="overview\.js\?v=20260912-1"/);
+  assert.match(vrDetailHtml, /href="dashboard\.css\?v=20260911-2"/);
+  assert.match(vrDetailHtml, /src="dashboard\.js\?v=20260911-2"/);
   assert.doesNotMatch(vrHtml, /<style>/);
   assert.doesNotMatch(vrHtml, /<script>\s*[\s\S]+?<\/script>/);
   for (const destination of [
@@ -331,9 +334,9 @@ test("세 관리자 대시보드는 공용 전환 메뉴와 로그아웃을 제�
   assert.match(switcherCss, /@media\(max-width:760px\)/);
 });
 
-test("VR 대시보드는 일반 사용자 학습 지표와 업무용 시각 체계를 제공한다", async () => {
+test("VR 기존 상세 화면은 일반 사용자 학습 지표와 업무용 시각 체계를 보존한다", async () => {
   const [html, script, css] = await Promise.all([
-    readFile(new URL("../public/dashboard/index.html", import.meta.url), "utf8"),
+    readFile(new URL("../public/dashboard/details.html", import.meta.url), "utf8"),
     readFile(new URL("../public/dashboard/dashboard.js", import.meta.url), "utf8"),
     readFile(new URL("../public/dashboard/dashboard.css", import.meta.url), "utf8"),
   ]);
