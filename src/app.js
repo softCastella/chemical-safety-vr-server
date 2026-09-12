@@ -190,9 +190,10 @@ export function createApp({
     );
   }
 
+  const resolvedTrainingTelemetryRepository = enableTrainingTelemetryIngest
+    ? trainingTelemetryRepository ?? createTrainingTelemetryRepository(databasePool)
+    : null;
   if (enableTrainingTelemetryIngest) {
-    const resolvedTrainingTelemetryRepository =
-      trainingTelemetryRepository ?? createTrainingTelemetryRepository(databasePool);
     const sessionTokenService = enableMetaTrainingTelemetryAuth
       ? createTrainingTelemetrySessionTokenService({
           secret: trainingTelemetrySessionTokenSecret,
@@ -238,6 +239,19 @@ export function createApp({
       pushService: resolvedPushService,
     });
     app.use("/api/server-status", router);
+    app.get("/api/training-telemetry/dashboard-overview", requireAdmin, async (request, response) => {
+      response.set("Cache-Control", "no-store");
+      if (!resolvedTrainingTelemetryRepository) {
+        response.status(503).json({ error: "ENABLE_TRAINING_TELEMETRY_INGEST is not enabled." });
+        return;
+      }
+      const days = request.query.days === undefined ? 30 : Number(request.query.days);
+      if (![7, 30].includes(days)) {
+        response.status(400).json({ error: "days must be 7 or 30." });
+        return;
+      }
+      response.json({ data: await resolvedTrainingTelemetryRepository.getDashboardOverview(days) });
+    });
     app.use(
       "/api/starlight-analytics",
       createStarlightAnalyticsRouter({
