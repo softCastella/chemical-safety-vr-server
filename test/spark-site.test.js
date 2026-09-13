@@ -58,17 +58,18 @@ test("별빛 스도쿠 상세 페이지는 5개 언어와 언어별 타이틀 �
   const css = await readFile(new URL("spark/spark.css", siteRoot), "utf8");
   assert.match(css, /\.detail-identity img\{[^}]*width:92px;[^}]*height:92px;[^}]*object-fit:contain/);
   assert.match(css, /\.title-poster img\{[^}]*width:100%;[^}]*height:auto;[^}]*object-fit:contain/);
-  assert.match(html, /href="detail\.css\?v=20260913-1"/);
-  assert.match(html, /src="i18n\.js\?v=20260913-1"/);
+  assert.match(html, /href="detail\.css\?v=20260913-6"/);
+  assert.match(html, /src="i18n\.js\?v=20260913-3"/);
   assert.match(detailCss, /\.starlight-detail \.hero-landing-cta\{/);
   assert.match(html, /class="gameplay-showcase"/);
   assert.match(html, /src="\.\.\/\.\.\/assets\/Spark\/Starlight%20Sudoku\/game\.png"[^>]*data-i18n-alt="gameplayImageAlt"/);
-  assert.match(html, /data-i18n="gameplayStep1"[\s\S]*data-i18n="gameplayStep2"[\s\S]*data-i18n="gameplayStep3"/);
-  for (const key of ["gameplayTitle", "gameplayIntro", "gameplayStep1", "gameplayStep2", "gameplayStep3", "gameplayCaption", "gameplayImageAlt"]) {
+  assert.match(html, /data-i18n="gameplayStep1"[\s\S]*data-i18n="gameplayStep2"[\s\S]*data-i18n="gameplayStep3"[\s\S]*data-i18n="gameplayStep4"/);
+  for (const key of ["gameplayTitle", "gameplayIntro", "gameplayStep1", "gameplayStep2", "gameplayStep3", "gameplayStep4", "gameplayCaption", "gameplayImageAlt"]) {
     assert.equal((script.match(new RegExp(`${key}:`, "g")) ?? []).length, 5, `${key}는 5개 언어에 필요하다`);
   }
   assert.match(script, /document\.querySelectorAll\("\[data-i18n-alt\]"\)/);
   assert.match(detailCss, /\.starlight-detail \.gameplay-showcase\{/);
+  assert.match(detailCss, /\.starlight-detail \.detail-header\{[^}]*background:rgba\(7,21,47,\.96\)/);
   await access(new URL("assets/Spark/Starlight%20Sudoku/game.png", siteRoot));
   for (const hreflang of ["ko", "en", "ja", "zh-Hans", "zh-Hant", "x-default"]) {
     assert.match(html, new RegExp(`hreflang="${hreflang}"`));

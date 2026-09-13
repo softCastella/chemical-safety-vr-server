@@ -25,8 +25,8 @@
   <script id="starlight-detail-structured-data" type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","@id":"https://spark.tycheworks.com/starlight-sudoku/#game","name":"별빛 스도쿠","alternateName":"Starlight Sudoku","description":"퍼즐을 풀어 별빛을 모으고 멈춰버린 마을의 아침을 되찾는 스토리형 모바일 스도쿠 게임입니다.","url":"https://spark.tycheworks.com/starlight-sudoku/","image":"https://spark.tycheworks.com/assets/Spark/Starlight%20Sudoku/Title_Image_Starlight%20Sdoku%20KR.png","inLanguage":"ko","applicationCategory":"GameApplication","operatingSystem":"Android","publisher":{"@type":"Organization","@id":"https://tycheworks.com/#organization","name":"TYCHE WORKS","url":"https://tycheworks.com/"}}</script>
   <meta name="theme-color" content="#0b1730">
   <link rel="stylesheet" href="../spark.css?v=20260908-1">
-  <link rel="stylesheet" href="detail.css?v=20260913-1">
-  <script src="i18n.js?v=20260913-1" defer></script>
+  <link rel="stylesheet" href="detail.css?v=20260913-6">
+  <script src="i18n.js?v=20260913-3" defer></script>
 </head>
 <body class="starlight-detail">
   <header class="detail-header">
@@ -45,8 +45,8 @@
     <div class="detail-subnav">
       <nav class="detail-toc" aria-label="페이지 목차">
         <a href="#overview" data-i18n="navOverview">소개</a>
-        <a href="#play" data-i18n="navGameplay">플레이</a>
         <a href="#world" data-i18n="navWorld">세계</a>
+        <a href="#play" data-i18n="navGameplay">플레이</a>
         <a href="#info" data-i18n="navInfo">정보</a>
       </nav>
       <div class="locale-switcher" role="group" aria-label="언어 선택">
@@ -65,7 +65,7 @@
         <div class="detail-copy">
           <p class="eyebrow">TYCHE SPARK ORIGINAL · 01</p>
           <div class="detail-identity"><img src="../../assets/Spark/Starlight%20Sudoku/Icon_Starlight_Sudoku_v4.png" width="1254" height="1254" alt="별빛 스도쿠 앱 아이콘"><span>STARLIGHT SUDOKU</span></div>
-          <h1 data-i18n="heroTitle">퍼즐을 풀어 별빛을 모으고,<br>멈춰버린 마을의 아침을 되찾는 스도쿠.</h1>
+          <h1 data-i18n="heroTitle">퍼즐을 풀어 별빛을 모으고,<br>멈춰버린 마을의 아침을<br>되찾는 스도쿠.</h1>
           <p data-i18n="heroBody">클래식 스도쿠의 논리적인 재미에 작은 판타지 세계와 마을 복원이라는 목표를 더한 감성 퍼즐 게임입니다.</p>
           <div class="detail-tags"><span>MOBILE PUZZLE</span><span>SUDOKU</span><span>STORY &amp; RESTORATION</span></div>
           <div class="store-status" aria-label="Google Play 입점 예정">
@@ -98,62 +98,76 @@
       </div>
     </section>
 
+    <section id="core-loop" class="detail-section core-loop-section">
+      <div class="shell split-heading">
+        <p class="eyebrow orange">CORE LOOP</p>
+        <div><h2 data-i18n="loopTitle">풀고, 모으고, 밝힌다.</h2><p data-i18n="loopIntro">익숙한 규칙에서 시작해 세계의 변화로 이어지는 세 단계의 플레이.</p></div>
+      </div>
+      <div class="shell play-grid">
+        <article><span>01 · SOLVE</span><h3 data-i18n="solveTitle">스도쿠를 풉니다</h3><p data-i18n="solveBody">9×9 스도쿠의 익숙한 규칙으로 차분하게 문제를 완성합니다.</p><div class="sudoku-mini" aria-hidden="true"><i>1</i><i>·</i><i>3</i><i>·</i><i>6</i><i>·</i><i>9</i><i>·</i><i>2</i></div></article>
+        <article><span>02 · COLLECT</span><h3 data-i18n="collectTitle">별빛을 모읍니다</h3><p data-i18n="collectBody">퍼즐 완료의 보상은 단순 점수가 아니라 마을을 변화시키는 별빛으로 이어집니다.</p><div class="star-orbit" aria-hidden="true">✦</div></article>
+        <article><span>03 · RESTORE</span><h3 data-i18n="restorePlayTitle">마을을 밝힙니다</h3><p data-i18n="restorePlayBody">모은 별빛으로 잠든 장소를 깨우고, 마을에 따뜻한 빛을 되돌립니다.</p><div class="village-mini" aria-hidden="true"></div></article>
+      </div>
+    </section>
+
+    <section id="world" class="detail-section world-section">
+      <div class="shell split-heading">
+        <p class="eyebrow orange">WORLD TRANSFORMATION</p>
+        <div><h2 data-i18n="worldTitle">같은 마을, 다른 시간.</h2><p data-i18n="worldBody">마을 자체가 플레이의 진행도를 보여줍니다. 별빛을 되찾아 갈수록 깊은 밤의 정적은 밝고 따뜻한 아침으로 바뀝니다.</p></div>
+      </div>
+      <div class="shell world-compare">
+        <figure><div class="scene-image"><img src="../../assets/Spark/Starlight%20Sudoku/village_night_light.png" width="941" height="1672" loading="lazy" decoding="async" alt="별빛을 잃고 밤에 잠긴 마을"></div><figcaption><span>BEFORE · NIGHT</span><strong data-i18n="nightTitle">아침이 멈춘 마을</strong><p data-i18n="nightBody">별빛이 흩어진 뒤, 마을은 긴 밤 속에 멈춰 있습니다.</p></figcaption></figure>
+        <figure><div class="scene-image"><img src="../../assets/Spark/Starlight%20Sudoku/village_scene_day.png" width="941" height="1672" loading="lazy" decoding="async" alt="별빛을 되찾아 아침이 돌아온 마을"></div><figcaption><span>AFTER · DAY</span><strong data-i18n="dayTitle">다시 돌아온 아침</strong><p data-i18n="dayBody">별빛을 모아 복원을 이어가면 마을은 본래의 밝은 모습을 되찾습니다.</p></figcaption></figure>
+      </div>
+    </section>
+
+    <section class="detail-section restore-section">
+      <div class="shell split-heading">
+        <p class="eyebrow orange">RESTORE THE VILLAGE</p>
+        <div><h2 data-i18n="placesTitle">별빛으로 깨어나는 장소들.</h2><p data-i18n="placesBody">별빛이 쌓일수록 마을의 장소들이 서서히 본래의 모습을 되찾습니다.</p></div>
+      </div>
+      <div class="shell restore-grid">
+        <article class="restore-card"><img src="../../assets/Spark/Starlight%20Sudoku/icon_bakery.png" width="1254" height="1254" loading="lazy" decoding="async" alt="빵집 아이콘"><h3 data-i18n="bakeryTitle">빵집</h3><p data-i18n="bakeryBody">따뜻한 불빛이 가장 먼저 돌아오기 좋은 일상의 공간.</p></article>
+        <article class="restore-card"><img src="../../assets/Spark/Starlight%20Sudoku/icon_book.png" width="1254" height="1254" loading="lazy" decoding="async" alt="도서관 아이콘"><h3 data-i18n="libraryTitle">도서관</h3><p data-i18n="libraryBody">고요한 마을의 기록과 이야기가 머무는 장소.</p></article>
+        <article class="restore-card"><img src="../../assets/Spark/Starlight%20Sudoku/icon_fontaine.png" width="1254" height="1254" loading="lazy" decoding="async" alt="분수광장 아이콘"><h3 data-i18n="fountainTitle">분수광장</h3><p data-i18n="fountainBody">마을이 다시 움직이기 시작했음을 보여주는 중심 공간.</p></article>
+      </div>
+    </section>
+
     <section id="play" class="detail-section play-section">
-      <div class="shell">
-        <div class="section-heading light-heading"><div><p class="eyebrow">CORE LOOP</p><h2 data-i18n="loopTitle">풀고, 모으고, 밝힌다.</h2></div><p data-i18n="loopIntro">익숙한 규칙에서 시작해 세계의 변화로 이어지는 세 단계의 플레이.</p></div>
-        <div class="play-grid">
-          <article><span>01 · SOLVE</span><h3 data-i18n="solveTitle">스도쿠를 풉니다</h3><p data-i18n="solveBody">9×9 스도쿠의 익숙한 규칙으로 차분하게 문제를 완성합니다.</p><div class="sudoku-mini" aria-hidden="true"><i>1</i><i>·</i><i>3</i><i>·</i><i>6</i><i>·</i><i>9</i><i>·</i><i>2</i></div></article>
-          <article><span>02 · COLLECT</span><h3 data-i18n="collectTitle">별빛을 모읍니다</h3><p data-i18n="collectBody">퍼즐 완료의 보상은 단순 점수가 아니라 마을을 변화시키는 별빛으로 이어집니다.</p><div class="star-orbit" aria-hidden="true">✦</div></article>
-          <article><span>03 · RESTORE</span><h3 data-i18n="restorePlayTitle">마을을 밝힙니다</h3><p data-i18n="restorePlayBody">모은 별빛으로 잠든 장소를 깨우고, 마을에 따뜻한 빛을 되돌립니다.</p><div class="village-mini" aria-hidden="true"></div></article>
-        </div>
+      <div class="shell split-heading">
+        <p class="eyebrow orange">ACTUAL GAMEPLAY</p>
+        <div><h2 id="gameplay-title" data-i18n="gameplayTitle">한 칸씩 추리해 완성하는 9×9 스도쿠.</h2><p data-i18n="gameplayIntro">같은 가로줄, 세로줄, 3×3 구역에 숫자 1부터 9까지가 각각 한 번씩 들어가도록 빈 칸을 채웁니다.</p></div>
+      </div>
+      <div class="shell gameplay-layout">
         <section class="gameplay-showcase" aria-labelledby="gameplay-title">
           <div class="gameplay-copy">
-            <p class="eyebrow">ACTUAL GAMEPLAY</p>
-            <h3 id="gameplay-title" data-i18n="gameplayTitle">한 칸씩 채워 나가는 9×9 스도쿠.</h3>
-            <p data-i18n="gameplayIntro">실제 게임 화면에서 퍼즐 보드와 숫자 입력, 메모·힌트 도구를 한눈에 볼 수 있습니다.</p>
             <ol class="gameplay-steps">
-              <li><span>01</span><p data-i18n="gameplayStep1">9×9 보드의 빈 칸을 선택합니다.</p></li>
-              <li><span>02</span><p data-i18n="gameplayStep2">아래 숫자 버튼으로 답을 입력하고, 필요하면 메모·삭제·힌트를 사용합니다.</p></li>
-              <li><span>03</span><p data-i18n="gameplayStep3">퍼즐을 완성해 별빛을 모으고 마을을 밝히는 여정으로 이어갑니다.</p></li>
+              <li><span>01</span><p data-i18n="gameplayStep1">빈 칸을 선택하고, 그 칸의 가로줄·세로줄·3×3 구역에 이미 있는 숫자를 살펴봅니다.</p></li>
+              <li><span>02</span><p data-i18n="gameplayStep2">세 곳 어디에도 겹치지 않는 숫자를 찾아 아래 숫자 버튼으로 입력합니다.</p></li>
+              <li><span>03</span><p data-i18n="gameplayStep3">확신이 없을 때는 후보 숫자를 메모합니다. 입력을 지우거나 되돌릴 수 있고, 막히면 선택한 칸에 힌트를 사용할 수 있습니다.</p></li>
+              <li><span>04</span><p data-i18n="gameplayStep4">규칙에 맞게 보드를 완성하면 별빛을 모으고, 마을을 밝히는 여정이 이어집니다.</p></li>
             </ol>
           </div>
           <figure class="gameplay-figure">
-            <img src="../../assets/Spark/Starlight%20Sudoku/game.png" width="500" height="893" loading="lazy" decoding="async" alt="별빛 스도쿠 쉬움 1 플레이 화면: 9×9 보드와 숫자 입력 버튼" data-i18n-alt="gameplayImageAlt">
+            <img src="../../assets/Spark/Starlight%20Sudoku/game.png" width="500" height="893" loading="eager" decoding="async" alt="별빛 스도쿠 쉬움 1 플레이 화면: 9×9 보드와 숫자 입력 버튼" data-i18n-alt="gameplayImageAlt">
             <figcaption data-i18n="gameplayCaption">실제 플레이 화면 · 한국어 버전</figcaption>
           </figure>
         </section>
       </div>
     </section>
 
-    <section id="world" class="detail-section world-section">
-      <div class="shell">
-        <div class="split-heading"><p class="eyebrow orange">WORLD TRANSFORMATION</p><div><h2 data-i18n="worldTitle">같은 마을, 다른 시간.</h2><p data-i18n="worldBody">마을 자체가 플레이의 진행도를 보여줍니다. 별빛을 되찾아 갈수록 깊은 밤의 정적은 밝고 따뜻한 아침으로 바뀝니다.</p></div></div>
-        <div class="world-compare">
-          <figure><div class="scene-image"><img src="../../assets/Spark/Starlight%20Sudoku/village_night_light.png" width="941" height="1672" loading="lazy" decoding="async" alt="별빛을 잃고 밤에 잠긴 마을"></div><figcaption><span>BEFORE · NIGHT</span><strong data-i18n="nightTitle">아침이 멈춘 마을</strong><p data-i18n="nightBody">별빛이 흩어진 뒤, 마을은 긴 밤 속에 멈춰 있습니다.</p></figcaption></figure>
-          <figure><div class="scene-image"><img src="../../assets/Spark/Starlight%20Sudoku/village_scene_day.png" width="941" height="1672" loading="lazy" decoding="async" alt="별빛을 되찾아 아침이 돌아온 마을"></div><figcaption><span>AFTER · DAY</span><strong data-i18n="dayTitle">다시 돌아온 아침</strong><p data-i18n="dayBody">별빛을 모아 복원을 이어가면 마을은 본래의 밝은 모습을 되찾습니다.</p></figcaption></figure>
-        </div>
-      </div>
-    </section>
-
-    <section class="detail-section restore-section">
-      <div class="shell">
-        <div class="section-heading"><div><p class="eyebrow orange">RESTORE THE VILLAGE</p><h2 data-i18n="placesTitle">별빛으로 깨어나는 장소들.</h2></div><p data-i18n="placesBody">별빛이 쌓일수록 마을의 장소들이 서서히 본래의 모습을 되찾습니다.</p></div>
-        <div class="restore-grid">
-          <article class="restore-card"><img src="../../assets/Spark/Starlight%20Sudoku/icon_bakery.png" width="1254" height="1254" loading="lazy" decoding="async" alt="빵집 아이콘"><h3 data-i18n="bakeryTitle">빵집</h3><p data-i18n="bakeryBody">따뜻한 불빛이 가장 먼저 돌아오기 좋은 일상의 공간.</p></article>
-          <article class="restore-card"><img src="../../assets/Spark/Starlight%20Sudoku/icon_book.png" width="1254" height="1254" loading="lazy" decoding="async" alt="도서관 아이콘"><h3 data-i18n="libraryTitle">도서관</h3><p data-i18n="libraryBody">고요한 마을의 기록과 이야기가 머무는 장소.</p></article>
-          <article class="restore-card"><img src="../../assets/Spark/Starlight%20Sudoku/icon_fontaine.png" width="1254" height="1254" loading="lazy" decoding="async" alt="분수광장 아이콘"><h3 data-i18n="fountainTitle">분수광장</h3><p data-i18n="fountainBody">마을이 다시 움직이기 시작했음을 보여주는 중심 공간.</p></article>
-        </div>
-      </div>
-    </section>
-
     <section id="info" class="detail-section info-section">
-      <div class="shell info-layout">
-        <div><p class="eyebrow">PROJECT INFORMATION</p><h2 data-i18n="infoTitle">TYCHE SPARK의<br>모바일 퍼즐 프로젝트.</h2></div>
+      <div class="shell split-heading">
+        <p class="eyebrow orange">PROJECT INFORMATION</p>
+        <div><h2 data-i18n="infoTitle">TYCHE SPARK<br>모바일 퍼즐 프로젝트.</h2></div>
+      </div>
+      <div class="shell info-layout info-detail-grid">
         <dl>
           <div><dt>TITLE</dt><dd data-i18n="infoName">별빛 스도쿠 / Starlight Sudoku</dd></div>
           <div><dt>LINE</dt><dd>TYCHE SPARK</dd></div>
           <div><dt>GENRE</dt><dd>Sudoku · Puzzle · Story Restoration</dd></div>
           <div><dt>PLATFORM</dt><dd>Android Mobile</dd></div>
+          <div><dt>LANGUAGES</dt><dd><span lang="ko">한국어</span> · <span lang="en">English</span> · <span lang="ja">日本語</span> · <span lang="zh-CN">简体中文</span> · <span lang="zh-TW">繁體中文</span></dd></div>
           <div><dt>PLAY STYLE</dt><dd>Single Player · Relaxed Puzzle</dd></div>
           <div><dt>STATUS</dt><dd data-i18n="infoStatus">Google Play 입점 예정</dd></div>
         </dl>
