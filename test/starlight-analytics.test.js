@@ -313,8 +313,8 @@ test("세 관리자 대시보드는 공용 전환 메뉴와 로그아웃을 제�
     assert.match(html, /dashboard-switcher\.css\?v=20260911-1/);
     assert.match(html, /dashboard-switcher\.js\?v=20260911-1/);
   }
-  assert.match(vrHtml, /href="overview\.css\?v=20260912-1"/);
-  assert.match(vrHtml, /src="overview\.js\?v=20260912-1"/);
+  assert.match(vrHtml, /href="overview\.css\?v=20260914-2"/);
+  assert.match(vrHtml, /src="overview\.js\?v=20260914-1"/);
   assert.match(vrDetailHtml, /href="dashboard\.css\?v=20260911-2"/);
   assert.match(vrDetailHtml, /src="dashboard\.js\?v=20260911-2"/);
   assert.doesNotMatch(vrHtml, /<style>/);
