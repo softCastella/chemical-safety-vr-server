@@ -84,50 +84,61 @@ test('모든 사이트 페이지는 공용 또는 프로젝트 전용 파비콘�
   }
 });
 
-test('홈 작품 캐러셀은 세 배너를 유지하고 이동 트랙에서 슬라이드를 자르지 않는다', async () => {
+test('홈 히어로는 실제 VR·게임 작품 두 개만 소개한다', async () => {
   const [html, css] = await Promise.all([
     readFile(new URL('index.html', siteRoot), 'utf8'),
-    readFile(new URL('styles.css', siteRoot), 'utf8'),
+    readFile(new URL('home-feature.css', siteRoot), 'utf8'),
   ]);
 
-  const slides = html.match(/class="[^"]*\brelease-slide\b[^"]*"/g) ?? [];
-  assert.equal(slides.length, 3);
-
-  const trackRules = [...css.matchAll(/\.release-track\s*\{([^}]*)\}/g)];
-  assert.ok(trackRules.length > 0);
-  assert.equal(
-    trackRules.some(([, declarations]) => /overflow\s*:\s*hidden/.test(declarations)),
-    false,
-  );
+  assert.match(html, /<section class="hero shell">[\s\S]*?<section id="featured-releases"/);
+  assert.equal((html.match(/class="featured-slide"/g) ?? []).length, 2);
+  assert.match(html, /<h3>화학물질 안전훈련 VR<\/h3>/);
+  assert.match(html, /<h3>별빛 스도쿠<\/h3>/);
+  assert.match(html, /href="https:\/\/spark\.tycheworks\.com\/starlight-sudoku\/"/);
+  assert.match(html, /Google Play 입점 예정/);
+  assert.doesNotMatch(html, /release-slide|game-hd\.jpg|app-hd\.jpg/);
+  assert.match(css, /\.featured-track\s*\{[^}]*display:\s*flex/);
 });
 
-test('홈 첫 번째 VR 배너의 남는 영역은 흰색 배경을 사용한다', async () => {
-  const css = await readFile(new URL('styles.css', siteRoot), 'utf8');
-  const mediaRule = css.match(/\.release-media-banner\s*\{([^}]*)\}/);
-  const slideRule = css.match(/\.release-slide-vr\s*\{([^}]*)\}/);
-
-  assert.ok(mediaRule);
-  assert.ok(slideRule);
-  assert.match(mediaRule[1], /background\s*:\s*#fff!important/);
-  assert.match(slideRule[1], /background\s*:\s*#fff/);
+test('홈 작품 카드는 각 작품의 실제 이미지를 표시한다', async () => {
+  const [html, css] = await Promise.all([
+    readFile(new URL('index.html', siteRoot), 'utf8'),
+    readFile(new URL('home-feature.css', siteRoot), 'utf8'),
+  ]);
+  assert.match(html, /metahorizon_hero_v2\.png/);
+  assert.match(html, /feature_graphic_v1_1024x500\.png/);
+  assert.match(css, /\.featured-art-vr\s*\{\s*background:\s*#fff/);
+  await Promise.all([
+    access(new URL('assets/Immersa/Chemical%20Safety%20Training%20VR/metahorizon_hero_v2.png', siteRoot)),
+    access(new URL('assets/Spark/Starlight%20Sudoku/feature_graphic_v1_1024x500.png', siteRoot)),
+  ]);
 });
 
-test('홈 작품 배너 외곽은 매우 연한 회색 선을 사용한다', async () => {
-  const css = await readFile(new URL('styles.css', siteRoot), 'utf8');
-  const carouselRules = [...css.matchAll(/\.release-carousel\s*\{([^}]*)\}/g)];
-  const finalCarouselRule = carouselRules.at(-1)?.[1] ?? '';
-
-  assert.match(css, /--line-soft\s*:\s*rgba\(32,32,32,\.06\)/);
-  assert.match(finalCarouselRule, /border\s*:\s*1px solid var\(--line-soft\)/);
+test('홈 작품 카드는 옅은 선을 쓰고 라인 카드는 상호작용 시 강조한다', async () => {
+  const [html, css] = await Promise.all([
+    readFile(new URL('index.html', siteRoot), 'utf8'),
+    readFile(new URL('home-feature.css', siteRoot), 'utf8'),
+  ]);
+  assert.match(css, /\.featured-work\s*\{[^}]*border:\s*1px solid var\(--line\)/);
+  assert.match(css, /\.line-card:hover, \.line-card:focus-visible\s*\{/);
+  assert.match(css, /\.line-card:hover::before, \.line-card:focus-visible::before\s*\{/);
+  assert.match(css, /\.hero\s*\{\s*grid-template-columns:\s*minmax\(0, 1fr\)/);
+  const lineCards = html.slice(html.indexOf('<div class="line-grid">'), html.indexOf('</div></section>', html.indexOf('<div class="line-grid">')));
+  assert.doesNotMatch(lineCards, /active-line|Meta Horizon|Google Play/);
+  assert.equal((lineCards.match(/OPENING SOON/g) ?? []).length, 1);
 });
 
 test('홈과 세부 라인의 포인트 컬러 역할을 구분한다', async () => {
-  const css = await readFile(new URL('styles.css', siteRoot), 'utf8');
+  const [css, homeCss] = await Promise.all([
+    readFile(new URL('styles.css', siteRoot), 'utf8'),
+    readFile(new URL('home-feature.css', siteRoot), 'utf8'),
+  ]);
 
   assert.match(css, /--brand-accent\s*:\s*#6c4bd8/);
   assert.match(css, /\.btn-primary\{[^}]*background\s*:\s*var\(--brand-accent\)/);
-  assert.match(css, /\.active-line\{[^}]*rgba\(40,120,255,\.065\)/);
-  assert.match(css, /\.status\.live\{[^}]*color\s*:\s*var\(--immersa\)/);
+  assert.match(homeCss, /\.line-card-immersa\s*\{\s*--line-accent:\s*var\(--immersa\)/);
+  assert.match(homeCss, /\.line-card-spark\s*\{\s*--line-accent:\s*var\(--spark\)/);
+  assert.match(homeCss, /\.line-card-loop\s*\{\s*--line-accent:\s*var\(--loop\)/);
   assert.match(css, /--immersa\s*:\s*#2878ff/);
   assert.match(css, /--spark\s*:\s*#ff7a00/);
   assert.match(css, /--loop\s*:\s*#f4c430/);

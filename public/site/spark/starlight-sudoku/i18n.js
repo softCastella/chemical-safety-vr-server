@@ -13,6 +13,9 @@ const translations = {
     solveTitle: "스도쿠를 풉니다", solveBody: "9×9 스도쿠의 익숙한 규칙으로 차분하게 문제를 완성합니다.",
     collectTitle: "별빛을 모읍니다", collectBody: "퍼즐 완료의 보상은 단순 점수가 아니라 마을을 변화시키는 별빛으로 이어집니다.",
     restorePlayTitle: "마을을 밝힙니다", restorePlayBody: "모은 별빛으로 잠든 장소를 깨우고, 마을에 따뜻한 빛을 되돌립니다.",
+    gameplayTitle: "한 칸씩 채워 나가는 9×9 스도쿠.", gameplayIntro: "실제 게임 화면에서 퍼즐 보드와 숫자 입력, 메모·힌트 도구를 한눈에 볼 수 있습니다.",
+    gameplayStep1: "9×9 보드의 빈 칸을 선택합니다.", gameplayStep2: "아래 숫자 버튼으로 답을 입력하고, 필요하면 메모·삭제·힌트를 사용합니다.", gameplayStep3: "퍼즐을 완성해 별빛을 모으고 마을을 밝히는 여정으로 이어갑니다.",
+    gameplayCaption: "실제 플레이 화면 · 한국어 버전", gameplayImageAlt: "별빛 스도쿠 쉬움 1 플레이 화면: 9×9 보드와 숫자 입력 버튼",
     worldTitle: "같은 마을, 다른 시간.", worldBody: "마을 자체가 플레이의 진행도를 보여줍니다. 별빛을 되찾아 갈수록 깊은 밤의 정적은 밝고 따뜻한 아침으로 바뀝니다.",
     nightTitle: "아침이 멈춘 마을", nightBody: "별빛이 흩어진 뒤, 마을은 긴 밤 속에 멈춰 있습니다.",
     dayTitle: "다시 돌아온 아침", dayBody: "별빛을 모아 복원을 이어가면 마을은 본래의 밝은 모습을 되찾습니다.",
@@ -35,6 +38,9 @@ const translations = {
     solveTitle: "完成数独", solveBody: "按照熟悉的 9×9 数独规则，静心完成每一道题。",
     collectTitle: "收集星光", collectBody: "完成谜题的奖励不只是分数，而是能够改变小镇的星光。",
     restorePlayTitle: "点亮小镇", restorePlayBody: "用收集到的星光唤醒沉睡的地点，让温暖的光重新回到小镇。",
+    gameplayTitle: "逐格填满 9×9 数独。", gameplayIntro: "游戏画面展示了棋盘、数字输入，以及笔记和提示工具。",
+    gameplayStep1: "在 9×9 棋盘上选择一个空格。", gameplayStep2: "用下方数字按钮填入答案，需要时使用笔记、删除或提示。", gameplayStep3: "完成谜题，收集星光，继续点亮小镇。",
+    gameplayCaption: "实际游戏画面 · 韩语版本", gameplayImageAlt: "《星光数独》简单 1 关游戏画面：9×9 棋盘和数字输入按钮",
     worldTitle: "同一座小镇，不同的时光。", worldBody: "小镇本身就是游戏进度的呈现。随着星光回归，深夜的寂静会化为明亮温暖的清晨。",
     nightTitle: "清晨停驻的小镇", nightBody: "星光散落后，小镇停在了漫长的黑夜中。",
     dayTitle: "重新归来的清晨", dayBody: "收集星光并持续修复，小镇会找回原本明亮的模样。",
@@ -57,6 +63,9 @@ const translations = {
     solveTitle: "完成數獨", solveBody: "按照熟悉的 9×9 數獨規則，靜心完成每一道題。",
     collectTitle: "收集星光", collectBody: "完成謎題的獎勵不只是分數，而是能夠改變小鎮的星光。",
     restorePlayTitle: "點亮小鎮", restorePlayBody: "用收集到的星光喚醒沉睡的地點，讓溫暖的光重新回到小鎮。",
+    gameplayTitle: "逐格填滿 9×9 數獨。", gameplayIntro: "遊戲畫面呈現棋盤、數字輸入，以及筆記與提示工具。",
+    gameplayStep1: "在 9×9 棋盤上選取一個空格。", gameplayStep2: "用下方的數字按鈕填入答案，需要時使用筆記、刪除或提示。", gameplayStep3: "完成謎題、收集星光，繼續點亮小鎮。",
+    gameplayCaption: "實際遊戲畫面 · 韓文版本", gameplayImageAlt: "《星光數獨》簡單 1 關遊戲畫面：9×9 棋盤與數字輸入按鈕",
     worldTitle: "同一座小鎮，不同的時光。", worldBody: "小鎮本身就是遊戲進度的呈現。隨著星光回歸，深夜的寂靜會化為明亮溫暖的清晨。",
     nightTitle: "清晨停駐的小鎮", nightBody: "星光散落後，小鎮停在了漫長的黑夜中。",
     dayTitle: "重新歸來的清晨", dayBody: "收集星光並持續修復，小鎮會找回原本明亮的模樣。",
@@ -79,6 +88,9 @@ const translations = {
     solveTitle: "数独を解く", solveBody: "おなじみの9×9数独のルールで、落ち着いて問題を完成させます。",
     collectTitle: "星の光を集める", collectBody: "パズルを解いた報酬は点数だけでなく、村を変える星の光になります。",
     restorePlayTitle: "村を照らす", restorePlayBody: "集めた星の光で眠る場所を起こし、村に温かな光を戻します。",
+    gameplayTitle: "一マスずつ埋めていく9×9の数独。", gameplayIntro: "実際のゲーム画面では、盤面、数字入力、メモやヒントの操作を確認できます。",
+    gameplayStep1: "9×9の盤面から空いているマスを選びます。", gameplayStep2: "下の数字ボタンで答えを入力し、必要に応じてメモ・削除・ヒントを使います。", gameplayStep3: "パズルを完成させて星の光を集め、村を照らしていきます。",
+    gameplayCaption: "実際のプレイ画面 · 韓国語版", gameplayImageAlt: "星明かりの数独の「かんたん1」プレイ画面。9×9の盤面と数字入力ボタン",
     worldTitle: "同じ村、違う時間。", worldBody: "村そのものがプレイの進行を映します。星の光を取り戻すほど、深い夜の静けさは明るく温かな朝へ変わります。",
     nightTitle: "朝が止まった村", nightBody: "星の光が散ったあと、村は長い夜の中で止まっています。",
     dayTitle: "戻ってきた朝", dayBody: "星の光を集めて復興を続けると、村は本来の明るい姿を取り戻します。",
@@ -101,6 +113,9 @@ const translations = {
     solveTitle: "Solve Sudoku", solveBody: "Complete each puzzle at your own pace with the familiar rules of 9×9 Sudoku.",
     collectTitle: "Gather starlight", collectBody: "Your reward is more than a score: it becomes the starlight that transforms the village.",
     restorePlayTitle: "Light the village", restorePlayBody: "Use the starlight you collect to wake sleeping places and bring warm light back to town.",
+    gameplayTitle: "Fill the 9×9 grid, one cell at a time.", gameplayIntro: "The game screen shows the puzzle board, number keys, notes, and hint controls.",
+    gameplayStep1: "Select an empty cell on the 9×9 board.", gameplayStep2: "Enter a number with the keys below, and use notes, erase, or hints when needed.", gameplayStep3: "Complete the puzzle to gather starlight and continue lighting up the village.",
+    gameplayCaption: "Actual gameplay screen · Korean version", gameplayImageAlt: "Starlight Sudoku Easy 1 gameplay screen with a 9×9 grid and number keys",
     worldTitle: "The same village, a different time.", worldBody: "The village itself shows your progress. As starlight returns, the stillness of deep night gives way to a bright, warm morning.",
     nightTitle: "A village without morning", nightBody: "After the starlight scattered, the village became suspended in a long night.",
     dayTitle: "Morning returns", dayBody: "As you gather starlight and restore the village, it regains its bright and welcoming form.",
@@ -193,6 +208,10 @@ function applyLocale(locale, updateUrl = true) {
   document.querySelectorAll("[data-i18n]").forEach((element) => {
     const value = copy[element.dataset.i18n];
     if (value) element.innerHTML = value;
+  });
+  document.querySelectorAll("[data-i18n-alt]").forEach((element) => {
+    const value = copy[element.dataset.i18nAlt];
+    if (value) element.alt = value;
   });
 
   if (titleImage) {
