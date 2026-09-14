@@ -23,6 +23,9 @@ import {
 } from "./modules/training-telemetry/training-telemetry-meta-auth.js";
 import { createTrainingTelemetryRepository } from "./modules/training-telemetry/training-telemetry-repository.js";
 import { createTrainingTelemetryRouter } from "./modules/training-telemetry/training-telemetry-routes.js";
+import { createTrainingTelemetryService } from "./modules/training-telemetry/training-telemetry-service.js";
+import { dashboardBaseline } from "./modules/training-telemetry/training-telemetry-dashboard-baseline.js";
+import { toDashboardPlaySession } from "./modules/training-telemetry/training-telemetry-dashboard-play.js";
 import { createContactRouter } from "./modules/contact/contact-routes.js";
 import { createResendContactMailer } from "./modules/contact/resend-contact-mailer.js";
 import { createStarlightAnalyticsRepository } from "./modules/starlight-analytics/starlight-analytics-repository.js";
@@ -251,6 +254,60 @@ export function createApp({
         return;
       }
       response.json({ data: await resolvedTrainingTelemetryRepository.getDashboardOverview(days) });
+    });
+    app.get("/api/training-telemetry/dashboard-users", requireAdmin, async (request, response) => {
+      response.set("Cache-Control", "no-store");
+      if (!resolvedTrainingTelemetryRepository) {
+        response.status(503).json({ error: "ENABLE_TRAINING_TELEMETRY_INGEST is not enabled." });
+        return;
+      }
+      const metaUserId = request.query.metaUserId ?? "";
+      const page = request.query.page === undefined ? 1 : Number(request.query.page);
+      if (typeof metaUserId !== "string" || !/^[0-9]{0,64}$/.test(metaUserId)
+        || !Number.isSafeInteger(page) || page < 1) {
+        response.status(400).json({ error: "metaUserId must contain only decimal digits (up to 64); page must be a positive integer." });
+        return;
+      }
+      response.json({ data: await resolvedTrainingTelemetryRepository.getDashboardUsers({ metaUserId, page }) });
+    });
+    app.get("/api/training-telemetry/dashboard-users/:participantId", requireAdmin, async (request, response) => {
+      response.set("Cache-Control", "no-store");
+      if (!resolvedTrainingTelemetryRepository) {
+        response.status(503).json({ error: "ENABLE_TRAINING_TELEMETRY_INGEST is not enabled." });
+        return;
+      }
+      const participantId = Number(request.params.participantId);
+      const page = request.query.page === undefined ? 1 : Number(request.query.page);
+      if (!Number.isSafeInteger(participantId) || participantId < 1
+        || !Number.isSafeInteger(page) || page < 1) {
+        response.status(400).json({ error: "participantId and page must be positive integers." });
+        return;
+      }
+      const user = await resolvedTrainingTelemetryRepository.getDashboardUser({ participantId, page });
+      if (!user) {
+        response.status(404).json({ error: "Training telemetry participant not found." });
+        return;
+      }
+      response.json({ data: user });
+    });
+    app.get("/api/training-telemetry/dashboard-play", requireAdmin, async (_request, response) => {
+      response.set("Cache-Control", "no-store");
+      if (!resolvedTrainingTelemetryRepository) {
+        response.status(503).json({ error: "ENABLE_TRAINING_TELEMETRY_INGEST is not enabled." });
+        return;
+      }
+      response.json({ data: await resolvedTrainingTelemetryRepository.getDashboardPlay() });
+    });
+    app.get("/api/training-telemetry/dashboard-play/sessions/:sessionId", requireAdmin, async (request, response) => {
+      response.set("Cache-Control", "no-store");
+      if (!resolvedTrainingTelemetryRepository) {
+        response.status(503).json({ error: "ENABLE_TRAINING_TELEMETRY_INGEST is not enabled." });
+        return;
+      }
+      const raw = await createTrainingTelemetryService({
+        repository: resolvedTrainingTelemetryRepository,
+      }).getSession(request.params.sessionId);
+      response.json({ data: toDashboardPlaySession(raw, raw.events), baseline: dashboardBaseline });
     });
     app.use(
       "/api/starlight-analytics",

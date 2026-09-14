@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Meta 앱 범위 사용자 ID로 VR 플레이 이력을 찾고 한 플레이의 수행 기록으로 이동">
+  <link rel="icon" href="data:,">
+  <title>TYCHE VR · 사용자</title>
+  <link rel="stylesheet" href="/server/dashboard-switcher.css?v=20260911-1">
+  <link rel="stylesheet" href="overview.css?v=20260915-3">
+  <link rel="stylesheet" href="play.css?v=20260915-3">
+  <link rel="stylesheet" href="users.css?v=20260915-1">
+  <script src="users.js?v=20260915-1" defer></script>
+  <script src="/server/dashboard-switcher.js?v=20260911-1" defer></script>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark">T</span><span>TYCHE <strong>SAFETY VR</strong></span></div>
+      <nav class="top-actions" aria-label="VR 대시보드 메뉴">
+        <a class="detail-link" href="./">핵심 현황</a>
+        <a class="detail-link" href="play.html">병목 분석</a>
+        <a class="detail-link" href="users.html" aria-current="page">사용자</a>
+        <div data-dashboard-switcher></div>
+      </nav>
+    </header>
+    <main>
+      <div class="page-head play-head users-head">
+        <div>
+          <p class="eyebrow">VR TRAINING · USERS</p>
+          <h1>사용자를 찾고,<br><em>플레이 이력을 확인합니다</em></h1>
+          <p class="intro">Meta 앱 범위 사용자 ID로 검색한 뒤 각 플레이의 시나리오·모드 실행과 완료 기록을 확인합니다.</p>
+        </div>
+      </div>
+      <div class="source-line play-source"><span class="source-dot"></span><span id="sourceStatus">사용자 기록을 불러오는 중입니다.</span></div>
+      <div id="error" class="error" role="alert" hidden></div>
+      <section class="user-search" aria-label="사용자 검색">
+        <form id="searchForm">
+          <label for="metaIdSearch">Meta 앱 범위 사용자 ID</label>
+          <div class="user-search-line">
+            <input id="metaIdSearch" type="search" inputmode="numeric" pattern="[0-9]*" maxlength="64" placeholder="ID 전체 또는 앞자리 숫자" autocomplete="off">
+            <button type="submit">검색</button>
+            <button type="button" id="clearSearch" class="secondary">전체 보기</button>
+          </div>
+        </form>
+        <p>검색은 서버에 저장된 사용자 전체를 대상으로 합니다. 목록은 최근 플레이 순입니다.</p>
+      </section>
+      <div class="users-layout">
+        <section class="play-panel user-list-panel" aria-labelledby="userListTitle">
+          <div class="play-panel-head"><div><p class="section-kicker">01 · USERS</p><h2 id="userListTitle">사용자 목록</h2><p id="userCount">조회 중</p></div></div>
+          <div id="userList" class="user-list"></div>
+          <div class="pager"><button type="button" id="usersPrev">이전</button><span id="usersPage">—</span><button type="button" id="usersNext">다음</button></div>
+        </section>
+        <section class="play-panel user-history-panel" aria-labelledby="historyTitle">
+          <div class="play-panel-head"><div><p class="section-kicker">02 · PLAY HISTORY</p><h2 id="historyTitle">선택한 사용자의 플레이</h2><p id="userIdentity">사용자를 선택해 주세요.</p></div></div>
+          <div id="userFacts" class="user-facts"></div>
+          <div class="table-scroll"><table class="time-table user-history-table"><thead><tr><th>플레이 시작</th><th>앱 버전</th><th>시나리오·모드 실행</th><th>완료 기록</th><th></th></tr></thead><tbody id="historyRows"><tr><td colspan="5" class="empty-row">사용자를 선택해 주세요.</td></tr></tbody></table></div>
+          <div class="pager"><button type="button" id="historyPrev">이전</button><span id="historyPage">—</span><button type="button" id="historyNext">다음</button></div>
+          <p class="transition-note">완료 기록은 각 모드의 완료 이벤트 여부입니다. 기록이 없는 실행의 종료 이유는 이 화면에서 추정하지 않습니다.</p>
+        </section>
+      </div>
+    </main>
+  </div>
+</body>
+</html>
