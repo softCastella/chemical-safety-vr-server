@@ -30,8 +30,8 @@ function drawTrend(days) {
   }).join("");
   const labels = [...new Set(ticks)].map((index) => `<text x="${x(index)}" y="${height - 5}" text-anchor="middle">${days[index].day.slice(5)}</text>`).join("");
   const dots = days.length <= 7 ? days.map((day, index) =>
-    `<circle cx="${x(index)}" cy="${y(day.newUsers)}" r="3.5" fill="#a0e7b6"/><circle cx="${x(index)}" cy="${y(day.returningUsers)}" r="3.5" fill="#e9bb75"/>`).join("") : "";
-  target.innerHTML = `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="일별 신규 관측 및 재방문 사용자 추이"><title>일별 신규 관측 및 재방문 사용자</title>${grid}<line class="axis" x1="${left}" y1="${top + plotHeight}" x2="${width - right}" y2="${top + plotHeight}"/>${labels}<path class="plot-line line-new" d="${line("newUsers")}"/><path class="plot-line line-return" d="${line("returningUsers")}"/>${dots}</svg>`;
+    `<circle class="dot-new" cx="${x(index)}" cy="${y(day.newUsers)}" r="3.5"/><circle class="dot-return" cx="${x(index)}" cy="${y(day.returningUsers)}" r="3.5"/>`).join("") : "";
+  target.innerHTML = `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="일별 신규 사용자 및 기존 사용자 추이"><title>일별 신규 사용자 및 기존 사용자</title>${grid}<line class="axis" x1="${left}" y1="${top + plotHeight}" x2="${width - right}" y2="${top + plotHeight}"/>${labels}<path class="plot-line line-new" d="${line("newUsers")}"/><path class="plot-line line-return" d="${line("returningUsers")}"/>${dots}</svg>`;
 }
 
 function drawModes(modes) {
@@ -58,7 +58,7 @@ function render(data) {
   $("refreshButton").hidden = Boolean(data.previewCapturedAtUtc);
   drawTrend(data.daily);
   drawModes(data.modes);
-  $("trendSummary").textContent = `기간 내 첫 관측 ${formatted(data.summary.newUsers)}명 · 플레이 ${formatted(data.summary.plays)}회. 동일 사용자의 여러 날짜 재방문은 날짜마다 한 번씩 표시합니다.`;
+  $("trendSummary").textContent = `기간 내 신규 사용자 ${formatted(data.summary.newUsers)}명 · 플레이 ${formatted(data.summary.plays)}회. 기존 사용자는 첫 플레이일 이후 다른 날짜에 플레이한 사용자 ID를 날짜마다 한 번씩 표시합니다.`;
 }
 
 async function load(days) {

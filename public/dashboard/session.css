@@ -1,0 +1,68 @@
+.session-head { align-items: end; }
+.session-back {
+  display: inline-flex;
+  align-items: center;
+  min-height: 42px;
+  padding: 10px 14px;
+  border: 1px solid #cbd6e0;
+  border-radius: 8px;
+  background: #fff;
+  color: #263a51;
+  font-size: 13px;
+  font-weight: 750;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.session-back:hover { border-color: #e66c00; }
+.session-controls {
+  margin: 21px 0;
+  padding: 19px 23px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--paper);
+}
+.session-controls label, .session-run-label { display: block; margin-bottom: 8px; color: #344354; font-size: 13px; font-weight: 800; }
+.session-controls select {
+  width: min(100%, 440px);
+  min-height: 42px;
+  padding: 9px 12px;
+  border: 1px solid #cbd6e0;
+  border-radius: 7px;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+}
+.session-run-label { margin-top: 17px; }
+.session-run-tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+.session-run-tabs button {
+  padding: 10px 13px;
+  border: 1px solid #cbd6e0;
+  border-radius: 7px;
+  background: #f5f8fa;
+  color: #344354;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 750;
+  cursor: pointer;
+}
+.session-run-tabs button[aria-pressed="true"] { border-color: #1d2833; background: #1d2833; color: #fff; box-shadow: inset 0 -3px 0 var(--orange); }
+.session-scope { margin: 0 0 13px; color: var(--muted); font-size: 13px; line-height: 1.6; }
+.session-metrics { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.session-metrics .metric { min-height: 132px; }
+.session-metrics .metric strong { font-size: 26px; }
+.session-table th:not(:first-child), .session-table td:not(:first-child) { text-align: left; }
+.session-table tbody tr[data-kind="failure"] { background: #fff8f1; }
+.session-table tbody tr[data-kind="quiz"] { background: #f5f8fb; }
+.session-table tbody tr.is-focused { outline: 2px solid #e66c00; outline-offset: -2px; background: #fff1e5; }
+.session-table .time-cell { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.session-source { margin: 24px 0 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+.session-source a { color: #365c80; font-weight: 750; }
+@media (max-width: 1100px) { .session-metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 680px) {
+  .session-head { display: block; }
+  .session-back { margin-top: 17px; }
+  .session-controls { padding: 16px; }
+  .session-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .session-table { min-width: 680px; }
+}
