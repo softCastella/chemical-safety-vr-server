@@ -1097,3 +1097,5 @@ Google Search Console 소유권 확인 TXT는 Vultr DNS의 `tycheworks.com` 루�
 - DB 마이그레이션, 운영 DB·사용자 데이터, 환경 변수와 Unity 클라이언트는 변경하지 않았다. 기존
   대시보드와 Nginx 설정은 서버 저장소 밖
   `/home/linuxuser/.config/tycheworks/static-backups/vr-dashboard-before-20260915-1105`에 백업했다.
+- 공용 대시보드 문서는 클라이언트 기준본 `main@1e8e8a5`에 동기화했다. 클라이언트 런타임·씬·XR
+  설정은 변경하지 않았다.
