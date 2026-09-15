@@ -94,14 +94,14 @@ test("VR 병목 조회는 최근 세션의 계산 이벤트만 반환하고 원�
   assert.doesNotMatch(JSON.stringify(result), /private-meta-id|private-answer|attempt-1/);
 });
 
-test("사용자 조회는 Meta ID 검색을 전체 참가자에 적용하고 플레이 이력을 모드 완료 기록과 연결한다", async () => {
+test("사용자 목록은 내부 사용자 ID로 조회하고 Meta ID는 상세과 플레이 이력에만 연결한다", async () => {
   const calls = [];
   const pool = {
     async execute(sql, values) {
       calls.push({ sql, values });
       if (sql.includes("COUNT(DISTINCT participant.participant_id) AS total")) return [[{ total: 21 }]];
       if (sql.includes("ORDER BY last_play_at DESC")) return [[{
-        participant_id: 7, meta_user_id: "123456789", play_count: 2,
+        participant_id: 7, play_count: 2,
         first_play_at: "2026-09-13T00:00:00.000Z", last_play_at: "2026-09-14T00:00:00.000Z",
       }]];
       if (sql.includes("WHERE participant.participant_id = ?") && sql.includes("GROUP BY")) return [[{
@@ -120,12 +120,13 @@ test("사용자 조회는 Meta ID 검색을 전체 참가자에 적용하고 플
     },
   };
   const repository = createTrainingTelemetryRepository(pool);
-  const users = await repository.getDashboardUsers({ metaUserId: "123", page: 2 });
+  const users = await repository.getDashboardUsers({ participantId: 7, page: 2 });
   assert.equal(users.total, 21);
   assert.equal(users.moreAvailable, false);
-  assert.equal(users.users[0].metaUserId, "123456789");
-  assert.deepEqual(calls[0].values, ["123%"]);
-  assert.deepEqual(calls[1].values, ["123%", 20, 20]);
+  assert.equal(users.users[0].participantId, 7);
+  assert.equal(Object.hasOwn(users.users[0], "metaUserId"), false);
+  assert.deepEqual(calls[0].values, [7]);
+  assert.deepEqual(calls[1].values, [7, 20, 20]);
   const user = await repository.getDashboardUser({ participantId: 7, page: 1 });
   assert.equal(user.playCount, 2);
   assert.equal(user.sessions[0].runs.length, 2);
@@ -145,7 +146,7 @@ test("VR 첫 화면의 운영 집계와 정적 자산은 관리자 세션으로 
     trainingTelemetryRepository: {
       async getDashboardOverview(days) { calls.push(days); return overview; },
       async getDashboardPlay() { return { sessions: [], limit: 100, moreAvailable: false }; },
-      async getDashboardUsers({ metaUserId, page }) { return { users: [], total: 0, page, pageSize: 20, metaUserId }; },
+      async getDashboardUsers({ participantId, page }) { return { users: [], total: 0, page, pageSize: 20, participantId }; },
       async getDashboardUser({ participantId, page }) { return participantId === 7
         ? { participantId, page, metaUserId: "123456789", sessions: [] } : null; },
       async findSession(sessionId) {
@@ -187,8 +188,9 @@ test("VR 첫 화면의 운영 집계와 정적 자산은 관리자 세션으로 
     assert.equal((await fetch(`${url}/chemical-safety-training-vr/session.js`, { headers })).status, 200);
     assert.equal((await fetch(`${url}/chemical-safety-training-vr/users.html`, { headers })).status, 200);
     assert.equal((await fetch(`${url}/chemical-safety-training-vr/users.js`, { headers })).status, 200);
-    assert.equal((await fetch(`${url}/api/training-telemetry/dashboard-users?metaUserId=12&page=2`, { headers })).status, 200);
-    assert.equal((await fetch(`${url}/api/training-telemetry/dashboard-users?metaUserId=a`, { headers })).status, 400);
+    assert.equal((await fetch(`${url}/api/training-telemetry/dashboard-users?participantId=7&page=2`, { headers })).status, 200);
+    assert.equal((await fetch(`${url}/api/training-telemetry/dashboard-users?participantId=a`, { headers })).status, 400);
+    assert.equal((await fetch(`${url}/api/training-telemetry/dashboard-users?participantId=0`, { headers })).status, 400);
     assert.equal((await fetch(`${url}/api/training-telemetry/dashboard-users/7`, { headers })).status, 200);
     assert.equal((await fetch(`${url}/api/training-telemetry/dashboard-users/8`, { headers })).status, 404);
     assert.equal((await fetch(`${url}/api/training-telemetry/dashboard-overview?days=1`, { headers })).status, 400);
