@@ -34,12 +34,17 @@ function drawTrend(days) {
   target.innerHTML = `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="일별 신규 사용자 및 기존 사용자 추이"><title>일별 신규 사용자 및 기존 사용자</title>${grid}<line class="axis" x1="${left}" y1="${top + plotHeight}" x2="${width - right}" y2="${top + plotHeight}"/>${labels}<path class="plot-line line-new" d="${line("newUsers")}"/><path class="plot-line line-return" d="${line("returningUsers")}"/>${dots}</svg>`;
 }
 
+function modeBar(value, maximum, variant, label) {
+  const width = number(value) / maximum * 100;
+  return `<svg class="track" viewBox="0 0 100 8" preserveAspectRatio="none" role="img" aria-label="${label} ${formatted(value)}건, 최대 ${formatted(maximum)}건 기준"><rect class="track-background" width="100" height="8" rx="4"/><rect class="${variant}" width="${width}" height="8" rx="4"/></svg>`;
+}
+
 function drawModes(modes) {
   const maximum = Math.max(1, ...modes.flatMap((mode) => [number(mode.started), number(mode.completed)]));
   $("modeRows").innerHTML = modes.map((mode) => {
     const started = number(mode.started);
     const completed = number(mode.completed);
-    return `<div class="mode-row"><span class="name">${modeNames[mode.mode] ?? "기타"}</span><div class="bars"><div class="track" title="시작 ${started}건"><i class="started" style="width:${started / maximum * 100}%"></i></div><div class="track" title="완료 ${completed}건"><i class="completed" style="width:${completed / maximum * 100}%"></i></div></div><span class="counts">시작 <b>${formatted(started)}</b><br>완료 <b>${formatted(completed)}</b></span></div>`;
+    return `<div class="mode-row"><span class="name">${modeNames[mode.mode] ?? "기타"}</span><div class="bars">${modeBar(started, maximum, "started", "시작")}${modeBar(completed, maximum, "completed", "완료")}</div><span class="counts">시작 <b>${formatted(started)}</b><br>완료 <b>${formatted(completed)}</b></span></div>`;
   }).join("");
 }
 
