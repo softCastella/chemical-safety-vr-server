@@ -343,8 +343,11 @@ VR 사용자 데이터는 서버 상태 대시보드에 섞어 표시하지 않�
 
 ## 서버 상태 대시보드 운영 상태
 
-- 로그인 URL: `https://admin.tycheworks.com/server-status/login`
-- 상태 화면: `https://admin.tycheworks.com/server-status/`
+- 로그인 URL: `https://admin.tycheworks.com/server/login`
+- 서버 상태 화면: `https://admin.tycheworks.com/server`
+- 별빛 스도쿠 분석 화면: `https://admin.tycheworks.com/starlight-sudoku`
+- 화학 안전 VR 분석 화면: `https://admin.tycheworks.com/chemical-safety-training-vr`
+- 이전 `/server-status`, `/starlight-analytics` 화면 경로는 새 경로로 `308` 이동
 - API: `/api/server-status`
 - 세션 유효시간: 8시간
 - 세션 저장: DB, 토큰은 SHA-256 해시로 저장
@@ -371,7 +374,7 @@ VR 사용자 데이터는 서버 상태 대시보드에 섞어 표시하지 않�
   DB 이벤트 ID, 서버 이상은 메모리·디스크·서비스·부하별 고정 ID와 발생 세대로 구분한다. 확인 상태는
   관리자 계정별 DB 기록으로 저장하므로 로그아웃·재접속 뒤에도 같은 건을 다시 알리지 않는다. 서버
   이상이 정상으로 복구된 뒤 같은 원인이 재발하면 발생 세대가 증가해 새 경고로 처리한다.
-- 서버 관리자 화면의 파비콘은 `/server-status/favicon.svg?v=2` 절대 경로로 제공해 상대 경로와 기존 브라우저 캐시 영향을 줄였다.
+- 서버 관리자 화면의 파비콘은 `/server/favicon.svg?v=4` 절대 경로로 제공해 상대 경로와 기존 브라우저 캐시 영향을 줄였다.
 - Vultr Account API 연결은 운영 서버 공인 IP `158.247.238.180/32`만 허용하고, API 키는 운영 `.env`에서만 읽는다.
 
 ### 근본 원인과 영향 범위
@@ -991,7 +994,7 @@ Google Search Console 소유권 확인 TXT는 Vultr DNS의 `tycheworks.com` 루�
 - 운영 랜딩 기준은
   `production/spark-starlight-20260903@37804c1483975f59d88f91f8793ddd48b27a5a1e`이며,
   상세 페이지 버튼 없이 중앙 `지금 플레이해보세요` 버튼만 제공한다.
-- 플레이 버튼은 `https://softcastella.github.io/Starlight-Sudoku/`를 데스크톱에서 최대
+- 플레이 버튼은 `https://softcastella.github.io/Starlight-Sudoku-WebDemo/`를 데스크톱에서 최대
   `430x900` 크기의 별도 창으로 열고, 모바일에서는 새 탭으로 연다.
 - 공개 게임 기준은 `softCastella/Starlight-Sudoku@253982fd4493006150ea12d8b8192640e67e06f0`이다.
   웹 브라우저의 자동재생 제한을 준수하도록 스플래시 뒤 `BGM ON` 입력에서 타이틀 음원을
@@ -1061,3 +1064,56 @@ Google Search Console 소유권 확인 TXT는 Vultr DNS의 `tycheworks.com` 루�
   상세페이지 `200`, TLS 검증 성공을 확인했다.
 - 실제 Meta User Proof와 Quest Release 세션 적재는 아직 확인하지 않았다. code 6 생성 전에 테스트 사용자
   한 명으로 인증·세션·이벤트·완료·중복 재전송과 DB 원본을 대조한다.
+
+## 별빛 스도쿠 브랜드·상세 페이지 서버 정적 사이트 반영
+
+이 절은 **`softCastella/chemical-safety-vr-server` 저장소의 `public/site`와 운영 서버의 Nginx 정적 파일에서 수행한 작업**을 기록한다. 별빛 스도쿠 Flutter 앱·WebDemo 게임 로직과 화학 안전 VR Unity 클라이언트는 이 서버 변경의 대상이 아니다. 위 GitHub Pages 체험판 연결 문단은 당시 이력이며, 현재 공개 랜딩의 플레이 링크는 서버가 제공하는 `https://starlight-sudoku.tycheworks.com/play/`로 연결된다.
+
+### 적용 변경과 원인
+
+- 브랜드 홈 `Now on Tyche`에 별빛 스도쿠의 대표 이미지와 작품 정보를 반영하고, 해당 작품 카드에 Google Play 입점 예정 상태를 표시했다. `OUR LINES`의 SPARK 카드는 제품 상태 대신 게임 라인 자체를 소개한다. 이 작업의 선행 서버 소스 기준은 `main@4efa7f6acf39bde7c7cca8f0c36ce2b5e2079e3b`다.
+- 별빛 스도쿠 상세 페이지의 본문을 히어로 → 게임 개요 → 코어 루프 → 마을 변화 → 장소 복원 → 실제 게임플레이 → 프로젝트 정보 → 마지막 배너 순서로 정리했다. 제목의 의미 단위 줄바꿈과 섹션별 좌측 라벨·우측 제목 배치를 통일하고, 프로젝트 정보 표를 최대 820px로 중앙에 놓았다. 프로젝트 정보에는 한국어·영어·일본어·중국어 간체·번체 지원을 명시했다.
+- 실제 플레이 화면 `game.png`를 상세 페이지에 사용하고, 게임플레이 설명을 다섯 언어의 네 단계로 구체화했다. 기존 문구는 숫자 입력만 강조해 스도쿠의 핵심인 **가로줄·세로줄·3×3 구역마다 1~9가 중복되지 않아야 한다는 규칙**을 설명하지 못했다. 새 문구는 빈 칸의 기존 숫자 확인, 겹치지 않는 숫자 입력, 메모·삭제·실행 취소·힌트, 보드 완료와 별빛 획득을 순서대로 안내한다. 이는 서버 공개 페이지의 설명 변경이며 게임 규칙을 구현하는 클라이언트 코드는 수정하지 않았다.
+- 공용 SPARK 스타일의 흰색 2단 네비게이션이 상세 페이지의 별밤 배경과 단절되어 보였다. 상세 페이지에만 남색 헤더, 밝은 로고·메뉴, 별빛색 언어 선택을 적용하고 목차 이동 시 고정 헤더가 제목을 가리지 않도록 했다. 네비 아래 히어로 카드까지의 상단 패딩은 데스크톱 `70px → 35px`, 모바일 `82px → 41px`로 줄였다.
+
+### 운영 영향과 완료 검증
+
+- 운영 상세 주소는 `https://spark.tycheworks.com/starlight-sudoku/`다. Nginx가 제공하는 `index.html`, `detail.css`, `i18n.js`, `game.png` 네 파일만 교체했다. 참조되지 않는 로컬 `game.jpg`, 랜딩·WebDemo 파일, API, DB, PM2, Nginx 설정은 이번 상세 페이지 배포에서 변경하지 않았다.
+- 교체 전 네 파일은 운영 저장소 밖의 `/home/linuxuser/.config/tycheworks/static-backups/starlight-sudoku-20260913150448-ci3yij/previous`에 보관했다. 운영 체크아웃은 당시 `aad625a84e6d066c622c0ddde3bc9d84a794e9de`였으며, 자동 Git 갱신 대신 대상 정적 파일만 교체했다.
+- 로컬 `npm test` 115개와 `git diff --check`가 통과했다. 공개 URL의 HTML·CSS·JavaScript·게임 화면 이미지가 HTTP `200`으로 응답하고 각 SHA-256이 배포 후보와 일치했다. 운영 브라우저에서 히어로 이미지의 디코딩, 데스크톱·390px 모바일 배치, 한국어·영어·일본어·중국어 간체·번체의 네 단계 문구를 확인했다. 390px 모바일에서 가로 넘침은 관찰되지 않았다.
+
+실제 iOS Safari와 Android 기기의 글꼴·터치·스크롤은 별도 수동 확인 대상으로 남는다. 이 정적 배포 검증은 Flutter 앱의 실제 플레이 동작이나 스토어 입점 검증을 대신하지 않는다.
+## 2026-09-15 화학물질 안전교육 VR 대시보드 운영 배포
+
+- 운영 런타임 기준은
+  `production/vr-dashboard-20260915@a76f99fd6f42e5563fff3167bd0b372a3e908813`이다.
+- 기존 운영 기준 `main@aad625a84e6d066c622c0ddde3bc9d84a794e9de`에서 대시보드 관련 커밋만
+  선별했다. 운영 작업 트리에 있던 `public/site/**`의 별빛 스도쿠 미커밋 변경은 배포 경로와 겹치지
+  않음을 확인하고 그대로 보존했다.
+- `https://admin.tycheworks.com/chemical-safety-training-vr/` 아래에 핵심 현황, 병목 분석, 사용자
+  목록과 플레이 상세 화면을 배포했다. 화면 명칭은 `화학물질 안전교육 VR 대시보드`로 통일했다.
+- 사용자 목록과 검색은 숫자 `participantId`를 사용자 ID로 사용한다. Meta 앱 범위 ID는 목록 응답에
+  포함하지 않고 선택한 사용자의 상세 조회에서만 표시한다.
+- 운영 DB를 읽기 전용으로 조회해 사용자 3명(내부 ID 3, 2, 1), 최신 앱 버전 `1.0.0`의 플레이
+  세션 8건을 확인했다. 이는 목업이 아니라 운영 텔레메트리 DB 조회 결과다.
+- Nginx에 `/api/training-telemetry/dashboard-` 관리자 API 프록시를 추가하고 설정 검사 후 reload했다.
+  Express 변경 반영을 위해 PM2의 `tyche-safety-training-server`를 재시작했으며 새 PID에서 `online`,
+  내부 health HTTP `200`을 확인했다. 미인증 대시보드 API는 HTTP `401`, 대시보드 경로는 로그인으로
+  HTTP `302` 이동한다.
+- 깨끗한 배포 브랜치에서 자동 테스트 112개를 모두 통과했고 운영 서버에서 VR 관련 집중 테스트
+  14개를 모두 통과했다. 운영 전체 테스트는 기존 별빛 스도쿠 미커밋 화면과 테스트 기대값이 다른
+  5건 때문에 107/112 통과했으며, 이 5건은 VR 배포 파일과 무관하다.
+- `npm audit --audit-level=high`는 기존 PM2 7 계열이 의존하는 `js-yaml` 경고 2건을 보고했다.
+  제시된 자동 수정은 PM2 5.3.1로의 주요 버전 변경이므로 이번 대시보드 배포에서 실행하지 않았다.
+- 운영 관리자 로그인 후 실제 브라우저에서 핵심 현황, 병목 분석, 사용자 목록과 플레이 상세의 렌더링을
+  확인했다. 최근 7일 핵심 현황은 사용자 ID 3개·신규 사용자 2명·플레이 16회·모드 완료 4회를 표시했고,
+  병목 분석은 앱 `1.0.0`의 8개 세션에서 조건별 기준시간·단계·PPE·문항 기록을 표시했다.
+- 사용자 목록에는 내부 ID 3·2·1만 표시됐다. 내부 ID 2를 선택하면 Meta 앱 범위 ID가 상세에만 나타나고
+  플레이 2회가 표시됐으며, 플레이 링크에서 단일 실행의 타임라인·단계·PPE 기록으로 이동했다.
+- 데스크톱 브라우저의 운영 실화면 검증은 완료했다. 모바일 실제 브라우저 레이아웃과 배포 후 새 HMD
+  플레이의 인증·업로드·조회 연결은 별도 후속 검증이다.
+- DB 마이그레이션, 운영 DB·사용자 데이터, 환경 변수와 Unity 클라이언트는 변경하지 않았다. 기존
+  대시보드와 Nginx 설정은 서버 저장소 밖
+  `/home/linuxuser/.config/tycheworks/static-backups/vr-dashboard-before-20260915-1105`에 백업했다.
+- 공용 대시보드 문서는 클라이언트 기준본 `main@1e8e8a5`에 동기화했다. 클라이언트 런타임·씬·XR
+  설정은 변경하지 않았다.

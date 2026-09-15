@@ -993,3 +993,674 @@ Quest APK 한 세션의 용량이나 운영 사용량으로 확대하지 않는�
   확인했다.
 - 이는 운영 수신 준비 완료 근거다. 실제 Meta proof 성공, Quest JSONL 업로드와 DB 원본 일치는 code 6
   이전의 실제 기기 통합 검증으로 남긴다.
+
+## 2026-09-10 code 6 Release APK 생성과 정적 제출 검증
+
+### 적용 결과
+
+- 클라이언트 `main@eba9e1a8d46d964ab4d31f4b07081b28fa861ed7`에서 개인 Keystore를 로컬
+  `PlayerSettings`에 지정하고 `MetaQuestAlphaBuild.BuildRelease`로 code 6 Release APK를 생성했다.
+- 출력 파일은 `Builds/MetaHorizonAlpha/ChemicalSafetyVR_Alpha_0_1_0_6.apk`, 파일 크기는
+  `219,710,171 bytes`, SHA-256은
+  `F092AA929888C713B738806E4624EA0AEB62CB0E7D8CC05289D253C1640AC4AF`다.
+- Keystore 경로와 비밀번호는 개인 로컬 설정으로만 사용하며 Git·문서·APK 검증 출력에 비밀값을 기록하지
+  않는다.
+
+### 완료한 검증
+
+- Unity BuildReport는 `[Meta Quest Alpha Build] PASS`를 기록했고 빌드 종료 뒤 Editor가 정상 상태로
+  복귀했다.
+- Android `aapt2`에서 package `com.tycheworks.immersa.safetyvr`, `versionCode=6`,
+  `versionName=0.1.0`, `minSdkVersion=25`, `targetSdkVersion=34`, `install-location=auto`,
+  `android.hardware.vr.headtracking required=true`, Meta VR category와 `arm64-v8a`를 확인했다.
+- `apksigner`에서 APK Signature Scheme v2와 기존 출시 인증서 서명을 확인했다. Manifest에는
+  `android:debuggable`이 없고 `usesCleartextTraffic=false`다.
+- APK에는 `libil2cpp.so`, `libUnityOpenXR.so`, `libUnityOpenXRHands.so`, `libopenxr_loader.so`를 포함한
+  ARM64 네이티브 라이브러리가 있다.
+- `node Tools/MetaAlphaSubmissionGateHarness.mjs`는 code 6 Release·code 5 Development APK, 기준 DB
+  migration 16개, 초기 수집량 `session 0 / event 0`, 로컬 기준 서버 HTTP 상태를 확인하고 `READY`를
+  반환했다.
+
+### 완료 상태와 다음 순서
+
+- **완료:** Release 인증·전송 코드, 서버 운영 반영, code 6 APK 빌드, 서명·Manifest·ABI 정적 검증과
+  제출 하네스 `READY`.
+- **미검증:** 실제 Meta 테스트 사용자의 User Proof 왕복, Alpha 채널 설치, Quest 단독 실행, 양안·입력·
+  오디오·시각 회귀, 같은 세션의 Quest JSONL과 운영 MySQL 원본 일치.
+- 다음 사용자 단계는 검증된 code 6 APK를 Meta Alpha 채널에 업로드하고 Quest에 채널 설치하는 것이다.
+  그 뒤 한 번의 짧은 Release 회차로 인증·원본·서버 적재를 대조한다. 업로드 완료를 Quest 통합 성공으로
+  합쳐 쓰지 않는다.
+
+## 2026-09-10 작업 종료 기준: Meta Alpha 업로드 이후
+
+### 현재 확인 상태
+
+- 사용자는 Meta 업로드 화면에서 code 6 APK의 처리 완료를 확인했다. 이 기록은 사용자의 Dashboard 화면
+  확인을 근거로 하며, Codex가 Meta API나 채널 상세 화면에서 독립 조회한 결과는 아니다.
+- 업로드 대상은 정적 검증을 통과한
+  `Builds/MetaHorizonAlpha/ChemicalSafetyVR_Alpha_0_1_0_6.apk`다. 업로드 시 연령대는 앱의 실제 대상에
+  맞춰 `Teens and Adults (13+)`를 선택했다.
+- Meta 목록용 512×512 불투명 PNG 아이콘은
+  `Builds/MetaHorizonAlpha/SubmissionAssets/Meta_Horizon_Icon_512.png`로 준비했다. APK Android 아이콘과
+  Meta App Metadata의 Store/Library 아이콘은 별도 자산이므로, 아이콘 준비를 App Metadata 저장이나
+  Quest 라이브러리 반영 완료로 합쳐 쓰지 않는다.
+
+### 다음 통합 검증 순서
+
+1. Meta Dashboard에서 업로드된 빌드의 `versionCode=6`과 대상 채널 `ALPHA`, 테스트 사용자 할당을 확인한다.
+2. Quest에서 기존 앱을 완전히 종료하고 Alpha 채널의 code 6을 설치한 뒤 단독 실행한다.
+3. 타이틀·파트너 로고, 로딩 12초 연출, PPE 모달, 정상 장화·안전모 최초 Grab 음성, 입력, 양안·주변 시야와
+   프레임 안정성을 확인한다.
+4. 짧은 Release 회차 한 번을 완료하고 Quest 원본 JSONL의 `sessionId`, 이벤트 수와 마지막 `sequence`를
+   확보한다.
+5. Codex가 같은 회차의 Meta proof 인증, 단기 token, 운영 MySQL 세션·이벤트·완료·재조회와 중복 전송
+   결과를 대조한다.
+6. 위 결과가 모두 일치할 때만 `Release 통합 검증 완료`로 상태를 올린다. App Metadata 작성, 정식 Store
+   심사 제출과 대시보드 KPI 확정은 별도 후속 단계다.
+
+## 2026-09-10 기준 데이터 비공개 Git 원격 보존
+
+### 보존 결정
+
+- 2026-09-08 Unity Editor + Quest Link에서 채택한 6개 시나리오·모드 JSONL 기준본은 기존에
+  `.baseline-preservation/editor-link-20260908/`의 로컬 단일 사본으로만 보존돼 있었다.
+- 사용자는 해당 기준 데이터가 본인 수행 데이터임을 확인하고 PC 장애와 앱 삭제에 대비해 비공개
+  `softCastella/chemical-safety-vr-client` 저장소에 원본 그대로 보존하도록 승인했다.
+- 대상은 `B20260908-01`부터 `B20260908-06`까지의 기존 6개 JSONL만이며, 다른 로컬 세션과 Quest 앱
+  데이터는 이번 보존 범위에 포함하지 않는다.
+
+### 개인정보·무결성 확인
+
+- 대상 원본에는 `metaAppScopedUserId`가 포함돼 있다. 인증 token, Meta User Proof, password, secret,
+  email 필드는 없음을 값 출력 없이 필드명 기준으로 확인했다.
+- GitHub 저장소의 가시성은 `PRIVATE`로 확인했다. 저장소를 공개로 전환하거나 원본을 다른 위치에
+  재배포할 때는 개인정보 포함 여부를 다시 검토한다.
+- 6개 파일의 SHA-256은 이 문서의 `2026-09-08 Unity Editor + Quest Link 6개 조합 기준 데이터 채택`
+  절에 기록된 값과 모두 일치한다.
+- `.gitattributes`에서 대상 JSONL을 `-text`로 지정해 `core.autocrlf`에 의한 줄바꿈 변환 없이 원본
+  바이트를 보존한다.
+
+### 검증 경계
+
+- 이 원격 보존은 Quest의 code 5 앱을 삭제해도 채택한 6개 기준 원본을 복구할 수 있게 하는 조치다.
+- 원격 Git 보존 완료를 기준 DB 반영, 운영 MySQL 대조 또는 code 6 Release 통합 검증 완료로 합쳐 쓰지
+  않는다.
+
+## 2026-09-10 Quest code 6 실제 연동과 앱 내부 종료 후속
+
+### 기준 저장소와 실제 통합 결과
+
+- 클라이언트 변경 전 기준은 `main@be7709bca652cbeb4b20babb00ccd314edd8c475`, 서버 확인 기준은
+  `main@bb7595b6ea0e1c387262d10e7d3312bec746d91f`다. 서버는 `main...origin/main`으로 동기화돼 있었다.
+- Quest Alpha code 6의 실제 Meta 인증이 성공했고 운영 DB 참여자 identity type은 `meta`로 확인했다.
+- `LeakResponse/Training` 세션 `5df09877…`은 `mode_session_completed`를 포함해 이벤트 165개,
+  `sequence 1~165`, `session_ended/application_quitting`으로 운영 MySQL에 저장됐다. 마지막 종료 데이터는
+  종료 순간이 아니라 다음 앱 실행의 durable recovery에서 전송됐다.
+- Quest 원본 JSONL을 ADB로 직접 추출해 파일 단위로 대조하지는 않았다. 위 결과는 운영 DB의 연속 sequence,
+  이벤트 종류와 서버 세션 상태를 근거로 한다.
+
+### 앱 내부 종료 재현과 클라이언트 수정
+
+- 사용자가 앱 내부 `종료하기`를 눌러 Quest 라이브러리로 복귀한 최신 세션 `0cb9366f…`은 서버에서
+  `eventCount=135`, `lastSequence=135`, `endedAt/endReason=null`, `status=open`으로 남았다. 마지막 수신은
+  `voice_playback_ended`였고 `application_paused`와 `session_ended`는 도착하지 않았다.
+- 원인은 `QuitApplicationButton`이 서버 업로드 완료를 기다리지 않고 즉시 `Application.Quit()`을 호출한
+  것이다. 클라이언트는 종료 이벤트를 먼저 한 번만 기록하고 현재 세션의 이벤트와 `/complete` ACK를 최대
+  5초 기다린 뒤 앱을 종료하도록 변경했다. timeout 때는 기존 durable recovery를 유지한다.
+- 서버 API·DB 계약과 배포 코드는 변경하지 않았다. code 7 Quest 실제 종료 검증 전까지 정적·Editor 검증
+  완료와 Release 통합 완료를 구분한다.
+
+### 연속 시나리오·모드 분리 계약
+
+- 한 앱 `sessionId` 안에서 사용자가 복귀 후 다른 시나리오 또는 Education·Training·Test를 연속 선택하는
+  동작은 허용한다.
+- 각 실행은 새 GUID `modeSessionId`로 시작하고 `mode`, `workPlan`, PPE·퀴즈·완료 이벤트를 그 ID에
+  연결한다. 복귀 시 모드 추적 상태를 초기화하되 앱 전체 세션은 닫지 않는다.
+- `PPETrainingDataContractHarness`에 종료 ACK 순서, 종료 이벤트 중복 방지, 새 `modeSessionId` 생성과 복귀
+  초기화 검사를 추가했고 Unity Editor에서 PASS를 확인했다. 실제 Quest 검증은 code 7 Alpha 설치 후
+  `앱 내부 종료 직후 서버 completed`와 `연속 실행의 서로 다른 modeSessionId`를 각각 확인해야 한다.
+
+### code 7 Release APK 생성 결과
+
+- 클라이언트 종료·연속 실행 분리 변경은 `main@d16c0b31d536fbb05777c06e8a927dc899141442`로 GitHub에
+  푸시됐다. Android `versionCode`를 7로 올리고 서명 준비 상태를 확인한 뒤 Release APK를 생성했다.
+- 출력은 `Builds/MetaHorizonAlpha/ChemicalSafetyVR_Alpha_0_1_0_7.apk`, 파일 크기는
+  `219,634,992 bytes`, SHA-256은
+  `A1F500B135304F81033CC738CCDADC63C6170A15CB06A2DCB687E4E7C15D7B9A`다.
+- Unity BuildReport `Success`, package `com.tycheworks.immersa.safetyvr`, `versionCode=7`, Android 25/34,
+  ARM64/OpenXR, Quest VR category, 필수 head tracking, `usesCleartextTraffic=false`, `android:debuggable`
+  부재와 기존 출시 인증서의 APK Signature Scheme v2 서명을 확인했다.
+- `MetaAlphaSubmissionGateHarness`는 code 7 APK와 기준 DB migration 16개를 확인했지만, 실행 시점에 로컬
+  Express TCP 3000이 닫혀 있어 `WAIT`였다. 이는 APK 정적 검증 실패가 아니며 Alpha 업로드·Quest 실제 종료
+  및 연속 회차 분리 검증은 아직 수행하지 않았다.
+
+### code 7 Alpha 업로드와 집 후속작업 인수인계
+
+- 사용자는 Meta Dashboard에서 code 7 Alpha 업로드 완료를 확인했다. Codex가 Meta API 또는 채널 상세에서
+  독립 조회한 결과는 아니므로 Quest 라이브러리의 설치 버전 확인 전까지 배포·설치 완료로 합쳐 쓰지 않는다.
+- 용량 확보 요청에 따라 `Builds/MetaHorizonAlpha` 아래 APK 7개, 총 `2,027,034,856 bytes`를 삭제했고 남은
+  APK는 0개다. code 7도 로컬에서 삭제됐으며 Meta Alpha 재설치 또는 같은 출시 Keystore 재빌드로만 다시
+  확보할 수 있다. Git의 소스·기준 JSONL·문서와 서버 데이터는 삭제하지 않았다.
+- 클라이언트는 `main@e06af5846ad0fba66d1da6fa899550560c0047db`, 서버 문서 미러는
+  `main@eebdd673532aa3e1b380992da31a27c610460b8b`에서 원격과 동기화된 상태를 기준으로 인수인계한다.
+- 클라이언트 작업 트리에는 사용자가 작업 중인 `Assets/Scenes/1_Title.unity`,
+  `Assets/Scenes/3_PPE_Room_3mode_loco_cam.unity`, `ProjectSettings/ProjectSettings.asset`의 preloaded asset
+  변경과 미추적 PPT가 남아 있다. `Assets/Settings/Mobile_RPAsset.asset`은 상태가 수정으로 보이지만
+  `git diff` 내용은 없으므로 다음 세션에서 재확인하고 임의 커밋하지 않는다.
+- 현재 브랜치는 클라이언트·서버 모두 `main`이며 별도 작업 브랜치가 없어 추가 병합 대상은 없다. 관련
+  한국어 커밋을 각 `origin/main`에 직접 푸시하는 것이 이번 병합 완료 기준이다.
+
+집에서 재개할 때는 다음 순서로 검증한다.
+
+1. Quest 라이브러리에서 Alpha code 7을 설치하고 표시 버전 또는 ADB package versionCode가 7인지 확인한다.
+2. 한 모드를 시작한 뒤 앱 내부 `종료하기`를 누른다. 라이브러리 복귀 후 ADB `pidof`에서 앱 PID가 없는지
+   확인한다.
+3. 앱을 다시 실행하기 전에 운영 서버의 같은 `sessionId`가 `completed`,
+   `endReason=application_quitting`이며 마지막 sequence까지 수신됐는지 확인한다.
+4. 앱을 한 번 실행한 상태에서 서로 다른 시나리오·모드 두 회차를 연속 완료한다. 같은 앱 `sessionId`
+   아래 서로 다른 `modeSessionId` 두 개와 각 1개의 `mode_session_completed`를 확인한다.
+5. 강제 종료·충돌·전원 차단은 종료 이벤트를 보장할 수 없다. 마지막 이벤트 뒤 장기 `open`인 세션을
+   비정상 종료로 추정하되 원인을 충돌·전원 종료로 확정하지 않는다. heartbeat 기반 세부 판정은 후속이다.
+6. 로컬 APK가 의도적으로 없으므로 `MetaAlphaSubmissionGateHarness`의 APK 없음 `WAIT`는 예상 결과다.
+   실제 Quest·서버 검증을 통과한 뒤 대시보드 상세 조회와 입점 신청 자료 후속으로 이동한다.
+
+## 2026-09-10 Android Release 서명정보의 로컬 분리
+
+### 이번 변경이 대응하는 사용자 요청과 보존 범위
+
+- 여러 PC가 서로 다른 절대 Keystore 경로를 `ProjectSettings/ProjectSettings.asset`에 저장해 Git pull이
+  반복 차단되는 문제를 제거한다.
+- Android build code, 앱 식별자, OpenXR, 빌드 씬과 기존 `MetaQuestAlphaBuild`의 Release APK 출력 규칙은
+  보존한다. UI·입력·텔레포트·PPE·음성·텔레메트리 런타임은 변경하지 않는다.
+- 상태 소유자는 Editor 전용 `MetaQuestSigningConfiguration`과 `MetaQuestAlphaBuild`다. 필수 로컬 값이
+  없으면 경로나 비밀번호를 추정하거나 자동 생성하지 않고, 누락된 환경변수 이름을 포함한 오류로 빌드를
+  중단한다.
+
+### 적용과 근본 원인
+
+- 근본 원인은 Git이 추적하는 `ProjectSettings.asset`에 사용자별 절대 경로와 Alias가 저장돼 있던 것이다.
+  추적 설정에서는 `AndroidKeystoreName`, `AndroidKeyaliasName`을 비우고 `androidUseCustomKeystore`를
+  비활성화했다.
+- 각 PC는 저장소 루트의 `.meta-quest-signing.example`을 `.meta-quest-signing.local`로 복사해 경로,
+  Alias와 두 비밀번호를 한 번 설정한다. `.meta-quest-signing.local`은 `.gitignore` 대상이며 비밀값을
+  Git·문서·로그에 출력하지 않는다. 같은 이름의 프로세스 환경변수가 있으면 로컬 파일보다 우선한다.
+- `Tools > XR > Build Meta Quest Alpha Release`는 빌드 범위에서만 로컬 값을 `PlayerSettings.Android`에
+  주입하고 성공·실패와 관계없이 이전 값을 `finally`에서 복원한다. 따라서 Unity 종료나 Git pull 전에
+  PC별 경로를 `ProjectSettings.asset`에 다시 저장할 필요가 없다.
+
+### 검증과 남은 수동 확인
+
+- `Tools > XR > Validate Meta Quest Signing Isolation`은 추적 설정에 PC별 서명값이 없는지와 로컬 파일의
+  Git 제외·예제 파일 계약을 검사한다. `Validate Local Meta Quest Signing`은 로컬 네 값과 Keystore 파일
+  존재를 검사하되 비밀값을 출력하지 않는다.
+- Unity `6000.4.8f1` 배치 실행에서 새 Editor 코드 컴파일과
+  `Validate Meta Quest Signing Isolation`, `DocumentationPolicyHarness.Validate`가 종료 코드 `0`으로
+  통과했다. `git diff --check`와 공용 문서의 양쪽 SHA-256 일치도 확인했다.
+- 이 PC의 `.meta-quest-signing.local`에는 기존 Keystore 경로와 Alias만 옮겼고 알 수 없는 두 비밀번호는
+  비워 두었다. 사용자가 두 값을 한 번 입력한 뒤 `Validate Local Meta Quest Signing`과 실제 Release APK
+  빌드, 인증서 지문을 별도로 확인해야 한다. 현재 결과를 서명·Meta 업로드 성공으로 확대하지 않는다.
+- 서버 API·DB·인증·텔레메트리 계약은 변경하지 않았다. 이 항목의 서버 저장소 반영은 공용 문서 미러
+  동기화뿐이며 서버 코드 반영이나 클라이언트·서버 통합 검증 완료를 뜻하지 않는다.
+
+## 2026-09-10 code 7 Quest 종료 검증과 재전송 계약 보강
+
+### 저장소·배포 기준
+
+- 검증 시작 기준은 클라이언트 `main@5c1204539f98e398536982043676787462df4e37`, 서버
+  `main@1d9b9fa0a146b4a15925470182ec7a7f2ceff462`다.
+- 운영 서버 checkout은 확인 시점에 `e3dc59b24acd6eba12724955e7dc395baa32d898`였다. 아래 서버 수정은
+  `main@0ef1619c70d1fbfa9d448463da3d0244ad9724ab`로 GitHub에 반영했지만 아직 운영에 배포하지
+  않았으므로 `서버 코드 수정`, `운영 반영`, `통합 검증`을 구분한다.
+
+### code 7 실제 확인
+
+- Quest 2 설치본은 package `com.tycheworks.immersa.safetyvr`, `versionCode=7`, Meta 설치 관리자
+  `com.oculus.ocms`이며 non-debuggable Release 앱으로 확인했다.
+- Meta 식별은 두 실행 모두 완료됐고 동일한 앱 범위 사용자와 연령대가 수집됐다. 개인 식별값 자체는
+  문서에 기록하지 않는다.
+- 앱 내부 종료 검증 세션 `bb539742…`과 `31bddadc…`은 각각 운영 DB에서 `completed`,
+  `endReason=application_quitting`, 연속 sequence로 확인됐다. 두 번째 세션은 종료 버튼이 서버 완료 ACK를
+  확인한 로그와 Quest의 `completed=true` 업로드 상태까지 일치했다.
+- 두 세션에는 정상 모드 완료가 없어 `modeSessionId`와 `mode_session_completed`가 없었다. 같은 HMD의
+  두 번째 실행이라는 사실만으로 기존 사용자로 바꾸지 않으며, 정상 모드 완료 뒤 로컬 완료 기록이 생겨야
+  `Welcome_Old`를 선택하는 현재 계약과 일치한다.
+
+### 완료 세션 재전송 결함과 수정
+
+- Meta 설치 복원으로 과거 JSONL은 남았지만 ACK 메타데이터가 없거나 뒤처질 수 있다. 운영 DB에서 이미
+  완료된 가장 오래된 세션의 이벤트 재전송이 `409`가 되면 클라이언트 큐가 그 파일에서 중단돼 최신
+  세션 전송도 막혔다.
+- 실제 Quest 검증에서는 원본 JSONL을 먼저 백업하고 운영 DB의 완료 상태와 이벤트 수가 일치한 과거
+  세션의 로컬 ACK만 복구해 새 세션 전송을 재개했다. 서버 데이터와 JSONL 원본은 수정하지 않았다.
+- 서버 저장소는 완료 세션에도 ID·sequence·payload hash가 모두 같은 기존 이벤트만 `duplicate`로
+  응답하고, 새 이벤트나 다른 데이터는 계속 `409 CONFLICT`로 거부하도록 실제·인메모리 저장소를
+  보강했다. API 테스트는 완료 뒤 동일 이벤트 재전송과 새 이벤트 거부를 함께 검사하며 `npm test`
+  93개가 모두 PASS했다.
+- 운영 배포와 수정 서버 기준의 자동 복구 재검증은 아직 하지 않았다. 배포 승인 뒤 ACK 수동 보정 없이
+  대기 큐가 진행되는지 확인해야 한다.
+
+### 다음 순서
+
+1. 사용자 승인 뒤 서버 `main@0ef1619c70d1fbfa9d448463da3d0244ad9724ab`를 운영에 배포하고 완료
+   세션 중복 재전송이 200으로 응답하는지 확인한다.
+2. 한 앱 실행에서 서로 다른 모드 두 회차를 완료해 별도 `modeSessionId`와 각 1개의
+   `mode_session_completed`를 확인한다.
+3. 정상 완료 후 재실행에서 동일 Meta 사용자의 `Returning` 및 `Welcome_Old`를 확인한다.
+
+## 2026-09-10 Codex Desktop 중단 대비 최종 인수인계
+
+### Git과 실행 상태
+
+- 클라이언트 기능·서명 분리 기준은 `main@5c1204539f98e398536982043676787462df4e37`, code 7 실제 검증
+  문서 반영은 `main@4e51c8b1b95d75aa2a0c4d2306358fe22726d4b2`이며 모두 `origin/main`에
+  푸시됐다.
+- 서버 재전송 수정은 `main@0ef1619c70d1fbfa9d448463da3d0244ad9724ab`, 공용 문서 미러는
+  `main@ab2c5147767085a679af07411fa88cb10eeb1ac0`이며 모두 `origin/main`에 푸시됐다.
+- 서버 작업 트리는 깨끗하다. 클라이언트 작업 트리에는 사용자 소유 XR Simulation `.meta` 변경 2개와
+  미추적 `Assets/XR/Temp`, `Assets/_Recovery`가 남아 있으며 이번 작업에서 수정·삭제·커밋하지 않았다.
+- Quest 2 기기 `1WMHHA65BK2493`는 ADB에서 `device`로 인식되고 앱 프로세스는 종료된 상태다.
+
+### 복구 자료와 주의점
+
+- Quest에서 추출한 code 7 원본 JSONL 백업은 Git 제외 경로
+  `.codex-tmp/quest-code7-telemetry-20260910`에 있다. 운영 DB와 정확히 대조한 과거 세션 ACK 복구 파일은
+  `.codex-tmp/quest-code7-state-repair`에 있으며 두 폴더 모두 원격 Git 보존 대상이 아니다.
+- ACK 수동 복구는 운영 DB에서 같은 세션 ID, 이벤트 수, 연속 sequence와 `completed`를 확인한 세션에만
+  적용했다. 다음 세션에서 근거 없이 다른 ACK를 생성하거나 JSONL 원본을 편집하지 않는다.
+- 운영 서버 checkout 확인 기준은 `e3dc59b24acd6eba12724955e7dc395baa32d898`다. GitHub의 서버 수정
+  `0ef1619…`은 아직 운영에 배포하지 않았고 PM2 재시작·DB migration·운영 데이터 변경도 수행하지 않았다.
+- 서버 수정은 migration 없이 애플리케이션 저장소 로직만 바꾼다. `npm test` 93개 PASS는 로컬 자동
+  검증이며 운영 재전송 성공을 뜻하지 않는다.
+
+### 재개 시 단일 다음 작업
+
+사용자에게 운영 배포 승인을 먼저 확인한다. 승인받으면 서버 `0ef1619…`을 운영에 반영한 뒤, 이미 완료된
+세션의 정확히 같은 이벤트 재전송은 `200`과 `duplicates`로 응답하고 새 이벤트는 계속 `409`인지 확인한다.
+그 결과가 PASS인 뒤에만 Quest에서 연속 모드 두 회차와 정상 완료 후 `Welcome_Old`를 검증한다.
+
+## 2026-09-11 Build 8 Alpha 배포와 중도 퇴장 확인
+
+### 오늘 적용한 변경
+
+- 로딩 씬의 `progressFillDuration`을 8초로 조정했다.
+- Android 앱 버전을 정식 릴리즈 표기 `1.0.0`, `versionCode=8`로 맞춰 Build 8을 생성했다.
+- 이전 APK와 동일하게 Unity Player Settings의 Custom Keystore, alias, 비밀번호를 직접 사용하는 방식으로
+  되돌렸다. 별도 `.meta-quest-signing.local` 주입과 ProjectSettings 격리 검증은 제거했다.
+- 현재 씬 구조에 존재하지 않는 `PartnerLogos` 블록을 강제하던 Scene Dependency 검증을 제거하고,
+  로딩 시간 검증 기준을 8초로 갱신했다.
+
+### 실행 및 배포 확인
+
+- Build 8 APK가 Meta Horizon Alpha 채널에 업로드됐고, 처리 완료 후 Quest에서 자동 업데이트됐다.
+- Quest에서 앱 실행과 중도 퇴장·`종료하기` 흐름을 수행했으며, 종료 후 Quest 라이브러리로 복귀하는 동작을
+  확인했다.
+- Unity AI Assistant의 `generators.ai.unity.com` 접속 오류 로그는 프로젝트 컴파일 오류가 아닌 별도 서비스
+  로그로 분류했다.
+
+### 후속 작업
+
+1. 운영 조회용 토큰을 서버 환경에 설정한 뒤, 이번 Build 8 세션의 `sessionId`와 `EXIT Point 중도 중단`,
+   종료 이벤트 및 서버 `completed` 상태를 운영 조회 API에서 대조한다.
+2. `종료하기`에 의한 `application_quitting`과 `EXIT Point 중도 중단` 이벤트를 서로 구분해 결과를 기록한다.
+3. 정상 모드 완료 1회와 동일 앱 실행 중 다른 모드 1회를 추가로 수행해 별도 `modeSessionId`와
+   `mode_session_completed`가 생성되는지 확인한다.
+4. 이번 변경으로 제거한 `PartnerLogos` 검증이 실제 제품 요구사항과 일치하는지 다음 씬 정리 작업에서
+   재검토한다. 현재 확인은 Build 8 배포·실행 수준이며 양안 렌더링과 전체 교육 회귀 검증은 미완료다.
+
+## 2026-09-11 학원 Quest 2 Build 8 연속 실행·종료 통합 검증
+
+### 실행 기준
+
+- 클라이언트 저장소는 `main@dbb2e8f7d9babaa0f039812bdcf679b6163c19c6`, 서버 저장소와 운영 checkout은
+  `main@094524ec1db797a7c8c497086a868a7b0f4fb19e`을 기준으로 확인했다. 서버 checkout은
+  `0ef1619c70d1fbfa9d448463da3d0244ad9724ab`의 완료 세션 중복 재전송 수정도 포함한다.
+- 학원 Quest 2의 설치본은 Meta 설치 관리자 `com.oculus.ocms`를 통한 package
+  `com.tycheworks.immersa.safetyvr`, `versionCode=8`, `versionName=1.0.0`이다.
+- 이번 원본 앱 세션은 `0ec97178…`이며 개인 Meta ID 원문은 문서에 기록하지 않는다.
+
+### EXIT Point와 연속 모드 결과
+
+- 첫 `Education/LeakResponse` 회차 `4a221555…`는 `mode_session_started` 뒤 EXIT Point로 복귀했다.
+  동일 `modeSessionId`의 `mode_session_completed`는 없고, 앱의 `session_ended/application_quitting`도
+  기록되지 않았다. 따라서 정상 완료나 앱 종료로 오기록되지 않았음을 확인했다.
+- 현재 JSONL에는 EXIT Point 전용 이벤트가 없다. 중도 복귀는 `PpeArea → PpeEducationSelected` 상태 전이와
+  해당 `modeSessionId`의 완료 이벤트 부재로만 확인된다. 이 근거만으로 대시보드에서 중도 퇴장 원인을
+  확정하지 않는다.
+- 같은 앱 실행에서 `Training/LeakResponse` 회차 `ca2ae94dd…`와 `Test/LeakResponse` 회차
+  `2ddf9b94…`를 정상 완료했다. 두 회차는 서로 다른 `modeSessionId`를 사용하고 각각 정확히 한 개의
+  `mode_session_completed`로 닫혔다.
+- Training은 `modeElapsedSec=96.15`, Test는 `modeElapsedSec=151.52`였고 두 회차 모두 퀴즈 5/5,
+  `ppeWrongCount=0`으로 기록됐다.
+
+### 종료·서버 대조와 기존 사용자 판정
+
+- 앱 내부 `종료하기` 직후 Quest 앱 PID가 사라졌다. 앱을 다시 실행하기 전에 로컬 JSONL과 업로드 ACK는
+  이벤트 302개, 마지막 `sequence=302`, `completed=true`로 일치했다.
+- 운영 MySQL을 서버 저장소의 읽기 전용 repository 경로로 조회한 결과 같은 세션은 이벤트 302개,
+  마지막 `sequence=302`, `status=completed`, `endReason=application_quitting`으로 일치했다. 다음 실행의
+  durable recovery를 기다리지 않고 종료 ACK가 완료됐다.
+- 오늘 최초 Build 8 실행의 원본은 `metaProbeState=Completed`, `metaWelcomeState=Returning`을 기록했고
+  `VO_PPE_INTRO_002_Welcome_Old`가 시작·종료됐다. 사용자는 최초 실행과 이후 재실행 화면에서 모두 기존
+  사용자 안내를 확인했다. 재실행 관찰은 사용자 실기 증거이며 별도 새 JSONL 세션으로 계측하지 않았다.
+
+### 검증 수준과 남은 항목
+
+- **Quest/OpenXR 확인:** Meta Alpha Build 8 설치, EXIT Point 복귀, Training·Test 정상 완료, 결과 화면
+  복귀, 앱 내부 종료와 기존 사용자 안내를 실제 HMD에서 확인했다.
+- **서버 통합 확인:** Quest 원본과 운영 DB의 세션 ID, 이벤트 수, 마지막 sequence, 두 완료
+  `modeSessionId`, 앱 종료 상태가 일치했다.
+- **후속 Education 확인:** 별도 앱 세션 `9db5c193…`에서 `LeakResponse/Education` 회차
+  `99727875…`를 정상 완료했다. `mode_session_started(sequence=19)`와
+  `mode_session_completed(sequence=186)`가 같은 `modeSessionId`로 연결됐고, 퀴즈 5/5,
+  `ppeWrongCount=0`, `modeElapsedSec=97.32`로 기록됐다. 음성 안내는 사용자 합의에 따라 스킵했으므로
+  이 회차를 음성 품질 검증 근거로 사용하지 않는다.
+- **후속 종료·서버 대조:** 결과 모달 복귀 후 앱 내부 `종료하기`를 사용했다. Quest PID가 사라졌고 로컬
+  JSONL과 업로드 ACK는 이벤트 195개, 마지막 `sequence=195`, `completed=true`로 일치했다. 운영 MySQL도
+  같은 세션을 이벤트 195개, 마지막 `sequence=195`, `status=completed`,
+  `endReason=application_quitting`, `appVersion=1.0.0`으로 저장했다.
+- **미완료:** EXIT Point 전용 원본 이벤트, 운영 조회용 HTTP token과 조회 API, Quest 양안·거울 시각 품질,
+  스킵하지 않은 음성 품질과 성능 체감은 이번 계측으로 확정하지 않았다.
+- **문서 검증:** `git diff --check`에서 이번 문서 변경의 공백 오류는 없었다. Unity
+  `DocumentationPolicyHarness.Validate`는 학원 PC의 `No valid Unity Editor license found`로 종료 코드
+  `198`을 반환해 실행되지 않았으며, 문서 정책 실패로 해석하지 않는다.
+
+## 2026-09-11 Meta Horizon Store 제출 준비와 Build 8 서버 연동 재확인
+
+### 이번 작업의 범위
+
+- 학원 Quest 2에 Meta Alpha 채널의 Build 8(`versionName=1.0.0`, `versionCode=8`)을 설치한 상태에서
+  EXIT Point 복귀, Training·Test·Education 완료, 앱 내부 정상 종료와 기존 사용자 안내를 확인했다.
+- 위 HMD 실행 결과를 근거로 Meta Horizon Store의 제출 바이너리, 무료 가격, 앱 메타데이터, 콘텐츠 등급과
+  공유 설정을 준비했다.
+- 이번 기록은 Store 검토 제출 준비와 서버 수신 검증을 정리한다. 운영 대시보드 연결 완료나 Store 검토
+  승인까지 합쳐서 완료로 기록하지 않는다.
+
+### Meta Horizon Store 제출 설정
+
+- 제출 바이너리는 package `com.tycheworks.immersa.safetyvr`의 `1.0.0` Build 8이며, Alpha 채널에서 실제
+  설치·실행한 같은 빌드를 Production(Store) 제출 대상으로 선택했다.
+- 가격은 무료로 설정했고 콘텐츠 등급은 청소년 이상으로 지정했다.
+- 앱 유형은 `Immersive`, 실행 모드는 `Native`다. 앱에서 실제 지원하는 언어는 한국어만 선택했다.
+- Store 메타데이터의 기본 언어 `English (US)`는 현재 제출 화면에서 제거되지 않았다. 이를 앱의 영어 지원으로
+  해석하지 않고, 영어 기본 Store 설명에는 `Korean language only.`를 명시하고 한국어 현지화 메타데이터를
+  별도로 작성했다.
+- 영어 검색 키워드는 `ChemicalSafety`, `PPE`, `VRTraining`, `WorkplaceSafety`, `ConfinedSpace`로 입력했다.
+- 사양의 지원 입력에서는 실제 구현과 일치하도록 Touch controller만 사용하고 controller-free hand tracking인
+  `Hands`는 제외했다. Social features는 `No`, 앱 지원 언어는 `Korean`으로 설정했다.
+- 개발자와 퍼블리셔는 `Tyche works`, 웹사이트는
+  `https://immersa.tycheworks.com/chemical-safety-training`, 개인정보처리방침은
+  `https://softcastella.github.io/tycheworks-safetytrainingvr-privacy/`로 입력했다. 외부 지원 링크와 서비스
+  약관은 선택 항목이므로 비워 뒀다.
+- 한국어와 영어 메타데이터의 자산은 언어별 입력으로 관리했다. 아이콘은 512x512 불투명 배경 이미지로
+  보완했으며, 앱 메타데이터의 이름·카테고리 분류·사양·상세 정보·자산·콘텐츠 등급은 제출 화면에서 모두
+  초록색 완료 상태를 확인했다.
+- 검수자 노트에는 별도 계정 로그인이 필요하지 않고 시작 화면의 입력값은 테스트용 닉네임이라는 점, 앱 UI·안내·
+  음성이 한국어 전용이라는 점, PPE 시나리오와 Education·Training·Test 진입 방법을 안내했다.
+- 공유 설정 확인 화면에서는 미러링, 라이브스트리밍과 동영상 녹화가 선택된 상태를 확인했다. 이 설정은
+  Quest의 화면·콘텐츠 공유 기능이며 Multi-User의 앱 구매 권한 공유와 구분한다.
+- Meta Horizon Store 재제출 후 제출 상태가 `제출됨`으로 표시되는 것을 확인했다. 이는 Meta가 제출물을
+  접수한 초기 상태이며, `검토 중` 또는 승인 완료와는 구분한다. 현재 제출된 바이너리와 메타데이터는 Meta의
+  요청이 있기 전까지 수정하거나 제출 취소하지 않는다.
+
+### Meta 데이터 사용 확인(DUC)과 개인정보 고지
+
+- Meta Developer Dashboard의 `데이터 사용 확인`은 `검토 중`이다. 현재 제출에는 변경·추가·삭제 항목이 없고,
+  앱이 실제 사용하는 `사용자 ID`와 `사용자 연령대`가 각각 `활성`으로 표시된다.
+- 앱은 Horizon 사용자 이름과 프로필 사진을 요청하거나 저장하지 않으므로 `사용자 프로필` 권한을 추가하지
+  않는다. 친구, 차단된 사용자, 초대, 파티, 챌린지와 앱 내 구매 권한도 현재 기능에 필요하지 않다.
+- Meta 앱 범위 사용자 ID는 신규·기존 사용자를 구분하고 가명 훈련 세션을 연결하는 데 사용한다. User Proof는
+  서버에서 해당 앱 범위 ID를 검증하는 일회성 인증 자료이며 훈련 기록이나 대시보드 조회 자료로 보존하지 않는다.
+- 공개 개인정보처리방침은 Meta 앱 범위 사용자 ID, 연령대, 세션·회차 ID, 과정·모드·진행·완료, 수행 시간,
+  오류·재시도·힌트·종료 사유·앱 버전과 서버 접속·보안 로그의 수집 범위를 고지한다. 교육 현황 집계와 서비스
+  개선 목적, Vultr 대한민국 인프라, 보유 기간과 삭제 요청 경로도 함께 명시한다.
+- 운영 대시보드는 위 고지 범위 안에서 서버에 이미 저장된 훈련 기록을 인증된 관리자에게 조회·집계해 표시한다.
+  새로운 Meta 권한, 사용자 프로필, 원시 XR 자세, 마이크 또는 패스스루 카메라 데이터를 추가 수집하는 기능은
+  이번 대시보드 후속 범위에 포함하지 않는다.
+
+### Build 8 실제 서버 전송 근거
+
+- 앱 세션 `0ec97178…`은 Quest 로컬 JSONL과 업로드 ACK에서 이벤트 302개, 마지막 `sequence=302`,
+  `completed=true`로 일치했다. 운영 MySQL의 같은 세션도 이벤트 302개, 마지막 `sequence=302`,
+  `status=completed`, `endReason=application_quitting`으로 일치했다.
+- 같은 앱 실행에서 `Training/LeakResponse`와 `Test/LeakResponse`는 서로 다른 `modeSessionId`와 각 한 개의
+  `mode_session_completed`를 기록했다. Training은 96.15초, Test는 151.52초였고 두 회차 모두 퀴즈 5/5,
+  `ppeWrongCount=0`이었다.
+- 후속 앱 세션 `9db5c193…`의 `LeakResponse/Education` 회차도 정상 완료했다. Quest JSONL·ACK와 운영
+  MySQL이 이벤트 195개, 마지막 `sequence=195`, 완료 상태에서 일치했고 서버에는 `appVersion=1.0.0`과
+  `endReason=application_quitting`이 저장됐다.
+- 위 결과로 **Build 8의 Quest 원본 생성 → 운영 HTTPS 업로드 → 서버 운영 MySQL 저장**은 두 실제 앱 세션에서
+  통합 확인됐다. 이후 모든 네트워크 상태나 모든 미래 세션의 성공을 보장하는 결과로 확대 해석하지 않는다.
+
+### 검증과 남은 후속 작업
+
+- `node Tools/AgentHandoffHarness.mjs`는 PASS했다.
+- `node Tools/MetaAlphaSubmissionGateHarness.mjs`는 현재 `AndroidBundleVersionCode가 code 7이 아닙니다`로
+  FAIL했다. 하네스의 고정 기대값이 Build 8 이전 기준인 것이 원인이며, 위 실제 Build 8 서버 수신 실패를
+  의미하지 않는다. 다음 코드 작업에서 기대 version code를 현재 제출 기준에 맞추고 정적 계약과 실제 HMD
+  통합 증거를 계속 분리한다.
+- EXIT Point 전용 원본 이벤트는 아직 없으므로 중도 퇴장 원인을 확정 지표로 표시하지 않는다.
+- 운영 대시보드의 조회용 HTTP 인증과 실제 화면 조회는 아직 완료하지 않았다. Build 8 서버 수신 완료와
+  대시보드 연결 완료를 구분한다.
+- Store 제출은 `제출됨`, DUC는 `검토 중`까지 확인했다. Quest 양안·거울 시각 품질, 스킵하지 않은 전체 음성
+  품질과 성능 체감은 별도 수동 확인 항목으로 남긴다.
+
+### Meta 검토 중 진행할 운영 대시보드 후속 작업
+
+1. 제출된 Build 8은 변경하지 않는다. 이미 검증된 운영 HTTPS 전송과 MySQL 원본을 대시보드 데이터 원천으로
+   사용하고, 대시보드 표시를 위해 APK에 새로운 수집 항목이나 권한을 추가하지 않는다.
+2. 서버의 읽기 전용 조회 인증을 먼저 확정한다. 관리자 브라우저에는 조회 토큰, Meta User Proof, 데이터베이스
+   자격 증명을 노출하지 않고 서버 세션 또는 동등한 관리자 인증 뒤에서만 조회 API를 호출한다.
+3. 운영 조회 API `GET /api/training-telemetry/sessions`,
+   `GET /api/training-telemetry/sessions/{sessionId}`,
+   `GET /api/training-telemetry/participants`,
+   `GET /api/training-telemetry/participants/{participantId}`를 대시보드에 연결한다.
+4. 첫 통합 기준은 Build 8의 검증 세션 두 건으로 고정한다. 앱 세션 `0ec97178…`은 이벤트 302개와 마지막
+   `sequence=302`, 앱 세션 `9db5c193…`은 이벤트 195개와 마지막 `sequence=195`가 운영 DB 상세와 화면에서
+   일치해야 한다.
+5. 사용자·세션·시나리오·모드, 완료 상태, 수행 시간, 퀴즈 정답 수와 점수, PPE 오선택 수 및 원본 이벤트
+   sequence를 근거가 있는 값으로 표시한다. 앱 범위 사용자 ID는 전체 원문을 불필요하게 노출하지 않고
+   가명 참여자 식별 또는 마스킹된 값으로 다룬다.
+6. EXIT Point는 전용 원본 이벤트가 없으므로 대시보드에서 확정 종료 원인으로 표시하지 않는다.
+   `application_quitting`, 정상 `mode_session_completed`, 완료 이벤트가 없는 회차와 미종료 세션을 서로
+   다른 상태로 유지한다.
+7. 완료 판정은 서버 코드 존재, API 응답, 운영 DB 적재와 대시보드 화면 조회를 분리한다. 인증된 브라우저에서
+   위 두 기준 세션의 이벤트 수·마지막 sequence·완료 상태·모드 결과를 상세 원본까지 추적한 뒤에만
+   `운영 대시보드 연결 완료`로 기록한다.
+
+## 2026-09-11 Meta DUC 보완에 따른 사용자 연령대 제거 계획
+
+### 이번 변경이 대응하는 사용자 요청과 보존 범위
+
+- Meta DUC 보완 요청에서 `USER_AGE` 수집·사용 설명이 불명확하다는 지적을 받은 뒤, 사용자는 앱과 연동
+  시스템에서 사용자 연령대 요소를 제거하도록 요청했다.
+- 이번 변경은 Meta `UserAgeCategory.Get()` 조회, 신규 로컬 기록과 서버 전송, 서버 신규 저장 계약 및
+  대시보드 표시에서 연령대를 제거하는 데 한정한다.
+- Meta 앱 범위 사용자 ID, entitlement, User Proof 인증, 신규·기존 사용자 판정, 훈련 기록, PPE 흐름,
+  앱 종료 ACK와 기존 대시보드 지표는 보존한다.
+- 이미 수집된 운영 DB·Quest JSONL과 적용 완료된 DB 마이그레이션은 이번 코드 변경에서 삭제하거나
+  소급 수정하지 않는다. 운영 데이터 파기는 대상과 복구 가능성을 별도로 확인한 뒤 명시적 승인 하에 수행한다.
+
+### 변경 전 필수 질문 답변
+
+1. 기존 Inspector·씬 작성값은 변경하지 않으며, 런타임 UI 배치나 표현값도 덮어쓰지 않는다.
+2. Meta 계정 식별의 단일 소유자는 `MetaPlatformIdentityProbe`, 서버 전송의 단일 소유자는
+   `TycheTrainingTelemetryUploader`, 화면 표시는 서버 대시보드로 유지한다.
+3. 입력 경로는 변경하지 않는다. 데이터 경로는 `Meta Platform SDK → MetaPlatformIdentityProbe → 로컬
+   등록/JSONL → 업로더 → Express 계약/저장소 → 대시보드` 전체를 함께 수정한다.
+4. 연령대 필드가 남은 경우 자동 추정이나 대체값을 만들지 않는다. 신규 경로에서는 조회·기록·전송·표시하지
+   않고, 구형 원본 호환은 연령값을 신규 저장하지 않는 방향으로 제한한다.
+5. 영향 소비자는 Meta DUC, 클라이언트 인증 상태, 로컬 등록, 텔레메트리, 서버 사용자 계약, DB와 대시보드다.
+   UI·텔레포트·PPE Grab·거울·XR 양안 동작은 변경 대상이 아니다.
+6. 변경 전 기준은 Build 8에서 `USER_ID`와 `USER_AGE`를 함께 조회·기록한 상태다. 변경 후에는 정적 검색,
+   C# 컴파일, 서버 테스트와 브라우저 확인으로 신규 연령대 경로가 사라졌는지 비교한다.
+7. 정적·로컬 자동 검증을 우선 수행한다. 새 APK의 Quest/OpenXR Meta 인증, 운영 서버 무연령 전송과 Meta
+   DUC 재심사는 별도 수동·운영 검증으로 남긴다.
+
+
+### 적용 결과와 검증
+
+- 클라이언트의 `MetaPlatformIdentityProbe`에서 `UserAgeCategory.Get()` 호출과 연령 상태를 제거했다.
+  `USER_ID` 조회, entitlement, User Proof 인증 및 신규·기존 사용자 판정은 유지했다.
+- 신규 JSONL, 로컬 등록 DTO와 업로드 파서에서 `metaAgeCategory`를 제거했다. 구형 JSONL의 해당
+  필드는 업로드 DTO에 포함되지 않는다.
+- 서버 등록·사용자 CRUD 계약은 `metaAgeCategory`와 `ageGroup`을 허용하지 않는다. 기존
+  `external_identities.age_group` 마이그레이션은 소급 수정하지 않고 미사용 상태로 남겼다.
+- 로컬 텔레메트리 조회는 구형 JSONL 원본 파일을 변경하지 않으면서 응답에서 `metaAgeCategory`를
+  제거한다. 대시보드의 세션·사용자 화면에서도 연령 범주 표시를 삭제했다.
+- 공개 개인정보처리방침 작업본은 Meta 앱 범위 사용자 ID의 자동 수집·처리 목적과 이메일 삭제 절차를
+  명시하고, 사용자 연령대·정확한 나이·생년월일을 요청하거나 저장하지 않는 버전 1.1로 수정했다.
+  공개 GitHub Pages 반영은 개인정보처리방침 저장소의 별도 커밋·푸시 전까지 완료로 보지 않는다.
+- 정적 검색에서 클라이언트 런타임 연령 참조가 0건임을 확인했다. 서버 `npm test`는 113개 전체
+  PASS했고, `dotnet build Assembly-CSharp.csproj --no-restore`는 기존 참조·직렬화 경고 72개와
+  오류 0개로 완료됐다.
+- 아직 필요한 수동 검증은 새 APK의 Quest/OpenXR Meta 사용자 ID 인증, 실제 신규 JSONL·서버 요청에
+  연령 필드가 없는지 확인, 서버 배포 후 대시보드 표시 확인, 개인정보처리방침 공개 URL 확인 및 Meta
+  DUC에서 `사용자 연령대` 기능 삭제 후 재제출이다.
+- 기준 구현 커밋은 클라이언트 `73ba5a1`, 서버 `edd9d23`, 공개 개인정보처리방침
+  `dc37834`이다. 공용 문서 커밋과 원격 push 결과는 이 기준 구현 커밋과 구분해 최종 보고한다.
+
+## 2026-09-11 종료 기록: Build 9 Alpha 업로드와 Meta 제출 잠금
+
+### 오늘 확인한 상태
+
+- 사용자 연령대 처리를 제거한 클라이언트 기준은 `main@85f9ff6`이다. 앱 버전은 `1.0.0`, Android
+  `versionCode=9`이다.
+- Release APK는 `Builds/MetaHorizonAlpha/ChemicalSafetyVR_Alpha_1_0_0_9.apk`로 생성됐다. 로컬 파일
+  크기는 `219,687,231 bytes`, SHA-256은
+  `9BB569EB92D70C382B13604864C7B6226502FA39C8079ED9C067843AA6B0E993`이다.
+- APK 정적 검사에서 package `com.tycheworks.immersa.safetyvr`, `versionName=1.0.0`, `versionCode=9`,
+  Android 25/34, `android.hardware.vr.headtracking`, `com.oculus.intent.category.VR`, APK Signature Scheme v2
+  서명을 확인했다. Unity BuildReport는 `[Meta Quest Alpha Build] PASS`를 기록했다.
+- Meta Developer Dashboard의 Alpha 릴리스 채널 목록에 `1.0.0 / 코드 9`가 표시됐다. 빌드 상세의
+  연령대는 `청소년 및 성인(13세 이상)`으로 선택돼 있지만 자체 인증은 확정되지 않아 경고가
+  남아 있다. 따라서 Alpha 목록 표시와 배포 완료를 같은 상태로 합쳐 쓰지 않는다.
+- Meta 자동 테스트의 `기본 악성 코드 테스트`는 PASS했다. 보안 취약점 검토에서는 Android
+  Manifest의 `android:allowBackup=false` 미명시 경고가 표시됐다. 이 항목은 오늘 확인한 제출 잠금
+  오류의 원인으로 단정하지 않고, Production 전 별도 보안 보완 후보로 남겨 둔다.
+- 공개 개인정보처리방침은 `2026-09-11 / 1.1`로 갱신됐고
+  `https://softcastella.github.io/tycheworks-safetytrainingvr-privacy/`에서 HTTP 200과 갱신 문구를
+  확인했다. Meta 앱 범위 사용자 ID, 사용 목적과 이메일 삭제 요청 절차를 명시하고 사용자
+  연령대·정확한 나이·생년월일을 요청하거나 저장하지 않는다고 고지한다.
+- DUC 데이터 처리자는 `The Constant Company, LLC (Vultr)`, 용도는 클라우드 저장·처리/IT 서비스,
+  처리 국가는 `대한민국`으로 유지한다. 운영 인스턴스에서 Vultr 메타데이터 `region=ICN`과
+  공인 IP `158.247.238.180`을 읽기 전용으로 확인했다. `ICN`은 Vultr의 Seoul/KR 리전이며 Tokyo/JP
+  리전 `NRT`가 아니다.
+- DUC 요청 검토 화면에서 `추가됨: 사용자 ID`, `변경됨: 없음`, `삭제됨: 없음`을 확인했다.
+  `사용자 연령대`와 `사용자 프로필`은 요청에 추가하지 않았다. 요청 검토 단계까지는 확인했지만
+  최종 제출 완료 화면은 확인하지 못했으므로 제출 완료로 기록하지 않는다.
+
+### Meta 제출 잠금 근거
+
+- Build 9 상세에서 `청소년 및 성인(13+)` 연령대 확인을 시도하면 Meta가
+  `Submission cannot be modified`와 오류 코드 `1891841`을 반환했다. 메시지는 현재 제출이
+  `Approved` 또는 `Under Review`여서 수정할 수 없다고 명시했다.
+- Alpha의 Build 9를 Production(Store) 채널로 복사하는 시도는
+  `Binary cannot be copied to this channel` 및 오류 코드 `891173`으로 거부됐다. 메시지는 현재 제출
+  상태가 해당 채널의 바이너리 갱신을 허용하지 않는다고 명시했다.
+- 위 두 오류와 자동 테스트 완료 화면을 같이 대조하면, APK 패키징 실패나 테스트 진행 중
+  잠금보다 Meta의 현재 앱 제출 상태에 따른 서버 측 수정 잠금으로 판단한다. DUC 보완 제출은
+  필요하지만, DUC 내용을 바꾸는 것만으로 바이너리 잠금이 즉시 해제된다고 판단하지 않는다.
+
+### 2026-09-12 아침 재개 순서(당시 계획, 아래 추가 확인으로 대체)
+
+> 이 목록은 2026-09-11 종료 시점의 계획이다. 2026-09-12 대시보드에서 기존 `사용자 연령대`가 여전히
+> `활성`이고 이전 요청의 `삭제됨`이 `없음`인 것을 확인했으므로 실행 기준으로 사용하지 않는다. 현재
+> 실행 순서는 아래 `DUC 전체 옵트아웃과 재신청 대기` 절을 따른다.
+
+1. Meta DUC 상태에서 `사용자 ID` 1개의 최종 제출 완료 여부를 먼저 확인한다. 미제출이면 오늘
+   확인한 처리자·용도·국가와 요청 기능을 변경하지 않고 제출한다.
+2. 제출 상태가 `Under Review`, `Approved`, `Changes Requested` 중 어떤 값인지 기록하고, 심사 중에는
+   Production 바이너리 복사를 반복 시도하지 않는다.
+3. Alpha 채널에 표시된 Build 9를 테스트 계정의 Quest 라이브러리에서 설치할 수 있는지 확인한다.
+   설치 후에는 `versionCode=9`, Meta 사용자 ID 인증, 기존 사용자 훈련 기록 연결을 실제 Quest에서
+   확인하고 사용자 연령대 값이 신규 JSONL·서버 요청에 없는지 별도로 구분해 기록한다.
+4. Meta 제출 잠금이 해제된 후에만 Build 9의 연령대 `청소년 및 성인(13+)`을 확정하고
+   Production(Store) 복사를 재시도한다. `Mixed Ages`를 선택하거나 `USER_AGE`를 다시 추가하지 않는다.
+5. 잠금 해제 후에도 오류 `1891841` 또는 `891173`이 반복되면 오류 코드, 화면의 추적 ID,
+   앱 ID, Build ID, `1.0.0 / code 9 / Alpha`를 함께 첨부해 Meta Developer Support에 잠금 해제를 요청한다.
+6. `android:allowBackup=false` 경고는 현재 제출 잠금과 분리해 Production 전 보안 보완 필요성을 판단한다.
+   이 항목을 수정하기로 결정하면 기존 Unity 생성 Manifest와 XR 설정을 보존하는 Android manifest merge
+   경로를 사용하고, 새 `versionCode`로 재빌드·서명·Quest 검증한다.
+
+## 2026-09-12 추가 확인: DUC 전체 옵트아웃과 재신청 대기
+
+### 새로 확인한 대시보드 상태와 판단 정정
+
+- Meta가 다시 보낸 데이터 사용 확인 피드백의 영향 기능은 `사용자 연령대`와 `사용자 ID`다. 현재 기능
+  목록에서도 두 기능 모두 `활성`으로 표시됐다.
+- 앞선 요청 검토 화면은 `추가됨: 사용자 ID`, `삭제됨: 없음`이었다. 따라서 새 요청에서 `사용자 연령대`를
+  선택하지 않은 것만으로는 기존 연령대 기능이 삭제되지 않았으며, 이 상태로는 연령대 제거가 완료됐다고
+  판단할 수 없다.
+- `모든 기능 삭제`를 누르면 표시되는 `데이터 사용 확인 거부`는 요청 편집 단계가 아니라 전체 DUC
+  옵트아웃이다. 확인문에는 제출 즉시 모든 Meta Horizon 플랫폼 기능 접근이 삭제되고, 이후 필요한 기능은
+  새 DUC를 작성·제출해 다시 승인받아야 한다고 명시돼 있다.
+- 그러므로 이번 목표인 기존 `사용자 연령대` 접근의 완전한 제거를 위해 전체 옵트아웃을 사용한다. 단,
+  옵트아웃 시 필요한 `사용자 ID` 접근도 함께 중단될 수 있으며 새 요청 승인 전까지 일반 사용자 계정의
+  사용자 ID 연동을 운영 가능 상태로 간주하지 않는다.
+- 이전에 `사용자 연령대`를 제외한 요청 하나에서 삭제와 사용자 ID 재추가가 함께 처리된다고 판단한 것은
+  대시보드 결과와 일치하지 않았다. 실제 절차는 `전체 옵트아웃 → 기존 기능 제거 확인 → 사용자 ID만 새
+  DUC로 재신청`으로 정정한다.
+
+### 확정된 진행 순서와 현재 불확실성
+
+1. `데이터 사용 확인 거부` 확인란을 선택하고 `제출 후 옵트 아웃`을 제출한다.
+2. 화면을 갱신한 뒤 `사용자 연령대`와 `사용자 ID`의 `활성` 표시가 모두 사라졌는지 확인한다.
+3. 새 요청 작성이 허용되면 `사용자 ID`만 추가한다. `사용자 연령대`와 `사용자 프로필`은 추가하지 않는다.
+4. 사용자 ID의 사용 목적은 동일 사용자의 회차 연결, 가명 훈련 이력 및 신규·재방문 판정으로 한정하고,
+   기존에 확인한 처리자 `The Constant Company, LLC (Vultr)`, 클라우드 저장·처리/IT 서비스 용도와 처리
+   국가 `대한민국`을 사실대로 제출한다.
+5. 새 사용자 ID 요청을 제출한 뒤 DUC 검토 결과를 기다린다. 옵트아웃 직후 재신청이 즉시 가능한지,
+   별도 대기 상태가 생기는지와 승인까지 걸리는 시간은 실제 제출 후 대시보드 상태를 보기 전에는
+   확정하지 않는다.
+6. DUC 검토와 현재 앱 바이너리 심사 잠금은 별도 상태로 관리한다. DUC를 변경하거나 승인받는 것만으로
+   오류 `1891841`과 `891173`이 즉시 해제된다고 판단하지 않는다.
+
+### Build 8·Alpha Build 9·최종 Release 구분
+
+- 현재 심사 대상으로 잠긴 Build 8은 변경 전 `USER_ID`와 `USER_AGE`를 함께 사용한 바이너리이므로 최종
+  재제출 바이너리로 사용하지 않는다. 현재 심사가 종료·반려·취소되어 수정 가능 상태가 될 때까지
+  바이너리 교체를 반복 시도하지 않는다.
+- Alpha 채널의 Build 9는 연령대 코드 제거 결과와 Meta 자동 테스트를 확인하기 위한 검증 빌드로 보존한다.
+  이를 최종 Production 제출본으로 단정하거나 그대로 복사하는 것을 확정 절차로 기록하지 않는다.
+- DUC의 실제 옵트아웃·사용자 ID 재신청 상태와 앱 제출 잠금 해제를 확인한 뒤, 연령대 제거 코드 기준으로
+  별도의 Production용 Release 빌드를 생성한다. 이미 `versionCode=9`가 업로드됐으므로 새 바이너리는
+  다음 증가값인 `versionCode=10`을 사용한다.
+- Release 생성 시 Development Build와 Script Debugging 비활성화, 운영 서버 설정, 릴리스 서명,
+  package/version, Meta VR manifest 항목과 APK 서명을 다시 확인한다. `android:allowBackup=false` 보완을
+  적용할지는 현재 제출 잠금과 분리해 결정한다.
+- Release Build 10의 Production 업로드, `청소년 및 성인(13+)` 자체 인증과 스토어 재심사는 위 두 잠금
+  상태가 확인된 뒤 진행한다. 지금 단계에서는 추가 빌드를 만들지 않는다.
+
+### 다음 재개 시 첫 확인 항목
+
+- 옵트아웃 제출 성공 여부와 두 기존 기능의 활성 표시 제거
+- 사용자 ID 단독 DUC 작성 가능 여부, 제출 상태와 Meta의 새 피드백
+- 현재 Build 8 앱 심사의 종료 여부와 바이너리 수정 잠금 해제 여부
+- 위 결과가 확인되기 전에는 Release Build 10 생성·Production 업로드 일정을 확정하지 않는다.
+
+## 2026-09-13 Meta Store 페이지와 심사 상태 후속 확인
+
+### 사용자 관찰과 확인 수준
+
+- 사용자는 DUC가 `정상 처리`됐다고 알렸다. 이 표현을 기능별 권한 상태나 Meta의 최종 승인으로
+  확대하지 않는다. 앱은 Meta 전체 홈에서도 `검토 중`으로 보인다고 알렸다. 이번 문서 작업에서
+  Meta 개발자 대시보드의 현재 상태를 별도 계정으로 조회하지 않았다.
+- 사용자는 Store의 `구매 가능 여부` 설정이 `공개`라고 확인했다. 설정 표시와 앱 심사 승인,
+  Store 검색 노출, 모든 계정의 실행 권한은 별도 상태다.
+- 사용자가 제공한 Meta 페이지 화면에는 `화학물질 안전훈련 VR` 제품 상세, 영상·이미지와
+  `실행` 버튼이 표시됐다. 화면 주소는
+  `https://www.meta.com/ko-kr/experiences/chemical-safety-training-vr/1279114391950885/`다.
+  사용자는 이후 본인 계정이 아닌 다른 Meta 로그인 계정으로도 이 링크가 열리는 것을 확인했다고
+  알렸다. 다른 계정의 실행 성공 여부까지 확인한 것은 아니다.
+
+### 클라이언트 구현 기준과 후속 작업
+
+- 최신 확인 클라이언트 기준은 `origin/main@0a0e2277000e9033d43d2c453c48f9789e45cd0a`다.
+  `main@73ba5a1`의 연령대 처리 제거와 `main@85f9ff6`의 빌드 번호 갱신은 코드·커밋으로
+  확인했다. 이전 문서의 Build 8 심사 잠금, Alpha Build 9와 Release Build 10 계획을
+  Meta의 최신 승인·배포 사실로 바꾸지 않는다.
+- 후속으로 Meta 대시보드에서 DUC의 필요한 `사용자 ID` 기능 상태, 앱 심사 결과와 Production
+  제출 잠금 해제 여부를 각각 확인한다. 승인 결과에 맞춰 클라이언트의 연령대 제거 코드가
+  포함된 최종 Release 빌드·서명·Quest 실행을 검증하고, 서버 원본 이벤트 및 대시보드 조회와
+  대조한다. Store 페이지가 다른 로그인 계정에서 보인다는 사용자 확인은 이 통합 검증을
+  대신하지 않는다.

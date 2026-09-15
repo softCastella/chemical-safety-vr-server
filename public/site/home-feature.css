@@ -1,0 +1,80 @@
+.featured-work {
+  min-width: 0;
+  height: 500px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  background: #fff;
+  box-shadow: 0 24px 70px rgba(23, 36, 44, .08);
+}
+
+.featured-heading {
+  flex: none;
+  padding: 18px 28px 12px;
+  border-bottom: 1px solid var(--line-soft);
+}
+.featured-heading .eyebrow { margin: 0 0 1px; font-size: 11px; }
+.featured-heading h2 { margin: 0; font-size: 24px; line-height: 1.2; letter-spacing: -.035em; }
+
+.featured-carousel { flex: 1; min-height: 0; position: relative; overflow: hidden; }
+.featured-track {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  transition: transform .7s cubic-bezier(.22, .61, .36, 1);
+  will-change: transform;
+}
+.featured-slide { flex: 0 0 100%; min-width: 0; height: 100%; display: flex; flex-direction: column; }
+.featured-art { position: relative; flex: 0 0 180px; overflow: hidden; }
+.featured-art-vr { background: #fff; }
+.featured-art-vr img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.featured-art-spark { background: #17263e; }
+.featured-art-spark img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; }
+
+.featured-copy { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 16px 28px 58px; }
+.featured-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 10px; }
+.featured-line { color: var(--immersa); font-size: 11px; font-weight: 900; letter-spacing: .1em; }
+.featured-slide:nth-child(2) .featured-line { color: #c45a00; }
+.featured-status { padding: 3px 8px; border: 1px solid var(--line); border-radius: 999px; color: #68717c; font-size: 11px; font-weight: 800; line-height: 1.4; }
+.featured-copy h3 { margin: 9px 0 5px; font-size: clamp(21px, 2.2vw, 27px); line-height: 1.2; letter-spacing: -.035em; }
+.featured-copy p { margin: 0; color: #68717c; font-size: 13px; line-height: 1.5; }
+.featured-copy a { align-self: flex-start; margin-top: auto; color: #202020; font-size: 13px; font-weight: 900; }
+.featured-copy a:hover, .featured-copy a:focus-visible { color: var(--brand-accent); }
+.featured-copy a span { margin-left: 4px; }
+
+.featured-controls { position: absolute; right: 22px; bottom: 15px; display: flex; align-items: center; gap: 8px; }
+.featured-controls button { display: grid; place-items: center; width: 34px; height: 34px; padding: 0; border: 1px solid var(--line); border-radius: 50%; background: #fff; color: #26313c; cursor: pointer; }
+.featured-controls button:hover, .featured-controls button:focus-visible { border-color: var(--brand-accent); color: var(--brand-accent); }
+.featured-count { min-width: 43px; margin-left: 3px; color: #737d88; font-size: 11px; font-weight: 800; letter-spacing: .04em; }
+
+.line-card { position: relative; overflow: hidden; }
+.line-card-immersa { --line-accent: var(--immersa); }
+.line-card-spark { --line-accent: var(--spark); }
+.line-card-loop { --line-accent: var(--loop); }
+.line-card::before { content: ""; position: absolute; inset: 0 0 auto; height: 3px; background: var(--line-accent); transform: scaleX(0); transform-origin: left; transition: transform .25s; }
+.line-card:hover, .line-card:focus-visible { border-color: var(--line-accent); box-shadow: 0 16px 40px rgba(23, 36, 44, .08); }
+.line-card:hover::before, .line-card:focus-visible::before { transform: scaleX(1); }
+.line-card:focus-visible { outline: 2px solid var(--line-accent); outline-offset: 2px; }
+.line-kind { display: block; margin-top: 8px; color: #89929c; font-size: 11px; font-weight: 900; letter-spacing: .08em; }
+.line-card .text-link { display: block; border-top: 1px solid var(--line); padding-top: 18px; }
+
+@media (max-width: 900px) {
+  .hero { grid-template-columns: minmax(0, 1fr); }
+  .hero-copy { min-width: 0; }
+  .featured-work { width: 100%; max-width: 560px; }
+}
+@media (max-width: 600px) {
+  .featured-work { height: 490px; border-radius: 22px; }
+  .featured-heading { padding: 16px 20px 10px; }
+  .featured-art { flex-basis: 160px; }
+  .featured-copy { padding: 14px 20px 56px; }
+  .featured-controls { right: 15px; bottom: 13px; }
+}
+@media (max-width: 380px) {
+  .featured-work { height: 525px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .featured-track, .line-card, .line-card::before { transition: none; }
+}

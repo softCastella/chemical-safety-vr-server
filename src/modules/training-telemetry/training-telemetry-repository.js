@@ -1,6 +1,8 @@
 import { createHash } from "node:crypto";
 
 import { conflict, notFound, unauthorized } from "../../lib/app-error.js";
+import { dashboardBaseline } from "./training-telemetry-dashboard-baseline.js";
+import { toDashboardPlaySession } from "./training-telemetry-dashboard-play.js";
 
 function toIsoString(value) {
   if (value === null || value === undefined) {
@@ -160,6 +162,256 @@ function acceptedThrough(rows) {
 
 export function createTrainingTelemetryRepository(pool) {
   return {
+    async getDashboardUsers({ participantId = null, page = 1 }) {
+      const pageSize = 20;
+      const offset = (page - 1) * pageSize;
+      const where = participantId === null ? "" : "WHERE participant.participant_id = ?";
+      const filterValues = participantId === null ? [] : [participantId];
+      const [countRows] = await pool.execute(
+        `SELECT COUNT(DISTINCT participant.participant_id) AS total
+         FROM training_telemetry_participants AS participant
+         ${where}`,
+        filterValues,
+      );
+      const [rows] = await pool.execute(
+        `SELECT participant.participant_id, COUNT(DISTINCT session.session_id) AS play_count,
+                MIN(session.started_at) AS first_play_at,
+                MAX(session.started_at) AS last_play_at
+         FROM training_telemetry_participants AS participant
+         LEFT JOIN training_telemetry_sessions AS session
+           ON session.participant_id = participant.participant_id
+         ${where}
+         GROUP BY participant.participant_id
+         ORDER BY last_play_at DESC, participant.participant_id DESC
+         LIMIT ? OFFSET ?`,
+        [...filterValues, pageSize, offset],
+      );
+      const total = Number(countRows[0]?.total ?? 0);
+      return {
+        page, pageSize, total, moreAvailable: page * pageSize < total,
+        users: rows.map((row) => ({
+          participantId: Number(row.participant_id),
+          playCount: Number(row.play_count),
+          firstPlayAtUtc: toIsoString(row.first_play_at),
+          lastPlayAtUtc: toIsoString(row.last_play_at),
+        })),
+      };
+    },
+
+    async getDashboardUser({ participantId, page = 1 }) {
+      const pageSize = 20;
+      const [profileRows] = await pool.execute(
+        `SELECT participant.participant_id, meta.identity_value AS meta_user_id,
+                COUNT(DISTINCT session.session_id) AS play_count,
+                MIN(session.started_at) AS first_play_at,
+                MAX(session.started_at) AS last_play_at
+         FROM training_telemetry_participants AS participant
+         LEFT JOIN training_telemetry_identities AS meta
+           ON meta.participant_id = participant.participant_id
+          AND meta.source_project = participant.source_project
+          AND meta.identity_type = 'meta'
+         LEFT JOIN training_telemetry_sessions AS session
+           ON session.participant_id = participant.participant_id
+         WHERE participant.participant_id = ?
+         GROUP BY participant.participant_id, meta.identity_value
+         LIMIT 1`,
+        [participantId],
+      );
+      if (profileRows.length === 0) return null;
+      const profile = profileRows[0];
+      const [sessionRows] = await pool.execute(
+        `SELECT session_id, started_at, app_version, status
+         FROM training_telemetry_sessions
+         WHERE participant_id = ?
+         ORDER BY started_at DESC, session_id DESC
+         LIMIT ? OFFSET ?`,
+        [participantId, pageSize, (page - 1) * pageSize],
+      );
+      const ids = sessionRows.map((row) => row.session_id);
+      const bySession = new Map(ids.map((id) => [id, []]));
+      if (ids.length) {
+        const [eventRows] = await pool.execute(
+          `SELECT session_id, payload_json
+           FROM training_telemetry_events
+           WHERE session_id IN (${ids.map(() => "?").join(", ")})
+             AND event_type IN ('mode_session_started', 'mode_session_completed')
+           ORDER BY session_id, sequence`,
+          ids,
+        );
+        for (const row of eventRows) {
+          bySession.get(row.session_id).push(typeof row.payload_json === "string"
+            ? JSON.parse(row.payload_json) : row.payload_json);
+        }
+      }
+      return {
+        participantId: Number(profile.participant_id),
+        metaUserId: profile.meta_user_id ?? null,
+        playCount: Number(profile.play_count),
+        firstPlayAtUtc: toIsoString(profile.first_play_at),
+        lastPlayAtUtc: toIsoString(profile.last_play_at),
+        page, pageSize,
+        moreAvailable: page * pageSize < Number(profile.play_count),
+        sessions: sessionRows.map((row) => {
+          const events = bySession.get(row.session_id);
+          const starts = events.filter((event) => event.eventType === "mode_session_started");
+          return {
+            sessionId: row.session_id,
+            key: row.session_id.slice(0, 8),
+            startedAtUtc: toIsoString(row.started_at),
+            appVersion: row.app_version,
+            status: row.status,
+            runs: starts.map((start, index) => {
+              const nextSequence = starts[index + 1]?.sequence ?? Infinity;
+              const completion = events.find((event) => event.eventType === "mode_session_completed"
+                && event.sequence > start.sequence && event.sequence < nextSequence
+                && event.mode === start.mode && event.workPlan === start.workPlan);
+              const seconds = completion
+                ? (Date.parse(completion.timestampUtc) - Date.parse(start.timestampUtc)) / 1000 : null;
+              return {
+                sequence: start.sequence,
+                mode: start.mode,
+                workPlan: start.workPlan,
+                completed: Boolean(completion),
+                durationSeconds: Number.isFinite(seconds) && seconds >= 0 ? seconds : null,
+              };
+            }),
+          };
+        }),
+      };
+    },
+
+    async getDashboardPlay() {
+      const limit = 100;
+      const [latestRows] = await pool.execute(
+        `SELECT app_version FROM training_telemetry_sessions
+         ORDER BY started_at DESC, session_id DESC LIMIT 1`,
+      );
+      if (latestRows.length === 0) {
+        return { capturedAtUtc: new Date().toISOString(), limit, moreAvailable: false, baseline: dashboardBaseline, sessions: [] };
+      }
+      const appVersion = latestRows[0].app_version;
+      if (!appVersion) throw new Error("Latest training telemetry session has no app_version.");
+      const [sessionRows] = await pool.execute(
+        `SELECT session_id, participant_id, app_version, status, started_at
+         FROM training_telemetry_sessions
+         WHERE app_version = ?
+         ORDER BY started_at DESC, session_id DESC
+         LIMIT ?`,
+        [appVersion, limit + 1],
+      );
+      const selected = sessionRows.slice(0, limit);
+      if (selected.length === 0) throw new Error("Latest app_version session disappeared during dashboard read.");
+      const ids = selected.map((row) => row.session_id);
+      const placeholders = ids.map(() => "?").join(", ");
+      const [eventRows] = await pool.execute(
+        `SELECT session_id, payload_json
+         FROM training_telemetry_events
+         WHERE session_id IN (${placeholders})
+           AND event_type IN (
+             'session_started', 'scene_loaded', 'mode_session_started', 'flow_state_changed',
+             'ppe_grab_attempted', 'ppe_grab_attempt_resolved', 'ppe_grab_selected_without_attempt', 'ppe_inspection_started',
+             'ppe_choice_resolved', 'quiz_answer_resolved', 'mode_session_completed'
+           )
+         ORDER BY session_id, sequence`,
+        ids,
+      );
+      const bySession = new Map(ids.map((id) => [id, []]));
+      for (const row of eventRows) {
+        bySession.get(row.session_id).push(typeof row.payload_json === "string"
+          ? JSON.parse(row.payload_json) : row.payload_json);
+      }
+      return {
+        capturedAtUtc: new Date().toISOString(),
+        appVersion,
+        limit,
+        moreAvailable: sessionRows.length > limit,
+        baseline: dashboardBaseline,
+        sessions: selected.map((row) => toDashboardPlaySession({
+          sessionId: row.session_id,
+          participantId: Number(row.participant_id),
+          appVersion: row.app_version,
+          status: row.status,
+          startedAtUtc: toIsoString(row.started_at),
+        }, bySession.get(row.session_id))),
+      };
+    },
+
+    async getDashboardOverview(days = 30) {
+      const end = new Date();
+      end.setUTCHours(0, 0, 0, 0);
+      end.setUTCDate(end.getUTCDate() + 1);
+      const start = new Date(end);
+      start.setUTCDate(start.getUTCDate() - days);
+
+      const [dailyRows] = await pool.execute(
+        `SELECT DATE_FORMAT(session.started_at, '%Y-%m-%d') AS day,
+                COUNT(DISTINCT session.participant_id) AS active_users,
+                COUNT(DISTINCT CASE WHEN DATE(first_session.first_started_at) = DATE(session.started_at)
+                  THEN session.participant_id END) AS new_users,
+                COUNT(DISTINCT CASE WHEN DATE(first_session.first_started_at) < DATE(session.started_at)
+                  THEN session.participant_id END) AS returning_users,
+                COUNT(*) AS plays
+         FROM training_telemetry_sessions AS session
+         INNER JOIN (
+           SELECT participant_id, MIN(started_at) AS first_started_at
+           FROM training_telemetry_sessions GROUP BY participant_id
+         ) AS first_session ON first_session.participant_id = session.participant_id
+         WHERE session.started_at >= ? AND session.started_at < ?
+         GROUP BY day ORDER BY day`,
+        [start, end],
+      );
+      const [summaryRows] = await pool.execute(
+        `SELECT COUNT(DISTINCT participant_id) AS observed_users, COUNT(*) AS plays
+         FROM training_telemetry_sessions
+         WHERE started_at >= ? AND started_at < ?`,
+        [start, end],
+      );
+      const [modeRows] = await pool.execute(
+        `SELECT JSON_UNQUOTE(JSON_EXTRACT(payload_json, '$.mode')) AS mode,
+                event_type, COUNT(*) AS event_count
+         FROM training_telemetry_events
+         WHERE event_type IN ('mode_session_started', 'mode_session_completed')
+           AND timestamp_utc >= ? AND timestamp_utc < ?
+         GROUP BY mode, event_type`,
+        [start, end],
+      );
+      const [freshnessRows] = await pool.execute(
+        `SELECT MAX(timestamp_utc) AS last_event_at FROM training_telemetry_events`,
+      );
+
+      const byDay = new Map(dailyRows.map((row) => [row.day, row]));
+      const daily = [];
+      for (let date = new Date(start); date < end; date.setUTCDate(date.getUTCDate() + 1)) {
+        const day = date.toISOString().slice(0, 10);
+        const row = byDay.get(day);
+        daily.push({
+          day,
+          activeUsers: Number(row?.active_users ?? 0),
+          newUsers: Number(row?.new_users ?? 0),
+          returningUsers: Number(row?.returning_users ?? 0),
+          plays: Number(row?.plays ?? 0),
+        });
+      }
+      const modes = ["Education", "Training", "Test"].map((mode) => ({
+        mode,
+        started: Number(modeRows.find((row) => row.mode === mode && row.event_type === "mode_session_started")?.event_count ?? 0),
+        completed: Number(modeRows.find((row) => row.mode === mode && row.event_type === "mode_session_completed")?.event_count ?? 0),
+      }));
+      return {
+        startUtc: start.toISOString(),
+        endUtcExclusive: end.toISOString(),
+        days,
+        summary: {
+          observedUsers: Number(summaryRows[0]?.observed_users ?? 0),
+          plays: Number(summaryRows[0]?.plays ?? 0),
+          newUsers: daily.reduce((total, day) => total + day.newUsers, 0),
+          lastEventAtUtc: toIsoString(freshnessRows[0]?.last_event_at),
+        },
+        daily,
+        modes,
+      };
+    },
+
     async assertSessionMetaUserId(sessionId, metaUserId) {
       const [rows] = await pool.execute(
         `
@@ -240,15 +492,36 @@ export function createTrainingTelemetryRepository(pool) {
         if (!session) {
           throw notFound("Training telemetry session not found.");
         }
-        if (session.status !== "open") {
-          throw conflict("Completed training telemetry sessions cannot accept new events.");
-        }
+        const sessionCompleted = session.status !== "open";
 
         let accepted = 0;
         let duplicates = 0;
         for (const event of events) {
           const payloadJson = payloadFor(event);
           const sha256 = payloadHash(payloadJson);
+
+          if (sessionCompleted) {
+            const [rows] = await connection.execute(
+              `
+                SELECT session_id, event_id, sequence, payload_sha256
+                FROM training_telemetry_events
+                WHERE event_id = ? OR (session_id = ? AND sequence = ?)
+                FOR UPDATE
+              `,
+              [event.eventId, sessionId, event.sequence],
+            );
+            const exactDuplicate = rows.some((row) =>
+              row.session_id === sessionId &&
+              row.event_id === event.eventId &&
+              Number(row.sequence) === event.sequence &&
+              row.payload_sha256 === sha256);
+            if (!exactDuplicate) {
+              throw conflict("Completed training telemetry sessions cannot accept new events.");
+            }
+            duplicates += 1;
+            continue;
+          }
+
           try {
             await connection.execute(
               `

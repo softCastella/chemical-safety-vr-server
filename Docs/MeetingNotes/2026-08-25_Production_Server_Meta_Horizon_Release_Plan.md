@@ -2441,3 +2441,86 @@ Meta 업로드 검사가 첫 출시 서명 APK에서 Android Target SDK 36, 자�
 - 미완료: 실제 Meta User Proof 왕복, code 6 Release APK, Quest 단독 실행, 같은 세션의 운영 서버
   적재·재조회와 Alpha 업로드.
 - 대시보드 화면·KPI 확정은 Alpha 제출 완료 조건이 아니며 7단계까지 보류한다.
+
+## 2026-09-10 단계 5 완료: code 6 Release APK
+
+### 이번 실행 결과
+
+- 역할표의 `5. code 6 Release`를 완료했다. 클라이언트 기준은
+  `main@eba9e1a8d46d964ab4d31f4b07081b28fa861ed7`, 서버 구현 기준은
+  `main@5b8138865991408215011078328f74a0df229982`, 서버 공용 문서 미러 기준은
+  `main@5e13e0206b72f944b9b313f8eecb053d39594537`이다.
+- 생성 파일은 `Builds/MetaHorizonAlpha/ChemicalSafetyVR_Alpha_0_1_0_6.apk`, 크기
+  `219,710,171 bytes`, SHA-256
+  `F092AA929888C713B738806E4624EA0AEB62CB0E7D8CC05289D253C1640AC4AF`다.
+- 첫 빌드는 Unity 종료로 중단됐고, 재시작 뒤 동일 code 6 설정과 개인 서명정보를 다시 입력해 두 번째
+  빌드가 완료됐다. 중단된 첫 시도의 오래된 Tundra 오류와 두 번째 빌드 진행 로그를 분리해 판정했다.
+
+### 검증 수준
+
+- **정적 확인:** package `com.tycheworks.immersa.safetyvr`, `versionCode=6`, `versionName=0.1.0`,
+  최소 SDK 25, Target SDK 34, ARM64, 필수 VR headtracking, Meta VR category,
+  `usesCleartextTraffic=false`, `android:debuggable` 없음, APK Signature Scheme v2를 확인했다.
+- **Unity Editor 확인:** BuildReport의 `[Meta Quest Alpha Build] PASS`와 빌드 뒤 Editor 정상 복귀를
+  확인했다. `MetaAlphaSubmissionGateHarness`는 Release·Development APK, 기준 DB와 로컬 기준 서버를
+  검사해 `READY`를 반환했다.
+- **Quest/OpenXR 확인:** 아직 수행하지 않았다. APK 생성과 Manifest 검증을 실제 HMD 양안·입력·오디오,
+  Meta proof 또는 운영 서버 적재 성공으로 확대하지 않는다.
+
+### 다음 사용자·Codex 순서
+
+1. **사용자:** 이 code 6 APK를 Meta Dashboard의 Alpha 채널에 업로드하고 테스트 계정에 채널을 할당한다.
+2. **사용자:** Quest에서 기존 앱을 완전히 종료한 뒤 Alpha 채널의 code 6을 설치하고 단독 실행한다.
+3. **사용자와 Codex:** 타이틀·로딩·PPE 모달, 장화·안전모 음성, 양안·주변 시야, 입력과 프레임을 짧게
+   확인한다.
+4. **Codex:** 같은 회차의 Quest 원본, Meta 인증 결과, 서버 `sessionId`·이벤트 수·마지막 `sequence`와
+   운영 MySQL 재조회를 대조한다.
+5. 위 4단계가 모두 맞을 때만 `Release 통합 검증 완료`로 표시한다. Alpha 업로드 자체와 대시보드 완성은
+   별도 상태로 유지한다.
+
+## 2026-09-10 작업 종료 기록: Alpha 업로드와 다음 시작점
+
+### 오늘 완료한 범위
+
+- 사용자는 Meta 업로드 화면에서 code 6 Release APK 처리가 완료됐음을 확인했다. 현재 확정 가능한 상태는
+  `APK 생성·정적 검증·Alpha 업로드 완료`까지다.
+- 업로드 연령대는 아동용 앱이 아닌 화학물질 안전훈련의 실제 대상에 맞춰
+  `Teens and Adults (13+)`를 사용했다.
+- 릴리즈 노트에는 Release 인증·운영 HTTPS 전송, 타이틀·로딩 조정, 정상 장화·안전모 음성 참조 교정과
+  Quest/Android Release 설정 보완을 기록했다.
+- APK에는 프로젝트 아이콘이 포함돼 있지만 Meta Store/Library 목록 아이콘은 App Metadata에서 별도로
+  관리된다. 512×512, 24-bit RGB, 불투명 정사각형 자산
+  `Builds/MetaHorizonAlpha/SubmissionAssets/Meta_Horizon_Icon_512.png`를 준비했으며, 정식 심사 제출 버튼을
+  누르지 않고도 나중에 metadata 초안에 저장할 수 있다.
+
+### 완료로 확장하지 않는 항목
+
+- Alpha 업로드 완료는 테스트 사용자 채널 할당, Quest 설치, 실제 Meta User Proof, 단기 token 발급,
+  운영 서버 전송이나 MySQL 적재 성공을 뜻하지 않는다.
+- 현재 Meta 처리 화면의 주황색 기본 아이콘은 APK 빌드 실패 증거가 아니다. App Metadata 아이콘 저장과
+  Quest 라이브러리 반영은 별도로 확인한다.
+- App Metadata 초안 작성과 Store 심사 제출은 다른 동작이다. Quest Alpha 통합 검증 전에는
+  `Submit for Review`를 누르지 않는다.
+
+### Meta 개발자 정보 제출 확인
+
+- 사용자는 Meta 개발자 정보 화면에서 앱 이미지와 사이트 주소를 포함한 요구 항목을 모두 제출했다고
+  확인했다. 이미지에는 기존 512×512 앱 아이콘과 고가화된 타일용 180×180 불투명 배경,
+  180×180 투명 전경 자산이 포함된다.
+- 고가화된 타일 전경은 공식 `VR` 로고와 `화학물질 안전훈련` 표기를 유지하고, Meta 표시 안전영역인
+  138×138 안에 배치했다. 제출에 사용한 레이어 자산은
+  `Builds/MetaHorizonAlpha/SubmissionAssets/Meta_Horizon_Tile_Background_180.png`와
+  `Builds/MetaHorizonAlpha/SubmissionAssets/Meta_Horizon_Tile_Foreground_180.png`다.
+- 이 상태의 근거는 사용자가 확인한 Meta 화면이다. `개발자 정보 입력·제출 완료`는 확정하지만,
+  입력한 URL의 외부 접근성 검사, Meta의 필드 검증 통과, Store 심사 접수 또는 승인을 완료로 합쳐 쓰지
+  않는다.
+
+### 다음 세션 시작 순서
+
+1. Dashboard에서 `versionCode=6`, `ALPHA`, 테스트 사용자 할당과 개발자 정보의 검증 오류 유무를 캡처
+   또는 화면으로 확인한다.
+2. Quest에 Alpha code 6을 설치하고 앱 정보의 version code를 확인한다.
+3. 단독 실행에서 타이틀·로딩·PPE 음성·모달·입력·양안과 성능을 짧게 회귀 검증한다.
+4. 한 회차를 완료해 Quest JSONL과 운영 서버 저장·재조회 결과를 같은 ID와 수량으로 대조한다.
+5. 통합 PASS 뒤 제출한 App Metadata의 처리·반려 상태를 확인하고, Store 심사 제출 여부는 사용자 결정으로
+   별도 진행한다.

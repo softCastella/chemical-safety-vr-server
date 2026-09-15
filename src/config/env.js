@@ -32,6 +32,13 @@ function readBoolean(name, fallback) {
   throw new Error(`${name} must be either true or false.`);
 }
 
+function readList(name) {
+  return (process.env[name] ?? "")
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean);
+}
+
 const nodeEnv = process.env.NODE_ENV ?? "development";
 const defaultUnityTelemetryDirectory = process.env.USERPROFILE
   ? path.join(
@@ -101,6 +108,43 @@ export const env = Object.freeze({
     ),
   }),
   enableContactForm: readBoolean("ENABLE_CONTACT_FORM", false),
+  enableStarlightAnalyticsIngest: readBoolean(
+    "ENABLE_STARLIGHT_ANALYTICS_INGEST",
+    false,
+  ),
+  starlightAnalyticsAllowedOrigins: Object.freeze(
+    readList("STARLIGHT_ANALYTICS_ALLOWED_ORIGINS"),
+  ),
+  starlightAnalyticsRateLimitPerHour: readInteger(
+    "STARLIGHT_ANALYTICS_RATE_LIMIT_PER_HOUR",
+    1200,
+    10,
+    100000,
+  ),
+  starlightAnalyticsRetentionDays: readInteger(
+    "STARLIGHT_ANALYTICS_RETENTION_DAYS",
+    90,
+    1,
+    365,
+  ),
+  starlightAnalyticsCleanupIntervalSeconds: readInteger(
+    "STARLIGHT_ANALYTICS_CLEANUP_INTERVAL_SECONDS",
+    21600,
+    300,
+    86400,
+  ),
+  enableStarlightReleasePush: readBoolean(
+    "ENABLE_STARLIGHT_RELEASE_PUSH",
+    false,
+  ),
+  starlightReleasePush: Object.freeze({
+    rateLimitPerHour: readInteger(
+      "STARLIGHT_RELEASE_PUSH_RATE_LIMIT_PER_HOUR",
+      20,
+      1,
+      1000,
+    ),
+  }),
   kakaoJavaScriptKey: process.env.KAKAO_JAVASCRIPT_KEY ?? "",
   contact: Object.freeze({
     resendApiKey: process.env.RESEND_API_KEY ?? "",

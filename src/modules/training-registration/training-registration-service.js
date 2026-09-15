@@ -2,7 +2,6 @@ import { badRequest, notFound } from "../../lib/app-error.js";
 
 const fields = new Set([
   "metaUserId",
-  "metaAgeCategory",
   "sessionId",
   "timestampUtc",
   "scene",
@@ -71,7 +70,6 @@ export function createTrainingRegistrationService({ repository, now = () => new 
 
       const record = {
         metaUserId: readRequiredString(payload, "metaUserId", 128),
-        metaAgeCategory: readOptionalString(payload, "metaAgeCategory", 32),
         sessionId: normalizeSessionId(readRequiredString(payload, "sessionId", 128)),
         timestampUtc: readTimestamp(payload),
         scene: readRequiredString(payload, "scene", 512),

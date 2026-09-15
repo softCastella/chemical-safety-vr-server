@@ -23,8 +23,15 @@ import {
 } from "./modules/training-telemetry/training-telemetry-meta-auth.js";
 import { createTrainingTelemetryRepository } from "./modules/training-telemetry/training-telemetry-repository.js";
 import { createTrainingTelemetryRouter } from "./modules/training-telemetry/training-telemetry-routes.js";
+import { createTrainingTelemetryService } from "./modules/training-telemetry/training-telemetry-service.js";
+import { dashboardBaseline } from "./modules/training-telemetry/training-telemetry-dashboard-baseline.js";
+import { toDashboardPlaySession } from "./modules/training-telemetry/training-telemetry-dashboard-play.js";
 import { createContactRouter } from "./modules/contact/contact-routes.js";
 import { createResendContactMailer } from "./modules/contact/resend-contact-mailer.js";
+import { createStarlightAnalyticsRepository } from "./modules/starlight-analytics/starlight-analytics-repository.js";
+import { createStarlightAnalyticsRouter } from "./modules/starlight-analytics/starlight-analytics-routes.js";
+import { createStarlightReleasePushRepository } from "./modules/starlight-release-push/starlight-release-push-repository.js";
+import { createStarlightReleasePushRouter } from "./modules/starlight-release-push/starlight-release-push-routes.js";
 
 const publicRoot = fileURLToPath(new URL("../public/", import.meta.url));
 const dashboardRoot = path.join(publicRoot, "dashboard");
@@ -36,6 +43,15 @@ const chemicalSafetyTrainingRoot = path.join(
 );
 const serverStatusRoot = path.join(publicRoot, "server-status");
 const telemetryIngestTestRoot = path.join(publicRoot, "telemetry-ingest-test");
+const starlightAnalyticsRoot = path.join(publicRoot, "starlight-analytics");
+const serverDashboardPath = "/server";
+const starlightDashboardPath = "/starlight-sudoku";
+const chemicalSafetyVrDashboardPath = "/chemical-safety-training-vr";
+
+const redirectToTrailingSlash = (target) => (request, response, next) => {
+  if (request.path.endsWith("/")) return next();
+  return response.redirect(308, `${target}/`);
+};
 
 export function createApp({
   userRepository,
@@ -60,6 +76,13 @@ export function createApp({
   contactMailer,
   enableContactForm = env.enableContactForm,
   contactRateLimitPerHour = env.contact.rateLimitPerHour,
+  starlightAnalyticsRepository,
+  enableStarlightAnalyticsIngest = env.enableStarlightAnalyticsIngest,
+  starlightAnalyticsAllowedOrigins = env.starlightAnalyticsAllowedOrigins,
+  starlightAnalyticsRateLimitPerHour = env.starlightAnalyticsRateLimitPerHour,
+  starlightReleasePushRepository,
+  enableStarlightReleasePush = env.enableStarlightReleasePush,
+  starlightReleasePushRateLimitPerHour = env.starlightReleasePush.rateLimitPerHour,
   kakaoJavaScriptKey = env.kakaoJavaScriptKey,
 } = {}) {
   const app = express();
@@ -90,6 +113,39 @@ export function createApp({
 
     response.status(200).json({ kakaoJavaScriptKey });
   });
+
+  const starlightAnalyticsEnabled = enableStarlightAnalyticsIngest || enableServerAdmin;
+  const resolvedStarlightAnalyticsRepository = starlightAnalyticsEnabled
+    ? starlightAnalyticsRepository ?? createStarlightAnalyticsRepository(databasePool)
+    : null;
+  if (enableStarlightAnalyticsIngest) {
+    app.use(
+      "/api/starlight-analytics",
+      createStarlightAnalyticsRouter({
+        repository: resolvedStarlightAnalyticsRepository,
+        ingestEnabled: true,
+        allowedOrigins: starlightAnalyticsAllowedOrigins,
+        rateLimitPerHour: starlightAnalyticsRateLimitPerHour,
+        requireAdmin: null,
+      }),
+    );
+  }
+
+  const starlightReleasePushEnabled = enableStarlightReleasePush || enableServerAdmin;
+  const resolvedStarlightReleasePushRepository = starlightReleasePushEnabled
+    ? starlightReleasePushRepository ?? createStarlightReleasePushRepository(databasePool)
+    : null;
+  if (enableStarlightReleasePush) {
+    app.use(
+      "/api/starlight-release-push",
+      createStarlightReleasePushRouter({
+        repository: resolvedStarlightReleasePushRepository,
+        subscribeEnabled: true,
+        allowedOrigins: starlightAnalyticsAllowedOrigins,
+        rateLimitPerHour: starlightReleasePushRateLimitPerHour,
+      }),
+    );
+  }
 
   if (enableContactForm) {
     const resolvedContactMailer =
@@ -137,9 +193,10 @@ export function createApp({
     );
   }
 
+  const resolvedTrainingTelemetryRepository = enableTrainingTelemetryIngest
+    ? trainingTelemetryRepository ?? createTrainingTelemetryRepository(databasePool)
+    : null;
   if (enableTrainingTelemetryIngest) {
-    const resolvedTrainingTelemetryRepository =
-      trainingTelemetryRepository ?? createTrainingTelemetryRepository(databasePool);
     const sessionTokenService = enableMetaTrainingTelemetryAuth
       ? createTrainingTelemetrySessionTokenService({
           secret: trainingTelemetrySessionTokenSecret,
@@ -179,19 +236,127 @@ export function createApp({
     const resolvedCountryLookupService = serverAdminCountryLookupService
       ?? createServerAdminCountryLookup(env.serverAdminCountryLookup);
     const resolvedPushService = serverAdminPushService ?? createServerAdminPushService(env.serverAdminPush);
-    const { router, requireAdmin } = createServerAdminRouter({
+    const { router, requireAdmin, requireAdminPage } = createServerAdminRouter({
       repository: resolvedAdminRepository,
       countryLookupService: resolvedCountryLookupService,
       pushService: resolvedPushService,
     });
     app.use("/api/server-status", router);
-    app.get("/server-status/login", (_request, response) => response.sendFile(path.join(serverStatusRoot, "login.html")));
-    app.get("/server-status/login.html", (_request, response) => response.redirect(308, "/server-status/login"));
-    for (const asset of ["status.css", "controls.css", "login.js", "dashboard.js", "push-worker.js", "manifest.webmanifest"]) {
-      app.get(`/server-status/${asset}`, (_request, response) => response.sendFile(path.join(serverStatusRoot, asset)));
+    app.get("/api/training-telemetry/dashboard-overview", requireAdmin, async (request, response) => {
+      response.set("Cache-Control", "no-store");
+      if (!resolvedTrainingTelemetryRepository) {
+        response.status(503).json({ error: "ENABLE_TRAINING_TELEMETRY_INGEST is not enabled." });
+        return;
+      }
+      const days = request.query.days === undefined ? 30 : Number(request.query.days);
+      if (![7, 30].includes(days)) {
+        response.status(400).json({ error: "days must be 7 or 30." });
+        return;
+      }
+      response.json({ data: await resolvedTrainingTelemetryRepository.getDashboardOverview(days) });
+    });
+    app.get("/api/training-telemetry/dashboard-users", requireAdmin, async (request, response) => {
+      response.set("Cache-Control", "no-store");
+      if (!resolvedTrainingTelemetryRepository) {
+        response.status(503).json({ error: "ENABLE_TRAINING_TELEMETRY_INGEST is not enabled." });
+        return;
+      }
+      const participantIdText = request.query.participantId ?? "";
+      const participantId = participantIdText === "" ? null : Number(participantIdText);
+      const page = request.query.page === undefined ? 1 : Number(request.query.page);
+      if (typeof participantIdText !== "string"
+        || (participantIdText !== "" && (!/^[0-9]{1,16}$/.test(participantIdText)
+          || !Number.isSafeInteger(participantId) || participantId < 1))
+        || !Number.isSafeInteger(page) || page < 1) {
+        response.status(400).json({ error: "participantId and page must be positive integers." });
+        return;
+      }
+      response.json({ data: await resolvedTrainingTelemetryRepository.getDashboardUsers({ participantId, page }) });
+    });
+    app.get("/api/training-telemetry/dashboard-users/:participantId", requireAdmin, async (request, response) => {
+      response.set("Cache-Control", "no-store");
+      if (!resolvedTrainingTelemetryRepository) {
+        response.status(503).json({ error: "ENABLE_TRAINING_TELEMETRY_INGEST is not enabled." });
+        return;
+      }
+      const participantId = Number(request.params.participantId);
+      const page = request.query.page === undefined ? 1 : Number(request.query.page);
+      if (!Number.isSafeInteger(participantId) || participantId < 1
+        || !Number.isSafeInteger(page) || page < 1) {
+        response.status(400).json({ error: "participantId and page must be positive integers." });
+        return;
+      }
+      const user = await resolvedTrainingTelemetryRepository.getDashboardUser({ participantId, page });
+      if (!user) {
+        response.status(404).json({ error: "Training telemetry participant not found." });
+        return;
+      }
+      response.json({ data: user });
+    });
+    app.get("/api/training-telemetry/dashboard-play", requireAdmin, async (_request, response) => {
+      response.set("Cache-Control", "no-store");
+      if (!resolvedTrainingTelemetryRepository) {
+        response.status(503).json({ error: "ENABLE_TRAINING_TELEMETRY_INGEST is not enabled." });
+        return;
+      }
+      response.json({ data: await resolvedTrainingTelemetryRepository.getDashboardPlay() });
+    });
+    app.get("/api/training-telemetry/dashboard-play/sessions/:sessionId", requireAdmin, async (request, response) => {
+      response.set("Cache-Control", "no-store");
+      if (!resolvedTrainingTelemetryRepository) {
+        response.status(503).json({ error: "ENABLE_TRAINING_TELEMETRY_INGEST is not enabled." });
+        return;
+      }
+      const raw = await createTrainingTelemetryService({
+        repository: resolvedTrainingTelemetryRepository,
+      }).getSession(request.params.sessionId);
+      response.json({ data: toDashboardPlaySession(raw, raw.events), baseline: dashboardBaseline });
+    });
+    app.use(
+      "/api/starlight-analytics",
+      createStarlightAnalyticsRouter({
+        repository: resolvedStarlightAnalyticsRepository,
+        ingestEnabled: false,
+        allowedOrigins: starlightAnalyticsAllowedOrigins,
+        rateLimitPerHour: starlightAnalyticsRateLimitPerHour,
+        requireAdmin,
+      }),
+    );
+    app.use(
+      "/api/starlight-release-push",
+      createStarlightReleasePushRouter({
+        repository: resolvedStarlightReleasePushRepository,
+        requireAdmin,
+      }),
+    );
+    app.get(`${serverDashboardPath}/login`, (_request, response) => response.sendFile(path.join(serverStatusRoot, "login.html")));
+    app.get(`${serverDashboardPath}/login.html`, (_request, response) => response.redirect(308, `${serverDashboardPath}/login`));
+    for (const asset of [
+      "status.css",
+      "controls.css",
+      "login.css",
+      "login.js",
+      "dashboard.js",
+      "dashboard-switcher.css",
+      "dashboard-switcher.js",
+      "push-worker.js",
+      "manifest.webmanifest",
+    ]) {
+      app.get(`${serverDashboardPath}/${asset}`, (_request, response) => response.sendFile(path.join(serverStatusRoot, asset)));
     }
-    app.get("/server-status/favicon.svg", (_request, response) => response.sendFile(path.join(siteRoot, "assets", "Immersa", "Chemical Safety Training VR", "favicon_round_crop.svg")));
-    app.get(["/server-status", "/server-status/"], requireAdmin, (_request, response) => response.sendFile(path.join(serverStatusRoot, "index.html")));
+    app.get(`${serverDashboardPath}/favicon.svg`, (_request, response) => response.sendFile(path.join(siteRoot, "assets", "Immersa", "Chemical Safety Training VR", "favicon_round_crop.svg")));
+    app.get(serverDashboardPath, redirectToTrailingSlash(serverDashboardPath));
+    app.get(`${serverDashboardPath}/`, requireAdminPage(`${serverDashboardPath}/`), (_request, response) => response.sendFile(path.join(serverStatusRoot, "index.html")));
+    app.get(starlightDashboardPath, redirectToTrailingSlash(starlightDashboardPath));
+    app.get(`${starlightDashboardPath}/`, requireAdminPage(`${starlightDashboardPath}/`), (_request, response) => response.sendFile(path.join(starlightAnalyticsRoot, "index.html")));
+    app.use(starlightDashboardPath, requireAdmin, express.static(starlightAnalyticsRoot, { index: false }));
+    app.get(chemicalSafetyVrDashboardPath, redirectToTrailingSlash(chemicalSafetyVrDashboardPath));
+    app.get(`${chemicalSafetyVrDashboardPath}/`, requireAdminPage(`${chemicalSafetyVrDashboardPath}/`), (_request, response) => response.sendFile(path.join(dashboardRoot, "index.html")));
+    app.use(chemicalSafetyVrDashboardPath, requireAdmin, express.static(dashboardRoot, { index: false }));
+
+    app.get(["/server-status/login", "/server-status/login.html"], (_request, response) => response.redirect(308, `${serverDashboardPath}/login`));
+    app.get(["/server-status", "/server-status/"], (_request, response) => response.redirect(308, `${serverDashboardPath}/`));
+    app.get(["/starlight-analytics", "/starlight-analytics/"], (_request, response) => response.redirect(308, `${starlightDashboardPath}/`));
   }
 
   app.use("/dashboard", express.static(dashboardRoot));

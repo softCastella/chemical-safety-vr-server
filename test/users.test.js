@@ -43,7 +43,6 @@ test("user CRUD lifecycle uses an internal UUID and a Meta identity", async () =
     method: "POST",
     body: JSON.stringify({
       metaUserId: "meta-app-scoped-user-001",
-      ageGroup: "teen",
     }),
   });
 
@@ -78,7 +77,6 @@ test("user CRUD lifecycle uses an internal UUID and a Meta identity", async () =
   const updateResult = await request(`/api/users/${userId}`, {
     method: "PATCH",
     body: JSON.stringify({
-      ageGroup: "adult",
       controllerGuideVersionCompleted: 1,
       status: "inactive",
     }),
@@ -86,7 +84,7 @@ test("user CRUD lifecycle uses an internal UUID and a Meta identity", async () =
   assert.equal(updateResult.response.status, 200);
   assert.equal(updateResult.body.data.status, "inactive");
   assert.equal(updateResult.body.data.controllerGuideVersionCompleted, 1);
-  assert.equal(updateResult.body.data.identities[0].ageGroup, "adult");
+  assert.equal(Object.hasOwn(updateResult.body.data.identities[0], "ageGroup"), false);
 
   const deleteResult = await request(`/api/users/${userId}`, {
     method: "DELETE",
@@ -120,6 +118,20 @@ test("name and profile fields are rejected", async () => {
   assert.equal(result.response.status, 400);
   assert.equal(result.body.error.code, "BAD_REQUEST");
   assert.deepEqual(result.body.error.details.fields, ["displayName"]);
+});
+
+test("age group fields are rejected", async () => {
+  const result = await request("/api/users", {
+    method: "POST",
+    body: JSON.stringify({
+      metaUserId: "meta-user-with-age",
+      ageGroup: "adult",
+    }),
+  });
+
+  assert.equal(result.response.status, 400);
+  assert.equal(result.body.error.code, "BAD_REQUEST");
+  assert.deepEqual(result.body.error.details.fields, ["ageGroup"]);
 });
 
 test("invalid user IDs and pagination are rejected", async () => {

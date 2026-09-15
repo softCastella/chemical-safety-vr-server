@@ -1,0 +1,408 @@
+# 별빛 스도쿠 Analytics 1차 구현
+
+## 1. 목적과 현재 상태
+
+별빛 스도쿠 랜딩과 웹 체험판의 익명 이용 흐름, 퍼즐 행동, 화면별 포인터 좌표를 한곳에서 분석하기 위한 1차 구현이다. 서버의 기존 Express 5, MySQL migration, 서버 관리자 세션 구조를 그대로 사용하고 별도 대형 프레임워크는 추가하지 않았다.
+
+현재 저장소 상태는 다음과 같다.
+
+- 서버 수집 API, MySQL 저장소, 집계 계층과 관리자용 대시보드는 구현되었다.
+- 대시보드는 실데이터가 한 건도 없을 때만 `샘플 데이터`를 명시해 표시한다. 실데이터가 존재한 뒤 선택한 필터 결과가 비어 있으면 샘플로 대체하지 않는다.
+- 사용자가 제공한 웹 체험판 실제 화면 16장을 화면 순서와 상태별로 배치하고 Canvas 밀도 히트맵 배경으로 사용한다.
+- Android는 화면과 필터 자리만 준비하고 `데이터 없음`으로 표시한다.
+- 서버 랜딩은 Threads 등에서 들어온 UTM과 현재 언어를 같은 Origin의 `/play/`까지 전달한다.
+- 랜딩과 WebDemo는 익명 제품 분석을 위한 별도 화면 내 동의 배너를 표시하지 않고 분석 이벤트를 전송한다. FCM 출시 알림 동의는 이 분석과 분리한다.
+- `Starlight-Sudoku-WebDemo` `main@de5115e3a281068de1b998deccfba4b14b8deac2`의 체험 종료 화면에 출시 알림 신청을 추가하고, `WEB_DEMO=true`, base href `/play/`로 만든 정적 산출물을 랜딩 하위에 포함했다.
+- 익명 분석과 출시 알림 신청 API, Nginx 프록시 경계, 개인정보처리방침 개정은 코드에 반영했다. migration 적용, 운영 환경 설정, 실제 배포와 실기기 수신 검증은 수행하지 않았다.
+
+## 2. 분석한 기존 구조
+
+### 서버
+
+- `src/app.js`가 기능 플래그에 따라 API와 정적 화면을 조립한다.
+- `src/modules/server-admin`의 `tyche_admin_session` 쿠키와 `requireAdmin` 미들웨어가 기존 관리자 인증 경계다.
+- `src/db/migrate.js`와 `db/migrations`가 순번 migration을 관리한다.
+- `public/site/starlight-sudoku-landing`이 현재 별빛 스도쿠 전용 랜딩 원본이다.
+- 기존 PPE 대시보드와 VR 텔레메트리는 별도 모듈이므로 수정하거나 결합하지 않았다.
+
+### Flutter 앱과 WebDemo
+
+- `Starlight-Sudoku`는 Android 앱 원본이며 이번 1차 서버 작업에서는 앱 수집을 연결하지 않았다.
+- `Starlight-Sudoku-WebDemo`는 Flutter Web 화면을 사용한다. 별도 기능 브랜치의 실패 격리형 `StarlightAnalytics`, 웹 전송 계층과 `web/analytics.js`가 화면·오버레이·퍼즐 행동 이벤트를 만든다.
+- 웹 런타임은 `localStorage` 익명 사용자 ID, `sessionStorage` 세션 ID와 UTM을 사용하고, 네트워크 실패가 게임 진행을 막지 않도록 전송을 기다리지 않는다.
+- 고빈도 좌표는 자체 수집기로 보내고 GA4에는 주요 퍼널 이벤트만 보낼 수 있도록 분리되어 있다.
+
+## 3. 구성과 경로
+
+```text
+별빛 랜딩 / Flutter WebDemo
+  -> POST /api/starlight-analytics/events/batch
+  -> starlight_analytics_events
+  -> 서버 집계 계층
+  -> GET /api/starlight-analytics/dashboard
+  -> /starlight-analytics/
+```
+
+- 수집 API: `POST /api/starlight-analytics/events/batch`
+- 집계 API: `GET /api/starlight-analytics/dashboard`
+- 관리자 화면: `GET /starlight-analytics/`
+- 관리자 화면과 하위 정적 자산, 집계 API는 기존 서버 관리자 세션이 필요하다.
+- 수집 API는 기능 플래그, Origin 허용 목록, IP별 시간당 요청 제한, 1~100개 배치, 최대 256 KiB를 적용한다.
+- `event_id` 고유 키와 `INSERT IGNORE`로 안전한 재전송을 허용한다.
+
+집계 API 필터는 `from`, `to`, `platform`, `locale`, `source`, `campaign`, `stage`다. 날짜는 실제로 존재하는 `YYYY-MM-DD`만 허용하고 `stage`는 1~5만 허용한다.
+
+## 4. 이벤트 규격
+
+### 퍼널과 화면
+
+- `landing_view`, `landing_cta_click`
+- `game_open`, `game_ready`, `puzzle_start`
+- `stage_1_start` ~ `stage_5_start`
+- `stage_1_clear` ~ `stage_5_clear`
+- `demo_complete`, `store_cta_click`
+- `screen_view`, `screen_exit`, `session_end`, `game_exit`
+
+### 게임 상호작용
+
+- `cell_select`, `number_input`, `wrong_input`, `erase`
+- `memo_toggle`, `memo_input`
+- `hint_open`, `hint_used`, `restart`
+- `pause`, `resume`, `settings_open`
+- `language_open`, `language_change`
+- `home_click`, `next_stage_click`, `village_click`
+
+### 포인터
+
+- `pointer_tap`
+- 좌표는 `x_ratio`, `y_ratio` 0~1 값으로 저장한다.
+- 함께 저장 가능한 문맥은 `screen_id`, `overlay_id`, `stage_id`, `puzzle_id`, `target_id`, `target_type`, `is_interactive`, viewport 크기, 화면/플레이 경과시간이다.
+- 입력한 숫자나 메모 문자열 같은 사용자 입력 원문은 받지 않는다. `properties`도 서버 허용 목록의 문자열·숫자·불리언만 보존한다.
+
+공통 문맥은 `event_id`, 익명 사용자 ID, 세션 ID, 플랫폼, locale, UTM source/medium/campaign/content/term과 발생 시각이다.
+
+## 5. DB와 집계
+
+`017_create_starlight_analytics_events.sql`은 원본 이벤트 테이블 하나를 추가한다. 퍼널·플레이 시간·단계 병목·히트맵은 원본 이벤트에서 조회 시 계산하므로 대시보드 UI와 저장 구조가 직접 결합되지 않는다.
+
+제공 집계는 다음과 같다.
+
+- Overview: 사용자, 세션, 게임 열기, 퍼즐 시작, 데모 완료, 전환율, 실제 플레이 시간
+- Acquisition: UTM source/medium/campaign별 사용자·시작률·완료율
+- Funnel: 각 단계 사용자, 이전/랜딩 대비 전환, 이탈, 다음 단계까지 평균 시간
+- Play: session, active engagement, game screen, active play, clear, first action, first hint, exit 시간의 평균·중앙값·P75·P90
+- Stage Analysis: 1~5단계의 시작·완료·이탈·재시작·시간·실수·힌트·메모·지우기·시도·다음 단계 전환
+- Interaction과 Expectation Click
+- Retention: 첫 방문일 기준 D1, D7, D30
+- Web/Android 상태 비교
+
+병목 점수는 `starlightBottleneckScore` 독립 함수다. 낮은 완료율, 높은 이탈/재시작/실수/힌트 비율과 긴 P90을 가중 합산하며 추후 실제 분포를 보고 가중치를 바꿀 수 있다.
+
+## 6. 실제 화면 히트맵
+
+웹 화면은 등장 순서와 비교 단위에 맞춰 다음처럼 나열한다.
+
+1. 타이틀: BGM 선택 → 타이틀 → 타이틀 설정
+2. 마을: 마을 보기 → 미션
+3. 인트로: 인트로 1 → 인트로 2 → 인트로 3
+4. 퍼즐 선택: 난이도 → 스테이지
+5. 게임: 게임 → 일시정지 → 다시 풀기 → 게임 설정 → 게임 나가기
+6. 데모 완료
+
+같은 카테고리의 상태는 가로로, 카테고리는 세로로 배치한다. 각 캡처의 브라우저 상단 65px 아래 게임 영역에 정규화 좌표를 투영한다. 상세 화면과 모든 축소 화면에 Canvas radial gradient를 겹쳐 개별 점이 아닌 밀도 열로 표시한다.
+
+유형 필터는 전체, 비기능 요소, 반복 클릭, 실수, 힌트 관련, 오래 머문 뒤 클릭이다. 게임 화면에는 단계 1~5 필터를 추가한다. 밀집 영역을 선택하면 이벤트 수, 익명 사용자 수, 화면 이벤트 비중, 대상 요소, 기능 여부와 평균 경과시간을 표시한다.
+
+현재 `반복 클릭`은 같은 익명 사용자·화면·대상을 2초 안에 다시 누른 경우의 1차 휴리스틱이다. `오래 머문 뒤 클릭`은 클릭 시점의 `elapsed_screen_time` 가중치이며 시선 추적이나 실제 Attention 측정이 아니다.
+
+## 7. 샘플과 실제 데이터 전환
+
+- 전체 DB에 별빛 이벤트가 없으면 내장 샘플을 표시하고 화면 상단에 `샘플 데이터` 배지를 붙인다.
+- 하나라도 실데이터가 생기면 집계 API 응답만 사용하며 `실시간 데이터` 배지를 붙인다.
+- 이후 특정 기간이나 필터에 결과가 없으면 빈 상태를 표시한다. 샘플로 되돌아가지 않는다.
+- Android는 별도로 실제 이벤트가 들어오기 전까지 항상 준비/No Data 상태다.
+
+## 8. 환경변수
+
+```dotenv
+ENABLE_STARLIGHT_ANALYTICS_INGEST=false
+STARLIGHT_ANALYTICS_ALLOWED_ORIGINS=https://starlight-sudoku.tycheworks.com
+STARLIGHT_ANALYTICS_RATE_LIMIT_PER_HOUR=1200
+```
+
+- `ENABLE_STARLIGHT_ANALYTICS_INGEST`: 공개 수집 라우트 활성화. 기본값은 `false`다.
+- `STARLIGHT_ANALYTICS_ALLOWED_ORIGINS`: 쉼표로 구분한 정확한 Origin 목록이다. 랜딩과 `/play/`의 운영 Origin만 허용한다.
+- `STARLIGHT_ANALYTICS_RATE_LIMIT_PER_HOUR`: 프록시를 통해 확인한 IP 기준 프로세스 내 시간당 제한이다.
+
+랜딩과 WebDemo의 `analytics-config.js`에는 collector URL, GA Measurement ID, enabled/debug 값이 있다. 두 화면은 같은 Origin의 상대 경로 `/api/starlight-analytics/events/batch`를 사용하고 운영 정적 설정의 `enabled`는 `true`다. 랜딩과 WebDemo 진입 HTML은 `analytics-consent.css`와 `analytics-consent.js`를 로드하지 않으며, 별도 동의 객체가 없을 때 익명 분석 런타임이 바로 활성화된다. 실제 API 활성 여부는 서버의 `ENABLE_STARLIGHT_ANALYTICS_INGEST`가 별도로 결정하며 운영값은 `true`다. GA ID와 운영 자격 증명은 코드에 하드코딩하지 않는다.
+
+## 9. 로컬 검증
+
+```powershell
+cd C:\Workspace\chemical-safety-vr-server
+npm ci
+npm test
+```
+
+첫 페이지를 현재 운영 집계로 로컬에서 확인할 때는 SSH 별칭 `tycheworks`가 설정된 개발 PC에서 다음 명령을 실행한다.
+
+```powershell
+node Tools/StarlightDashboardLocalPreview.mjs
+```
+
+주소는 `http://127.0.0.1:3018/starlight-analytics/?local-preview=1`이다. 이 미리보기는 `127.0.0.1`에만 열리고, 운영 서버에서 기존 조회·집계 코드를 읽기 전용으로 실행해 집계 결과만 반환한다. 원본 이벤트를 로컬 파일로 저장하거나 운영 DB·PM2·배포 파일을 변경하지 않는다. 연결 실패는 샘플로 대체하지 않고 화면에 실패 상태를 표시한다. 로컬 DB에서 전체 관리자 인증 흐름을 검증하려면 아래의 별도 DB 준비가 여전히 필요하다.
+
+`/play/` 산출물은 `softCastella/Starlight-Sudoku-WebDemo`의 위 기준 커밋에서 다음 명령으로 생성했다.
+
+```powershell
+flutter test --dart-define=WEB_DEMO=true test/web_bgm_contract_test.dart test/web_sfx_contract_test.dart test/web_audio_gate_harness_test.dart test/web_audio_preference_harness_test.dart test/web_demo_progress_session_test.dart test/trial_end_modal_harness_test.dart
+flutter build web --release --base-href "/play/" --dart-define=WEB_DEMO=true
+```
+
+산출물 위치는 `public/site/starlight-sudoku-landing/play/`이다. 갱신할 때는 생성된 Flutter 파일을 개별 수정해 앱과 다른 UI를 만들지 않고, 검증된 WebDemo 기준 커밋을 다시 빌드한다. 서버 배포용 `analytics-config.js`와 `release-push-config.js`는 같은 Origin API 및 정확한 운영 공개 키를 사용하도록 설정한다.
+
+로컬 DB에 migration을 적용하고 관리자 계정으로 로그인해야 실제 DB 대시보드까지 확인할 수 있다. `npm run db:migrate`는 이 저장소의 미적용 migration 전체에 영향을 줄 수 있으므로 별도 테스트 DB에서 대상 목록을 검토한 뒤 실행한다. 이번 작업에서는 migration과 서버 프로세스를 실행하지 않았다.
+
+## 10. 확정한 공개 구조
+
+정적 서비스의 목표 주소는 다음과 같다.
+
+```text
+https://starlight-sudoku.tycheworks.com/       랜딩
+https://starlight-sudoku.tycheworks.com/play/  웹 체험판
+```
+
+랜딩과 게임은 같은 프로토콜·호스트·포트를 쓰고 경로만 나눈다. 두 화면이 같은 Origin이 되므로 `localStorage`의 `anonymous_user_id`를 공유할 수 있고, UTM과 익명 사용자 행동을 함께 분석할 수 있다.
+
+운영 `starlight-sudoku.tycheworks.com`의 Nginx document root는 서버 저장소의 랜딩 디렉터리를 사용한다. 같은 디렉터리의 `play/`에 Flutter Web 산출물을 배치해 별도 도메인이나 iframe 없이 같은 Origin으로 제공한다. 기존 GitHub Pages 주소는 WebDemo 독립 배포 확인용으로 남길 수 있지만 캠페인 CTA와 통합 퍼널의 기준 주소로 사용하지 않는다.
+
+```text
+Nginx 정적 document root
+├─ index.html          랜딩
+├─ 랜딩 정적 자산
+└─ play/
+   ├─ index.html       Flutter WebDemo
+   ├─ flutter_bootstrap.js
+   └─ assets/
+
+Tyche 서버
+├─ POST /api/starlight-analytics/events/batch
+├─ GET  /api/starlight-analytics/dashboard
+└─ GET  /starlight-analytics/
+```
+
+랜딩 CTA는 데스크톱에서 모바일 세로 비율의 새 창으로 `/play/`를 연다. 현재 언어를 `lang` query로 먼저 붙이고 저장된 다섯 UTM 값을 이어 붙인다. 같은 Origin이므로 랜딩과 게임이 `localStorage` 익명 사용자 ID를 공유하고, 새 창 생성 시 복사되는 `sessionStorage`와 query로 세션·유입 문맥을 이어 간다. 지속 익명 ID 자체는 URL에 노출하지 않는다.
+
+## 11. 후속 작업
+
+다음 순서로 진행한다.
+
+1. 저장소 자동 테스트와 로컬 정적 서버에서 랜딩 → `/play/` 이동, `lang`, 다섯 UTM, 익명 사용자·세션 ID 연속성과 Flutter 자산 응답을 검증한다.
+2. 개인정보처리방침에 익명 이벤트, 좌표, 보관기간, GA4 사용 여부와 삭제 기준을 반영한다.
+3. 테스트 DB 백업과 migration 목록 확인 후 `017`을 적용한다.
+4. 운영 배포 승인 후 Nginx 설정과 `/play/` 정적 산출물을 반영하고 운영 CORS 허용 Origin, rate limit, 정적 `enabled`와 서버 수집 플래그를 함께 설정한다.
+5. 공개 랜딩과 `/play/`에서 collector 요청·응답, Flutter 화면·오디오·새로고침과 모바일 레이아웃을 확인한다.
+6. 관리자 로그인 후 샘플 배지, 실제 전환, 필터, 화면별 히트맵을 검증한다.
+7. Threads 링크는 `utm_source=threads`, `utm_medium=organic_social`, `utm_campaign`, `utm_content`를 게시물별로 다르게 붙인다.
+8. 보관기간/삭제 job, 모니터링과 DB 용량 경고를 추가한 뒤 제한된 트래픽부터 연다.
+
+### 반드시 먼저 해결할 식별 연속성
+
+기존 운영 구조는 Tyche 서버의 랜딩과 `softcastella.github.io` WebDemo가 서로 다른 Origin이었다. UTM은 전달됐지만 브라우저의 `localStorage`와 `sessionStorage`가 Origin별로 분리되어 랜딩의 익명 사용자/세션 ID가 게임의 ID와 자동으로 이어지지 않았다.
+
+저장소에서는 두 화면을 `starlight-sudoku.tycheworks.com`의 루트와 `/play/`로 합치고 CTA가 같은 Origin의 새 창을 열도록 바꿨다. 실제 운영 배포와 collector 수신 검증이 끝난 뒤부터만 `landing_view → game_open`을 동일 사용자·세션 퍼널로 계산한다. 통합 전 서로 다른 Origin에서 모인 기존 데이터는 같은 사용자 퍼널로 소급 해석하지 않는다.
+
+지속 익명 ID를 URL에 그대로 노출하는 방식은 사용하지 않는다.
+
+## 12. 이번 1차 범위 밖
+
+- 운영 Nginx 반영, 환경 변수 설정과 실제 배포
+- 운영 DB migration 적용과 기존 데이터 백필
+- Android 앱 수집과 앱 화면 캡처
+- GA4/Clarity 프로젝트 생성 및 Measurement ID 설정
+- 개인정보처리방침 최종 개정, 동의/옵트아웃 정책과 보관기간 자동 삭제
+- 여러 PM2 인스턴스에 공통 적용되는 Redis/게이트웨이 기반 rate limit
+- 실제 데이터로 병목 점수 임계값과 Rage Click 기준 보정
+- 시선 추적 기반 Attention 분석
+
+## 13. 검증 결과
+
+- WebDemo 기준 커밋의 공식 `WEB_DEMO=true` 회귀 테스트: 14개 통과, 실패 0개
+- `/play/` Flutter release 빌드: 통과. 75개 파일, 92,280,340 bytes이며 `<base href="/play/">`를 확인했다.
+- 서버 `npm test`: 102개 통과, 실패 0개
+- 랜딩·WebDemo Analytics와 CTA JavaScript `node --check`: 통과
+- 생성 산출물에서 과거 `/Starlight-Sudoku-WebDemo/` base path와 GitHub Pages CTA 주소가 남아 있지 않음을 확인했다.
+- 로컬 정적 서버에서 랜딩, `/play/`, Flutter bootstrap, `main.dart.js`, CanvasKit Wasm과 AssetManifest가 모두 HTTP `200`으로 응답했다.
+- Edge headless `430x900` 렌더링에서 일본어 `lang=ja`가 적용된 랜딩과 WebDemo 초기 화면을 확인했다. UTM·익명 사용자·세션 ID 연속성은 정적 계약 테스트로 확인했으며 실제 collector 수신은 운영 활성화 후 별도로 검증한다.
+- 실제 MySQL 연결, migration 실행, 운영 collector 전송과 배포: 미수행
+
+## 14. FCM 출시 알림 구현 상태
+
+체험 종료 화면의 선택 버튼은 이메일이나 전화번호를 받지 않고 브라우저 알림 권한을 요청한다. 동의한 브라우저의 Firebase Installation ID와 언어·UTM source/medium/campaign을 `POST /api/starlight-release-push/subscriptions`로 보내며, 서버는 ID 원문과 SHA-256 해시를 분리해 `starlight_release_push_subscriptions`에 저장한다. 관리자 화면은 등록 수와 유입 경로를 표시하지만 Installation ID 원문은 응답하지 않는다.
+
+- Firebase 프로젝트: `starlight-sudoku`, 웹 앱: `starlight-sudoku-web`
+- WebDemo 기준: `softCastella/Starlight-Sudoku-WebDemo` `main@de5115e3a281068de1b998deccfba4b14b8deac2`
+- 신규 migration: `018_create_starlight_release_push_subscriptions.sql`
+- 서버 기능 플래그: `ENABLE_STARLIGHT_RELEASE_PUSH=false`
+- 웹 공개 설정: `play/release-push-config.js`; Firebase 공개 웹 설정만 저장하고 VAPID 공개 키는 아직 비워 둔다.
+- 클릭 이동: 서비스 워커가 알림 클릭 시 같은 Origin의 `/store`를 열고 Nginx가 Google Play 주소로 전환한다.
+- 개인정보 범위: FCM 설치 식별값, 언어와 UTM 유입 정보이며 이메일·전화번호·이름은 수집하지 않는다. 출시 알림 발송 후 30일 보관 기준을 방침에 반영했다.
+
+현재 검증 단계는 `코드에 존재함`과 자동 테스트까지다. 운영 DB 적재, 실제 Android 브라우저 등록, FCM 발송·수신, 알림 클릭 후 Google Play 이동은 아직 검증하지 않았으므로 운영 완료로 표시하지 않는다.
+
+현재 WebDemo UI는 `TrialEndDialog`의 `출시 알림 받기` 버튼이 별도 `ReleaseNotificationDialog`를 여는 두 단계 모달 구조다. 두 번째 모달에는 개인정보처리방침 링크와 `휴대폰 알림 허용` 버튼이 있지만 명시적 동의 체크박스는 없다. 버튼을 누르고 브라우저 알림 권한이 허용되면 `release-push.js`가 서버 요청에 `consent: true`를 넣는다. 이 구조는 구현 현황일 뿐 최종 UX로 확정하지 않으며, 아래 결정에 따라 완료 모달 하나로 통합한다.
+
+## 15. 출시 알림 후속 작업
+
+1. 완료 모달에서 다시 출시 알림 모달을 여는 흐름을 제거하고, 현재 브라우저 직접 신청과 다른 휴대폰 QR 신청을 기존 완료 모달 하나에 통합한다.
+2. FCM 신청 계약에서 광고 유입 정보와 푸시 식별정보를 분리하고, 운영 적용 전에 최소 수집 항목과 저장 구조를 다시 확정한다.
+3. Firebase Console에서 웹 푸시 공개 키를 텍스트로 다시 복사해 `release-push-config.js`의 `vapidKey`에 넣는다. 현재 스크린샷에서 판독한 문자열은 P-256 공개 키 검증을 통과하지 않아 사용하지 않는다.
+4. 운영 DB 백업과 대상 migration 목록을 확인한 뒤 `018` 적용 여부와 후속 migration 필요 여부를 결정한다.
+5. 운영 환경에서 `ENABLE_STARLIGHT_RELEASE_PUSH=true`와 요청 제한을 설정하고 Nginx 정적 파일·프록시·CSP를 반영한다.
+6. 실제 Android 브라우저에서 동의 → Installation ID 저장 → 관리자 집계 표시를 확인한다.
+7. Firebase 서비스 계정 자격 증명을 저장소 밖에 준비하고, 출시 시 한 번 전송하는 서버 작업 또는 Firebase Console 발송 절차를 확정한다.
+8. 테스트 푸시의 수신과 클릭 시 `/store` → Google Play 이동을 확인한다.
+9. 만료·해지된 식별값 상태 갱신과 출시 발송 30일 뒤 삭제 작업을 구현한다.
+
+## 16. 결정: 기기 추정에 의존하지 않는 FCM 직접 신청과 QR 전환
+
+Google Play 사전등록 페이지를 아직 제공할 수 없고 웹 체험판을 먼저 배포하는 현재 단계에서는 자체 FCM 출시 알림을 임시 사전등록 수단으로 사용한다. 전화번호·이메일·이름과 사이트 계정을 받지 않으며, 알림은 사람 계정이 아니라 신청한 기기의 브라우저 설치 단위로 전달된다는 한계를 화면과 개인정보처리방침에 명확히 표시한다.
+
+### 신청 흐름
+
+- 공통 원칙은 체험 완료 뒤 표시되는 마지막 모달 하나에서 완료 안내와 출시 알림 안내를 함께 제공하는 것이다. 완료 모달 위에 출시 알림 모달을 다시 띄우지 않는다.
+- 브라우저의 모바일/PC 추정값은 정확성을 보장하지 않으므로 기능 분기의 확정 기준으로 사용하지 않는다. 화면 너비는 배치 조정에만 사용한다.
+- 현재 브라우저가 서비스 워커, Notifications API와 FCM Web Push를 지원하면 수집·이용 안내, 개인정보처리방침 링크, 출시 알림 동의 체크박스와 `이 기기에서 알림 받기`를 표시한다. 동의 체크 전에는 직접 신청 버튼을 비활성화한다.
+- 직접 신청 버튼을 누른 뒤 나타나는 브라우저 알림 권한 요청은 운영체제·브라우저가 제공하는 권한 UI이며 두 번째 앱 모달로 간주하지 않는다. 권한이 허용된 뒤에만 FCM 등록과 서버 저장을 수행한다.
+- 같은 마지막 모달에 `다른 휴대폰에서 받기` QR 경로를 함께 제공한다. 현재 브라우저가 Web Push를 지원하지 않을 때는 직접 신청을 비활성화하고 QR을 우선 동작으로 표시한다.
+- 현재 기기에서 한 동의로 다른 휴대폰 브라우저의 동의나 알림 권한을 대신 처리하지 않는다. 개인정보 동의와 브라우저 권한 요청은 QR을 스캔한 실제 휴대폰에서 다시 받는다.
+- QR에는 공개 HTTPS 주소 `https://starlight-sudoku.tycheworks.com/play/notify/`만 넣는다. Firebase Installation ID, 익명 분석 ID, 세션 ID, UTM 또는 다른 사용자 식별정보를 QR에 포함하지 않는다.
+- QR을 연 것만으로 알림 권한을 요청하거나 신청을 완료하지 않는다. 휴대폰 전용 페이지에서 수집 항목·목적·보유기간과 개인정보처리방침 링크를 먼저 안내하고, 사용자가 버튼을 직접 누른 뒤에만 브라우저 권한 요청과 FCM 등록을 실행한다.
+- `/play/notify/`는 전체 Flutter 체험판을 다시 내려받지 않는 가벼운 정적 페이지로 구성한다. 지원하지 않는 브라우저, 권한 거부와 등록 실패를 각각 구분해 안내한다.
+- 공용 또는 다른 사람의 PC에서는 신청하지 않도록 안내하고, 알림이 신청한 휴대폰 브라우저로 한 번만 전달된다는 점을 명시한다.
+
+### 마지막 모달 표시안
+
+- 직접 신청 지원 브라우저: `체험판 완료 안내` → `출시 알림 설명` → `출시 알림 정보 수집·이용 동의 체크박스와 개인정보처리방침 링크` → `이 기기에서 알림 받기 / 다른 휴대폰에서 받기 / 닫기`
+- 직접 신청 미지원 브라우저: `체험판 완료 안내` → `현재 브라우저 미지원 안내` → `다른 휴대폰에서 받기 QR` → `닫기`
+- 기존 완료 모달의 Google Play 이동 버튼은 사전등록 또는 공개 스토어 목적지가 실제로 준비됐을 때만 표시한다. 현재처럼 Google Play 사전등록을 제공하지 않는 단계에서는 출시 알림 신청보다 우선 CTA로 두지 않는다.
+- 출시 알림 동의와 익명 제품 분석은 목적과 저장 데이터가 다르므로 하나의 체크박스로 합치지 않는다. 이 절의 체크박스는 FCM 출시 알림 신청에만 적용하며, 익명 제품 분석에는 별도 화면 내 동의 UI를 표시하지 않는다.
+
+### 최소 수집과 개인정보 경계
+
+- 출시 알림에 필요한 최소 항목은 Firebase Installation ID, 동의 버전·시각, 구독 상태이며 알림 언어가 실제 다국어 발송에 필요할 때만 언어를 함께 저장한다.
+- 광고 유입 효과는 기존 익명 Analytics에서 별도로 측정한다. FCM 신청 저장소의 `source`, `medium`, `campaign`은 운영 적용 전 제거 또는 미수집으로 전환하고 푸시 식별정보와 익명 플레이 분석 기록을 연결하지 않는다.
+- Firebase Installation ID는 직접 연락처가 아니지만 특정 브라우저 설치를 구분하고 알림 대상으로 사용하는 식별정보이므로 `아무 정보도 수집하지 않는다`고 안내하지 않는다.
+- 개인정보처리방침과 신청 화면에는 수집 항목, 출시 알림 1회 발송 목적, 보유기간, 동의 거부 영향, 철회·삭제 방법과 Google Firebase를 통한 외부 전송을 실제 구현과 일치하게 표시한다.
+
+### 전환 조건과 현재 상태
+
+- Google Play 사전등록이 공개되면 신규 FCM 신청보다 Play 사전등록을 우선 CTA로 사용한다. 기존 FCM 구독은 약속한 출시 알림과 보유기간 정책에 따라 처리한다.
+- 현재는 FCM 등록 코드와 서버 저장 계약이 코드에 존재하는 단계다. PC QR, `/play/notify/`, 최소 수집 계약 변경은 아직 구현하지 않았다.
+- `ENABLE_STARLIGHT_RELEASE_PUSH`는 기본 비활성이고 VAPID 공개 키는 비어 있으며 migration `018`, 운영 배포, 실제 구독·발송·수신 검증도 수행하지 않았다. 이 결정 기록만으로 운영 완료로 표시하지 않는다.
+
+## 17. 운영 반영: 랜딩 분석 동의 배너 제거
+
+별빛 스도쿠 랜딩에서는 `analytics-consent.css`와 `analytics-consent.js`를 더 이상 로드하지 않는다. 따라서 랜딩에 `익명 이용 분석` 배너가 표시되지 않으며, 동의 객체가 없는 랜딩 분석 런타임은 기본 거부 상태로 동작해 랜딩 이벤트를 전송하지 않는다. URL에 포함된 UTM은 저장하지 않고 WebDemo `/play/` 링크에만 전달한다.
+
+- 기준 커밋: `main@8638d25` (`별빛 랜딩 분석 동의 배너를 제거`)
+- 로컬 검증: `npm test` 113개 통과, `git diff --check` 통과
+- 운영 반영 범위: `public/site/starlight-sudoku-landing/index.html` 한 파일
+- 운영 백업: `/home/linuxuser/.config/tycheworks/static-backups/starlight-index-20260912-before-analytics-banner-removal.html`
+- 운영 파일 SHA-256: `8152dc87d776d52f9c0f08c252bb70b9b764eda7c73cd0e0f02241b7fc084d1d`
+- 공개 검증: `https://starlight-sudoku.tycheworks.com/` HTTP `200`, 응답 HTML에서 `analytics-consent.css`와 `analytics-consent.js` 참조 없음
+- 서버 상태: PM2 `tyche-safety-training-server` `online`, `https://tycheworks.com/api/health` HTTP `200`
+
+운영 체크아웃은 `aad625a84e6d066c622c0ddde3bc9d84a794e9de`로 로컬 `main`보다 여러 커밋 뒤에 있어 전체 fast-forward를 수행하지 않았다. 요청 범위 밖의 서버·대시보드·DB 변경을 함께 배포하지 않기 위해 위 정적 파일만 교체했으며, 운영 체크아웃에는 해당 파일이 수정 상태로 남는다. PM2 재시작, Nginx reload, DB migration과 운영 데이터 변경은 수행하지 않았다.
+
+## 18. WebDemo 분석 동의 UI와 수집 일시 중지 기록
+
+랜딩 배너만 제거하면 `/play/` WebDemo의 진입 화면에서 같은 `익명 이용 분석` 배너가 다시 표시된다. 동의 위치를 마지막 완료 모달로 통합하기 전에 진입 배너를 유지하거나 동의 없이 수집을 계속해서는 안 되므로 다음 세 계층을 함께 비활성화한다.
+
+- `/play/index.html`과 `/play/landing/index.html`에서 `analytics-consent.css`와 `analytics-consent.js` 로드 제거
+- 랜딩과 WebDemo의 `analytics-config.js`에서 `enabled: false`
+- 운영 서버의 `ENABLE_STARLIGHT_ANALYTICS_INGEST=false`
+
+이 상태에서는 WebDemo 계측 코드와 DB·대시보드 구현이 저장소에 남아 있더라도 브라우저가 분석 이벤트를 전송하지 않고 서버 수집 API도 요청을 받지 않는다. 마지막 완료 모달에서 명시적 분석 동의를 받는 UI, 동의 전 이벤트 처리 원칙과 철회 방법을 구현하고 실제 브라우저에서 검증하기 전에는 세 계층을 다시 활성화하지 않는다.
+
+운영 반영 결과는 다음과 같다.
+
+- 기준 커밋: `main@98fa0f5` (`별빛 웹 체험판 분석 수집을 중지`)
+- 공개 랜딩, `/play/`, `/play/landing/`: HTTP `200`, 응답 HTML에 `analytics-consent` 참조 없음
+- `/analytics-config.js`, `/play/analytics-config.js`: `enabled: false`
+- `POST /api/starlight-analytics/events/batch`: HTTP `503` 비활성 응답
+- PM2 `tyche-safety-training-server`: 환경 갱신 재시작 후 `online`
+- `https://tycheworks.com/api/health`: HTTP `200`
+- 운영 환경 백업: `/home/linuxuser/.config/tycheworks/env-backups/chemical-safety-vr.env.before-98fa0f5-analytics-disable`
+- 정적 파일 백업: `/home/linuxuser/.config/tycheworks/static-backups/`의 `before-98fa0f5` 파일 네 개
+- 미수행: DB migration, 기존 분석 원본 변경·삭제, FCM 기능 활성화
+
+이 절은 동의 정책을 다시 구분하기 전의 일시 중지 기록이다. 현재 운영 상태는 아래 19절을 기준으로 한다.
+
+## 19. 익명 제품 분석 운영 활성화와 실브라우저 검증
+
+웹사이트 클릭 위치와 게임 사용 흐름을 측정하는 익명 제품 분석은 랜딩과 WebDemo에서 별도 화면 내 동의 UI 없이 수집한다. FCM 출시 알림은 브라우저 설치 식별값을 저장하는 별도 기능이므로 마지막 모달의 명시적 동의와 브라우저 알림 권한을 계속 요구한다.
+
+적용 내용은 다음과 같다.
+
+- 랜딩과 WebDemo `analytics-config.js`: `enabled: true`
+- 별도 동의 객체가 없는 익명 분석 런타임: 즉시 활성화
+- 랜딩, `/play/`, `/play/landing/`: `analytics-consent.css`와 `analytics-consent.js` 미로드 유지
+- 운영 서버: `ENABLE_STARLIGHT_ANALYTICS_INGEST=true`
+- 캐시 갱신: 랜딩과 WebDemo의 분석 설정·런타임 참조 버전을 `20260912-1`로 변경
+- 히트맵 원본: `pointer_tap`의 `x_ratio`, `y_ratio`, `viewport_width`, `viewport_height`, `screen_id`, `overlay_id`, `stage_id`, 대상 정보
+
+운영 반영 전 `npm test -- --test-reporter=spec`에서 113개 테스트가 모두 통과했다. 운영 정적 파일 일곱 개와 환경 파일을 백업한 뒤 정적 파일을 교체하고 PM2를 `--update-env`로 재시작했다. 공개 설정 두 곳은 `enabled: true`, 상태 API는 HTTP `200`, 수집 API는 빈 요청에 비활성 `503`이 아닌 계약 검증 `400`을 반환했다.
+
+실제 브라우저에서 랜딩을 거쳐 WebDemo를 조작한 검증 결과는 다음과 같다.
+
+- DB 기준값: 이벤트 0건, 세션 0건, 좌표 클릭 0건
+- 종료 후 안정값: 이벤트 124건, 익명 사용자 1명, 세션 1개
+- 흐름: `landing_view`, `landing_cta_click`, `game_open`, `game_ready`, `puzzle_start`, `stage_1_start` 저장 확인
+- 포인터: `pointer_tap` 51건이며 51건 모두 `x_ratio`와 `y_ratio`를 함께 저장
+- viewport: WebDemo `390x843` 48건, 랜딩 `1920x945` 3건
+- 화면 문맥: 랜딩, 스플래시, 타이틀, 오프닝, 난이도, 단계 선택, 게임, 설정·재시작 오버레이, 마을 화면 구분 확인
+- 대시보드 집계: `data_state=live`, 이벤트 124건, 히트맵 이벤트 합계 51건, 화면·오버레이 조합 13개로 계산됨
+- 미검증: 관리자 브라우저에서 대시보드 화면을 직접 열어 Canvas 히트맵 픽셀을 육안 확인하는 단계
+
+운영 백업은 `/home/linuxuser/.config/tycheworks/env-backups/chemical-safety-vr.env.before-20260912-analytics-enable`과 `/home/linuxuser/.config/tycheworks/static-backups/`의 `before-20260912-analytics-enable` 또는 `before-20260912-enable` 파일 일곱 개다. DB migration, 기존 데이터 수정·삭제와 FCM 활성화는 수행하지 않았다.
+
+## 20. 서버 전용 대시보드 첫 화면과 실데이터 로컬 미리보기
+
+### 적용 범위와 판단 근거
+
+이 절의 변경 대상은 **`softCastella/chemical-safety-vr-server` 저장소만**이다. 작업 전 서버 기준은 `main@79f1ad8c12b65594cbe084b8eb6afc983b5d12a9`, 조회 대상 운영 체크아웃은 `aad625a84e6d066c622c0ddde3bc9d84a794e9de`였다. 게임 구조 확인에 사용한 WebDemo 기준은 `codex/starlight-analytics-dashboard@1af8cd48d6a46bdfb61ddef6da32917c5023c340`, Unity 클라이언트 기준은 `main@0a0e2277000e9033d43d2c453c48f9789e45cd0a`다. 이번 작업에서 WebDemo와 Unity 클라이언트 코드는 수정하지 않았다.
+
+기존 첫 화면은 `stage_1_clear`와 `stage_3_clear`를 `1단계 완료`, `3단계 완료`로 표시해 난이도와 스테이지 관계가 드러나지 않았다. WebDemo의 `GameNotifier.startNewGame`은 난이도와 스테이지 번호를 따로 받아 이벤트에 `difficulty`와 `stage_id`를 기록한다. 현재 웹 체험판 설정은 **쉬움 난이도 스테이지 1~5**이며 보통·어려움 스테이지 수는 0이다. 따라서 첫 화면의 범위를 그 이름으로 명시하고, 임의로 고른 1·3 완료 지표 대신 1~5 스테이지의 시작·완료를 함께 보여 준다.
+
+첫 화면은 익명 사용자, 세션, `game_open`, `puzzle_start`, `demo_complete` 카드와 주요 행동별 참여, 쉬움 스테이지 1~5, 일별 활동으로 구성했다. 다음 표의 수치는 선택한 기간·플랫폼·언어·유입·캠페인·스테이지 필터의 결과다.
+
+| 화면 표시 | 근거와 계산 규칙 | 상세 조회 |
+| --- | --- | --- |
+| 익명 사용자·방문 세션 | 선택된 전체 이벤트의 `anonymous_user_id`·`session_id` 고유값 수 | `GET /api/starlight-analytics/dashboard`의 `overview.users`, `overview.sessions` |
+| 게임 열기·퍼즐 시작·데모 완료 | 각각 `game_open`, `puzzle_start`, `demo_complete` 이벤트 **건수** | 같은 API의 `overview.game_opens`, `puzzle_starts`, `demo_completes` |
+| 주요 행동별 참여 | `landing_view`, `game_open`, `puzzle_start`, `demo_complete` 각 이벤트를 경험한 **순 사용자 수**를 독립 집계 | 같은 API의 `funnel[].users`, 대시보드 `전환 흐름` |
+| 쉬움 스테이지 1~5 | `stage_id`별 `stage_N_start`·`stage_N_clear` 이벤트의 순 사용자 수. 현재 웹 체험판이 쉬움만 열려 있어 쉬움으로 표시 | 같은 API의 `stages[].start_users`, `clear_users`, 대시보드 `스테이지 분석` |
+| 일별 활동 | 발생일별 순 사용자 수와 스테이지 완료 이벤트 건수 | 같은 API의 `daily[]` |
+
+주요 행동 막대는 네 수치 중 최댓값에 대한 **길이 비교**일 뿐 전환율이 아니다. 기존 `aggregateFunnel`은 각 이벤트의 고유 사용자 수를 독립적으로 세므로 동일 사용자의 순차 도달률을 증명하지 않는다. `landing_view`보다 `game_open` 사용자가 많을 수 있으며, 기존 상세 전환 화면의 `이전 단계 대비`·`랜딩 대비` 비율도 순차 퍼널로 해석하면 안 된다. 첫 화면에서는 이 비율을 제거하고 기준을 설명했다. 향후 보통·어려움 난이도를 열면 현재 `aggregateStages`가 난이도를 구분하지 않고 `stage_id`만으로 묶으므로 집계 계약을 변경해야 한다.
+
+### 로컬 연결과 검증 상태
+
+`Tools/StarlightDashboardLocalPreview.mjs`는 기본 3018 포트의 `127.0.0.1`에만 미리보기를 연다. 3017은 다른 로컬 클라이언트가 사용 중이었다. 브라우저의 집계 요청마다 SSH 별칭 `tycheworks`를 통해 운영 체크아웃의 기존 조회·집계 코드를 실행하고, **집계 JSON만** 로컬 화면으로 반환한다. 운영 DB에는 `SELECT`만 수행하며 원본 이벤트, 익명 ID, 자격 증명을 로컬 파일이나 Git에 저장하지 않는다. 로컬 미리보기는 `?local-preview=1`에서 API 오류를 샘플 수치나 0건으로 위장하지 않고 연결 실패를 표시한다. 출시 알림 신청 탭은 이 미리보기 범위에서 제외했다.
+
+조회 시각 `2026-09-13 00:27 KST`, 조회 범위 `2026-09-07`~`2026-09-13`의 집계 API는 HTTP `200`, `meta.data_state=live`, 이벤트 308건, 익명 사용자 9명, 세션 9회, 게임 열기 11건, 퍼즐 시작 3건, 데모 완료 0건을 반환했다. 스테이지 1 시작은 순 사용자 3명, 완료는 0명이다. 이 수치는 그 시각의 실제 저장 이벤트에 대한 조회 결과이며 이후 새로고침 시 바뀔 수 있다. 선택 기간이 비면 샘플이 아닌 데이터 없음으로 표시된다.
+
+- **정적 검증:** `node --check`로 대시보드와 미리보기 스크립트 구문을 확인하고 `git diff --check`를 통과했다.
+- **로컬 검증:** 첫 페이지 HTML·CSS·JS는 각각 HTTP `200`, 집계 API는 실데이터 `200`, 잘못된 날짜 요청은 HTTP `400`을 확인했다. `npm test`는 113개 통과했다.
+- **운영 확인:** 운영 DB의 기존 이벤트를 읽기 전용으로 조회한 결과만 확인했다. 새 첫 화면 코드를 운영 대시보드에 배포하거나 PM2·DB·Nginx를 변경하지 않았다.
+- **미검증:** 브라우저 자동화 연결이 없어 실제 데스크톱·모바일 화면의 배치와 필터 조작, 관리자 인증 화면, Canvas 히트맵 픽셀을 육안 확인하지 못했다.
+
+### 후속 작업
+
+1. 로컬 3018 화면을 데스크톱과 모바일 브라우저에서 열어 숫자·한글·반응형 배치, 기간·필터·새로고침, 데이터 없음·연결 실패 표시를 직접 확인한다.
+2. 순차 퍼널이 필요하면 동일 익명 사용자·세션의 실제 이벤트 순서를 기준으로 집계와 분모를 다시 정의하고, 기존 상세 전환율의 의미를 수정한다. 현재 표본으로 이탈 원인을 확정하지 않는다.
+3. 보통·어려움 난이도 계측을 연결하기 전에 `difficulty × stage_id` 집계와 필터를 추가하고 WebDemo 이벤트·서버 저장·대시보드 결과를 통합 검증한다.
+4. 스테이지 완료, 데모 완료와 D1·D7 재방문 표본이 쌓인 뒤 병목·유지율을 판단한다. 추가 후보인 CTA→게임 준비 시간과 화면별 도달 현황은 원본 이벤트·계산 규칙·상세 조회 경로를 정한 뒤 별도 구현한다.
+5. 기간 조회가 원본 행 전체를 서버 메모리로 가져오는 현재 방식의 비용을 데이터 증가에 맞춰 측정하고, 필요한 경우 집계·캐시 방식을 설계한다. 첫 화면의 운영 배포와 관리자 실화면 검증은 별도 후속 작업이다.
+6. 날짜 버튼은 현재 브라우저의 `toISOString()`으로 UTC 날짜를 만들고 서버도 UTC 날짜 범위로 조회한다. 한국 시간 자정 전후의 `오늘`·`7일` 표시 범위가 운영자의 기대와 맞는지 확인하고, 변경이 필요하면 UI와 API의 날짜 기준을 함께 정의한다.

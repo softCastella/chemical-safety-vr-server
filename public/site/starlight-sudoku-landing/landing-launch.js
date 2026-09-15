@@ -1,10 +1,28 @@
 (() => {
-  const playUrl = "https://softcastella.github.io/Starlight-Sudoku/";
+  const playUrl = "/play/";
 
   function localizedPlayUrl() {
-    const url = new URL(playUrl);
+    const url = new URL(playUrl, window.location.origin);
     url.searchParams.set("lang", document.documentElement.lang || "ko");
-    return url.toString();
+    return window.starlightAnalytics
+      ? window.starlightAnalytics.decorateUrl(url.toString())
+      : url.toString();
+  }
+
+  function playWindowFeatures() {
+    const width = 390;
+    const height = 844;
+    const availableLeft = Number(window.screen.availLeft) || 0;
+    const availableTop = Number(window.screen.availTop) || 0;
+    const left = Math.max(
+      availableLeft,
+      Math.round(availableLeft + (window.screen.availWidth - width) / 2),
+    );
+    const top = Math.max(
+      availableTop,
+      Math.round(availableTop + (window.screen.availHeight - height) / 2),
+    );
+    return `popup=yes,width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`;
   }
 
   function seededRandom(seed) {
@@ -140,6 +158,8 @@
 
   const playLink = document.querySelector("[data-play-launch]");
   if (!playLink) return;
+  window.starlightAnalytics?.setScreen("landing", null, null);
+  window.starlightAnalytics?.trackJson(JSON.stringify({ event_name: "landing_view" }));
   playLink.href = localizedPlayUrl();
   document.addEventListener("starlight:locale", () => {
     playLink.href = localizedPlayUrl();
@@ -148,7 +168,6 @@
   const burstLayer = playLink.querySelector(".cta-burst-layer");
   const twinkles = [...playLink.querySelectorAll(".cta-twinkle")];
   let lastBurstAt = 0;
-  let launchTimer = 0;
 
   function createCtaBurst() {
     if (!burstLayer || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -188,33 +207,19 @@
   playLink.addEventListener("pointerdown", createCtaBurst);
 
   playLink.addEventListener("click", (event) => {
-    event.preventDefault();
+    const popup = window.open(localizedPlayUrl(), "_blank", playWindowFeatures());
+    if (popup) {
+      event.preventDefault();
+      popup.opener = null;
+      popup.focus();
+    }
+    window.starlightAnalytics?.trackJson(JSON.stringify({
+      event_name: "landing_cta_click",
+      screen_id: "landing",
+      target_id: "landing_cta",
+      target_type: "link",
+      is_interactive: true,
+    }));
     createCtaBurst();
-    if (launchTimer) return;
-
-    launchTimer = window.setTimeout(() => {
-      launchTimer = 0;
-      const launchUrl = localizedPlayUrl();
-      if (window.matchMedia("(max-width: 680px)").matches) {
-        const mobileWindow = window.open(launchUrl, "_blank");
-        if (mobileWindow) mobileWindow.opener = null;
-        else window.location.assign(launchUrl);
-        return;
-      }
-
-      const width = Math.max(360, Math.min(430, window.screen.availWidth - 32));
-      const height = Math.max(480, Math.min(900, window.screen.availHeight - 48));
-      const left = Math.max(0, Math.round((window.screen.availWidth - width) / 2));
-      const top = Math.max(0, Math.round((window.screen.availHeight - height) / 2));
-      const features = `popup=yes,width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`;
-      const gameWindow = window.open(launchUrl, "starlightSudokuMobile", features);
-
-      if (gameWindow) {
-        gameWindow.opener = null;
-        gameWindow.focus();
-      } else {
-        window.location.assign(launchUrl);
-      }
-    }, 420);
   });
 })();

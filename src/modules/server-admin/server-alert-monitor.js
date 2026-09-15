@@ -18,7 +18,7 @@ function pushPayload(occurrence) {
     title: occurrence.source === "security" ? "비정상 접속 알림" : "서버 상태 알림",
     body: occurrence.message,
     tag: `${occurrence.alertKey}@${occurrence.generation}`,
-    url: "/server-status",
+    url: "/server",
   };
 }
 

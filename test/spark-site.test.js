@@ -45,16 +45,32 @@ test("별빛 스도쿠 상세 페이지는 5개 언어와 언어별 타이틀 �
 
   assert.match(script, /document\.documentElement\.lang = resolvedLocale/);
   assert.match(script, /url\.searchParams\.set\("lang", resolvedLocale\)/);
-  assert.match(html, /data-landing-link/);
+  assert.equal((html.match(/data-landing-link/g) || []).length, 2);
   assert.match(script, /https:\/\/starlight-sudoku\.tycheworks\.com\//);
+  assert.match(html, /class="hero-landing-cta"/);
+  assert.match(html, /data-i18n="heroLandingCta"/);
+  assert.match(script, /heroLandingCta: "별빛 스도쿠 체험하기"/);
+  assert.match(script, /const landingLinks = document\.querySelectorAll/);
+  assert.match(script, /landingLinks\.forEach/);
   assert.match(html, /href="privacy\/" data-privacy-link/);
   assert.match(html, /rel="icon" type="image\/png" href="\.\.\/\.\.\/assets\/Spark\/Starlight%20Sudoku\/Icon_Starlight_Sudoku_v4\.png"/);
   assert.match(script, /privacy\/\?lang=/);
   const css = await readFile(new URL("spark/spark.css", siteRoot), "utf8");
   assert.match(css, /\.detail-identity img\{[^}]*width:92px;[^}]*height:92px;[^}]*object-fit:contain/);
   assert.match(css, /\.title-poster img\{[^}]*width:100%;[^}]*height:auto;[^}]*object-fit:contain/);
-  assert.match(html, /href="detail\.css\?v=20260903-4"/);
-  assert.match(html, /src="i18n\.js\?v=20260908-4"/);
+  assert.match(html, /href="detail\.css\?v=20260913-6"/);
+  assert.match(html, /src="i18n\.js\?v=20260913-3"/);
+  assert.match(detailCss, /\.starlight-detail \.hero-landing-cta\{/);
+  assert.match(html, /class="gameplay-showcase"/);
+  assert.match(html, /src="\.\.\/\.\.\/assets\/Spark\/Starlight%20Sudoku\/game\.png"[^>]*data-i18n-alt="gameplayImageAlt"/);
+  assert.match(html, /data-i18n="gameplayStep1"[\s\S]*data-i18n="gameplayStep2"[\s\S]*data-i18n="gameplayStep3"[\s\S]*data-i18n="gameplayStep4"/);
+  for (const key of ["gameplayTitle", "gameplayIntro", "gameplayStep1", "gameplayStep2", "gameplayStep3", "gameplayStep4", "gameplayCaption", "gameplayImageAlt"]) {
+    assert.equal((script.match(new RegExp(`${key}:`, "g")) ?? []).length, 5, `${key}는 5개 언어에 필요하다`);
+  }
+  assert.match(script, /document\.querySelectorAll\("\[data-i18n-alt\]"\)/);
+  assert.match(detailCss, /\.starlight-detail \.gameplay-showcase\{/);
+  assert.match(detailCss, /\.starlight-detail \.detail-header\{[^}]*background:rgba\(7,21,47,\.96\)/);
+  await access(new URL("assets/Spark/Starlight%20Sudoku/game.png", siteRoot));
   for (const hreflang of ["ko", "en", "ja", "zh-Hans", "zh-Hant", "x-default"]) {
     assert.match(html, new RegExp(`hreflang="${hreflang}"`));
   }
@@ -87,9 +103,9 @@ test("별빛 스도쿠 개인정보처리방침은 앱·웹 데이터 처리와 
   ]);
 
   assert.match(html, /data-detail-link/);
-  assert.match(html, /starlight-sudoku-locale/);
+  assert.match(script, /starlight-sudoku-locale/);
   assert.match(html, /privacy\.css\?v=20260909-1/);
-  assert.match(html, /privacy-i18n\.js\?v=20260904-1/);
+  assert.match(html, /privacy-i18n\.js\?v=20260911-4/);
   for (const locale of ["ko", "en", "ja", "zh-CN", "zh-TW"]) {
     assert.match(html, new RegExp(`data-locale="${locale}"`));
     assert.match(script, new RegExp(`(?:^|[\\s"'])${locale.replace("-", "\\-")}(?:[":])`, "m"));
@@ -98,8 +114,15 @@ test("별빛 스도쿠 개인정보처리방침은 앱·웹 데이터 처리와 
   assert.match(script, /com\.tychespark\.starlightsudoku/);
   assert.match(script, /Firebase Analytics와 AdMob도 사용하지 않습니다/);
   assert.match(script, /SS- 형식의 익명 사용자 ID/);
+  assert.match(script, /익명 이용 분석을 허용하면/);
+  assert.match(script, /수집 후 90일/);
+  assert.match(script, /광고·분석 사업자에게 제공하지 않습니다/);
   assert.match(script, /Google Play 인앱 리뷰 흐름을 요청/);
-  assert.match(script, /전송 시 암호화/);
+  assert.match(script, /출시 푸시 1회 발송/);
+  assert.match(script, /이메일·전화번호·이름은 수집하지 않고/);
+  assert.match(script, /알림 발송 후 30일/);
+  assert.match(script, /Google LLC의 Firebase Cloud Messaging/);
+  assert.match(script, /Firebase Cloud Messaging이 만든 설치 식별값/);
   assert.match(script, /연령에 따라 이용을 제한하지 않는 퍼즐 게임/);
   assert.match(script, /만 14세 미만 아동을 주요 대상으로 기획하거나 홍보하는 서비스는 아니며/);
   assert.match(script, /プライバシーポリシー \| 星明かりの数独/);
@@ -139,11 +162,15 @@ test("별빛 스도쿠 랜딩은 모바일 크기 웹 체험판을 연결한다"
   assert.match(css, /Keep the project route crisp[\s\S]*\.project-label\{color:#fff;text-shadow:none\}/);
   assert.match(css, /\.project-label:hover\{color:var\(--gold\)/);
   assert.match(css, /\.project-label:focus-visible\{[^}]*outline:/);
-  assert.match(html, /class="play-scroll-button" href="https:\/\/softcastella\.github\.io\/Starlight-Sudoku\/" target="_blank" rel="noopener noreferrer" data-play-launch/);
+  assert.match(html, /class="play-scroll-button" href="\/play\/\?lang=ko" target="_blank" rel="noopener noreferrer" data-play-launch/);
   assert.doesNotMatch(html, /id="play-demo"|data-start-game|landing-game\.js/);
   assert.match(html, /landing\.css\?v=20260908-107/);
   assert.match(html, /landing-i18n\.js\?v=20260908-37/);
-  assert.match(html, /landing-launch\.js\?v=20260908-42/);
+  assert.doesNotMatch(html, /analytics-consent\.css/);
+  assert.doesNotMatch(html, /analytics-consent\.js/);
+  assert.match(html, /analytics-config\.js\?v=20260912-1/);
+  assert.match(html, /analytics\.js\?v=20260912-1/);
+  assert.match(html, /landing-launch\.js\?v=20260911-46/);
   assert.match(html, /data-i18n="title">퍼즐을 풀어<br>별빛을 모으고,<br><strong>멈춰버린 밤에<br>아침을 불러오세요\.<\/strong>/);
   assert.match(script, /title: "퍼즐을 풀어<br>별빛을 모으고,<br><strong>멈춰버린 밤에<br>아침을 불러오세요\.<\/strong>"/);
   for (const localizedTitle of [
@@ -166,7 +193,8 @@ test("별빛 스도쿠 랜딩은 모바일 크기 웹 체험판을 연결한다"
   assert.match(script, /#starlight-structured-data/);
   assert.match(html, /data-i18n="releaseState">GOOGLE PLAY · 입점 준비 중/);
   assert.match(script, /releaseState: "GOOGLE PLAY · 입점 준비 중"/);
-  assert.match(launchScript, /const playUrl = "https:\/\/softcastella\.github\.io\/Starlight-Sudoku\/"/);
+  assert.match(launchScript, /const playUrl = "\/play\/"/);
+  assert.match(launchScript, /new URL\(playUrl, window\.location\.origin\)/);
   assert.match(launchScript, /url\.searchParams\.set\("lang", document\.documentElement\.lang \|\| "ko"\)/);
   assert.match(launchScript, /document\.addEventListener\("starlight:locale"/);
   assert.match(script, /ko: "Starlight%20Sdoku%20landing%20CTA_KR\.png"/);
@@ -175,12 +203,11 @@ test("별빛 스도쿠 랜딩은 모바일 크기 웹 체험판을 연결한다"
   assert.match(script, /ja: "Starlight%20Sdoku%20landing%20CTA_JP\.png"/);
   assert.match(script, /en: "Starlight%20Sdoku%20landing%20CTA_EN\.png"/);
   assert.match(html, /Starlight%20Sdoku%20landing%20CTA_KR\.png/);
-  assert.match(launchScript, /window\.matchMedia\("\(max-width: 680px\)"\)/);
-  assert.match(launchScript, /Math\.min\(430, window\.screen\.availWidth - 32\)/);
-  assert.match(launchScript, /Math\.min\(900, window\.screen\.availHeight - 48\)/);
-  assert.match(launchScript, /window\.open\(launchUrl, "starlightSudokuMobile", features\)/);
-  assert.match(launchScript, /gameWindow\.focus\(\)/);
-  assert.match(launchScript, /window\.location\.assign\(launchUrl\)/);
+  assert.match(html, /target="_blank" rel="noopener noreferrer" data-play-launch/);
+  assert.match(launchScript, /window\.open\(localizedPlayUrl\(\), "_blank", playWindowFeatures\(\)\)/);
+  assert.match(launchScript, /const width = 390;[\s\S]*const height = 844;/);
+  assert.match(launchScript, /popup=yes,width=\$\{width\},height=\$\{height\}/);
+  assert.doesNotMatch(launchScript, /window\.location\.assign/);
   assert.match(launchScript, /function createStarField\(container, count, seed\)/);
   assert.match(launchScript, /state \* 1664525 \+ 1013904223/);
   assert.match(launchScript, /lowerSky = random\(\) < 0\.64/);
@@ -267,7 +294,7 @@ test("별빛 스도쿠 랜딩은 모바일 크기 웹 체험판을 연결한다"
   assert.match(css, /@keyframes cta-carbonation\{[^}]*var\(--burst-start-x\)[\s\S]*100%\{opacity:0;transform:translate\(calc\(-50% \+ var\(--burst-start-x\)\),calc\(-50% \+ var\(--burst-start-y\)\)\)\}/);
   assert.doesNotMatch(css.match(/@keyframes cta-carbonation\{[^\n]+/)[0], /scale\(/);
   assert.match(launchScript, /playLink\.addEventListener\("pointerdown", createCtaBurst\)/);
-  assert.match(launchScript, /\}, 420\);/);
+  assert.doesNotMatch(launchScript, /launchTimer|\}, 420\);/);
   assert.match(css, /@keyframes cta-orbit-travel\{to\{offset-distance:112%\}\}/);
   assert.doesNotMatch(css, /cta-star-flip|cta-star-softlight|cta-star-halo/);
   assert.match(html, /<div class="sudoku-number-art" aria-hidden="true">[\s\S]*sudoku_number_3\.png[\s\S]*sudoku_number_1\.png[\s\S]*sudoku_number_7\.png[\s\S]*<\/div>/);

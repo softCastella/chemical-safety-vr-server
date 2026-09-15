@@ -26,7 +26,6 @@ after(async () => {
 test("Unity registration POST is readable by the same session ID", async () => {
   const payload = {
     metaUserId: "38950798361185177",
-    metaAgeCategory: "Unknown",
     sessionId: "89556d2796f141378061b77d6477c325",
     timestampUtc: "2026-08-26T07:25:48.000Z",
     scene: "Assets/Scenes/3_PPE_Room_3mode_loco.unity",
@@ -68,4 +67,22 @@ test("invalid registration data is rejected and missing sessions return 404", as
     `${baseUrl}/api/training-registrations/missing-session`,
   );
   assert.equal(missingResponse.status, 404);
+});
+
+test("Meta age category is rejected by the registration contract", async () => {
+  const response = await fetch(`${baseUrl}/api/training-registrations`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      metaUserId: "38950798361185177",
+      metaAgeCategory: "Adult",
+      sessionId: "age-category-is-not-supported",
+      timestampUtc: "2026-09-11T00:00:00.000Z",
+      scene: "Assets/Scenes/0_App.unity",
+    }),
+  });
+  const body = await response.json();
+
+  assert.equal(response.status, 400);
+  assert.deepEqual(body.error.details.fields, ["metaAgeCategory"]);
 });

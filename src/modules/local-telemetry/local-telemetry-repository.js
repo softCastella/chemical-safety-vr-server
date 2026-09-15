@@ -19,6 +19,16 @@ function uniqueValues(events, field, excluded = new Set()) {
   )];
 }
 
+function removeAgeCategory(event) {
+  if (!event || typeof event !== "object" || Array.isArray(event)) {
+    return event;
+  }
+
+  const sanitized = { ...event };
+  delete sanitized.metaAgeCategory;
+  return sanitized;
+}
+
 function summarize(fileName, events, invalidLines) {
   const ended = events.findLast((event) => event.eventType === "session_ended");
   const resolvedGrabs = events.filter(
@@ -31,7 +41,6 @@ function summarize(fileName, events, invalidLines) {
     endedAt: ended?.timestampUtc ?? null,
     endNote: ended?.note ?? null,
     metaUserId: lastValue(events, "metaAppScopedUserId"),
-    metaAgeCategory: lastValue(events, "metaAgeCategory"),
     modes: uniqueValues(events, "mode"),
     workPlans: uniqueValues(events, "workPlan", new Set(["None"])),
     lastFlowState: lastValue(events, "flowState"),
@@ -68,7 +77,7 @@ async function parseSessionFile(directory, fileName) {
       return;
     }
     try {
-      events.push(JSON.parse(line));
+      events.push(removeAgeCategory(JSON.parse(line)));
     } catch (error) {
       parseErrors.push({
         lineNumber: index + 1,

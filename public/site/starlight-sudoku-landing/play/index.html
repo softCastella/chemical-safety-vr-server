@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <!--
+    If you are serving your web app in a path other than the root, change the
+    href value below to reflect the base path you are serving from.
+
+    The path provided below has to start and end with a slash "/" in order for
+    it to work correctly.
+
+    For more details:
+    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
+
+    This is a placeholder for base href that will be replaced by the value of
+    the `--base-href` argument provided to `flutter build`.
+  -->
+  <base href="/play/">
+
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="별빛 스도쿠 체험판 - 퍼즐을 풀고 마을을 복원하는 게임">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="referrer" content="no-referrer">
+  <link rel="canonical" href="https://starlight-sudoku.tycheworks.com/">
+  <meta name="theme-color" content="#0E2040">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+  <!-- iOS meta tags & icons -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="별빛 스도쿠 체험판">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png?v=20260904a">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png?v=20260904a"/>
+
+  <title>별빛 스도쿠 체험판</title>
+  <link rel="manifest" href="manifest.json?v=20260904a">
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      background-color: #0E2040;
+    }
+    #launch-splash {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #0E2040;
+    }
+  </style>
+</head>
+<body>
+  <div id="launch-splash"></div>
+  <!-- Do not fetch BGM before consent. WebHtmlBgm reuses this element and the
+       user's ON gesture starts native HTTP range streaming. -->
+  <audio
+    id="starlight-html-bgm"
+    preload="none"
+    loop
+    playsinline
+    aria-hidden="true"
+    style="display: none"
+  ></audio>
+  <audio
+    id="starlight-html-sfx"
+    preload="none"
+    playsinline
+    aria-hidden="true"
+    style="display: none"
+  ></audio>
+  <script src="analytics-config.js?v=20260912-1"></script>
+  <script src="analytics.js?v=20260912-1"></script>
+  <script src="release-push-config.js?v=20260911-1"></script>
+  <script src="release-push.js?v=20260911-1"></script>
+  <script>
+    (function () {
+      var search = new URLSearchParams(window.location.search);
+      var hashQuery = window.location.hash.split('?')[1] || '';
+      var hash = new URLSearchParams(hashQuery);
+      var lang = search.get('lang') || hash.get('lang');
+      if (lang) {
+        try { sessionStorage.setItem('starlight_lang', lang); } catch (e) {}
+      }
+    })();
+  </script>
+  <script>
+    window.addEventListener('flutter-first-frame', function () {
+      var splash = document.getElementById('launch-splash');
+      if (splash) splash.remove();
+      var theme = document.querySelector('meta[name="theme-color"]');
+      if (theme) theme.setAttribute('content', '#0E2040');
+    });
+  </script>
+  <script src="flutter_bootstrap.js" async></script>
+</body>
+</html>
