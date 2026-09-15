@@ -240,13 +240,13 @@ h1 em { color: #ffac61; font-style: normal; }
   font-size: 12px;
 }
 .mode-rows { display: grid; gap: 25px; margin-top: 28px; }
-.mode-row { display: grid; grid-template-columns: 70px 1fr auto; align-items: center; gap: 13px; }
+.mode-row { display: grid; grid-template-columns: 70px minmax(0, 1fr) auto; align-items: center; gap: 13px; }
 .mode-row .name { color: var(--ink); font-size: 13px; font-weight: 750; }
-.mode-row .bars { display: grid; gap: 6px; }
-.mode-row .track { height: 8px; overflow: hidden; border-radius: 8px; background: #e9eef2; }
-.mode-row .track i { display: block; min-width: 0; height: 100%; border-radius: 8px; }
-.mode-row .started { background: #91a6ba; }
-.mode-row .completed { background: #145bc7; }
+.mode-row .bars { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; }
+.mode-row .track { display: block; width: 100%; height: 8px; overflow: hidden; border-radius: 8px; }
+.mode-row .track-background { fill: #e9eef2; }
+.mode-row .started { fill: #91a6ba; }
+.mode-row .completed { fill: #145bc7; }
 .mode-row .counts { color: var(--muted); font-size: 12px; text-align: right; white-space: nowrap; }
 .mode-row .counts b { color: var(--ink); font-weight: 750; }
 .mode-note {
@@ -295,5 +295,5 @@ h1 em { color: #ffac61; font-style: normal; }
   .source-line { flex-wrap: wrap; }
   .source-line #rangeLabel { width: 100%; margin-left: 15px; }
   .chart { height: 180px; }
-  .mode-row { grid-template-columns: 57px 1fr auto; gap: 8px; }
+  .mode-row { grid-template-columns: 57px minmax(0, 1fr) auto; gap: 8px; }
 }
