@@ -162,7 +162,7 @@ function renderRun() {
     for (const id of ["timelineRows", "stageRows", "ppeRows", "quizRows"]) $(id).innerHTML = '<tr><td colspan="6" class="empty-row">이 플레이에는 선택할 모드 실행 기록이 없습니다.</td></tr>';
     $("baselineSource").textContent = "모드 시작 기록이 없어 기준시간과 비교하지 않습니다.";
     $("backLink").href = fromUsers ? `users.html?user=${session.participantId}` : "play.html";
-    $("backLink").textContent = fromUsers ? "사용자로 돌아가기" : "병목 분석으로 돌아가기";
+    $("backLink").textContent = "전 화면으로 돌아가기";
     return;
   }
   const scope = `${labelPlan(run.start.workPlan)} · ${labelMode(run.start.mode)} · ${run.index}회차`;
@@ -206,7 +206,7 @@ function renderRun() {
   $("backLink").href = fromUsers
     ? `users.html?user=${session.participantId}`
     : `play.html?${backQuery}#${sourceSection}`;
-  $("backLink").textContent = fromUsers ? "사용자로 돌아가기" : "병목 분석으로 돌아가기";
+  $("backLink").textContent = "전 화면으로 돌아가기";
   if (focusSequence !== null && events.some((event) => event.sequence === focusSequence)) {
     requestAnimationFrame(() => $(`event-${focusSequence}`)?.scrollIntoView({ block: "center" }));
   }
