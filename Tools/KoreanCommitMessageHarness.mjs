@@ -90,6 +90,17 @@ function gitCommitExists(commitId) {
   return result.status === 0;
 }
 
+export function outgoingRevisionArguments(localOid, remoteOid, remoteName) {
+  const zeroOid = /^0+$/u;
+  if (remoteName) {
+    return [localOid, "--not", `--remotes=${remoteName}`];
+  }
+  if (remoteOid && !zeroOid.test(remoteOid)) {
+    return [`${remoteOid}..${localOid}`];
+  }
+  return [localOid, "--not", "--remotes"];
+}
+
 function outgoingCommitIds(input, remoteName) {
   const zeroOid = /^0+$/u;
   const commits = new Set();
@@ -106,9 +117,7 @@ function outgoingCommitIds(input, remoteName) {
       );
     }
 
-    const revisionArguments = remoteOid && !zeroOid.test(remoteOid)
-      ? [`${remoteOid}..${localOid}`]
-      : [localOid, "--not", remoteName ? `--remotes=${remoteName}` : "--remotes"];
+    const revisionArguments = outgoingRevisionArguments(localOid, remoteOid, remoteName);
     const output = runGit(["rev-list", ...revisionArguments]);
     for (const commitId of output.split("\n")) {
       if (commitId) commits.add(commitId);

@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { validateKoreanCommitMessage } from "../Tools/KoreanCommitMessageHarness.mjs";
+import {
+  outgoingRevisionArguments,
+  validateKoreanCommitMessage,
+} from "../Tools/KoreanCommitMessageHarness.mjs";
 
 test("commit message harness accepts a Korean subject and numbered body", () => {
   const errors = validateKoreanCommitMessage(
@@ -22,4 +25,11 @@ test("commit message harness requires a numbered body", () => {
     "한글 커밋 제목\n\n변경 내용을 기록한다.\n",
   );
   assert.match(errors.join(" "), /번호 목록/u);
+});
+
+test("pre-push harness excludes commits already present on another remote branch", () => {
+  assert.deepEqual(
+    outgoingRevisionArguments("local-sha", "target-branch-sha", "origin"),
+    ["local-sha", "--not", "--remotes=origin"],
+  );
 });
