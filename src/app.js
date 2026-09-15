@@ -240,14 +240,17 @@ export function createApp({
         response.status(503).json({ error: "ENABLE_TRAINING_TELEMETRY_INGEST is not enabled." });
         return;
       }
-      const metaUserId = request.query.metaUserId ?? "";
+      const participantIdText = request.query.participantId ?? "";
+      const participantId = participantIdText === "" ? null : Number(participantIdText);
       const page = request.query.page === undefined ? 1 : Number(request.query.page);
-      if (typeof metaUserId !== "string" || !/^[0-9]{0,64}$/.test(metaUserId)
+      if (typeof participantIdText !== "string"
+        || (participantIdText !== "" && (!/^[0-9]{1,16}$/.test(participantIdText)
+          || !Number.isSafeInteger(participantId) || participantId < 1))
         || !Number.isSafeInteger(page) || page < 1) {
-        response.status(400).json({ error: "metaUserId must contain only decimal digits (up to 64); page must be a positive integer." });
+        response.status(400).json({ error: "participantId and page must be positive integers." });
         return;
       }
-      response.json({ data: await resolvedTrainingTelemetryRepository.getDashboardUsers({ metaUserId, page }) });
+      response.json({ data: await resolvedTrainingTelemetryRepository.getDashboardUsers({ participantId, page }) });
     });
     app.get("/api/training-telemetry/dashboard-users/:participantId", requireAdmin, async (request, response) => {
       response.set("Cache-Control", "no-store");

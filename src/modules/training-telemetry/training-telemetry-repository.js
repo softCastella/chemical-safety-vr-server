@@ -162,33 +162,26 @@ function acceptedThrough(rows) {
 
 export function createTrainingTelemetryRepository(pool) {
   return {
-    async getDashboardUsers({ metaUserId = "", page = 1 }) {
+    async getDashboardUsers({ participantId = null, page = 1 }) {
       const pageSize = 20;
       const offset = (page - 1) * pageSize;
-      const identityJoin = `LEFT JOIN training_telemetry_identities AS meta
-        ON meta.participant_id = participant.participant_id
-       AND meta.source_project = participant.source_project
-       AND meta.identity_type = 'meta'`;
-      const where = metaUserId ? "WHERE meta.identity_value LIKE ?" : "";
-      const filterValues = metaUserId ? [`${metaUserId}%`] : [];
+      const where = participantId === null ? "" : "WHERE participant.participant_id = ?";
+      const filterValues = participantId === null ? [] : [participantId];
       const [countRows] = await pool.execute(
         `SELECT COUNT(DISTINCT participant.participant_id) AS total
          FROM training_telemetry_participants AS participant
-         ${identityJoin}
          ${where}`,
         filterValues,
       );
       const [rows] = await pool.execute(
-        `SELECT participant.participant_id, meta.identity_value AS meta_user_id,
-                COUNT(DISTINCT session.session_id) AS play_count,
+        `SELECT participant.participant_id, COUNT(DISTINCT session.session_id) AS play_count,
                 MIN(session.started_at) AS first_play_at,
                 MAX(session.started_at) AS last_play_at
          FROM training_telemetry_participants AS participant
-         ${identityJoin}
          LEFT JOIN training_telemetry_sessions AS session
            ON session.participant_id = participant.participant_id
          ${where}
-         GROUP BY participant.participant_id, meta.identity_value
+         GROUP BY participant.participant_id
          ORDER BY last_play_at DESC, participant.participant_id DESC
          LIMIT ? OFFSET ?`,
         [...filterValues, pageSize, offset],
@@ -198,7 +191,6 @@ export function createTrainingTelemetryRepository(pool) {
         page, pageSize, total, moreAvailable: page * pageSize < total,
         users: rows.map((row) => ({
           participantId: Number(row.participant_id),
-          metaUserId: row.meta_user_id ?? null,
           playCount: Number(row.play_count),
           firstPlayAtUtc: toIsoString(row.first_play_at),
           lastPlayAtUtc: toIsoString(row.last_play_at),
