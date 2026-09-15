@@ -11,10 +11,7 @@ const time = (value) => value ? new Date(value).toLocaleString("ko-KR", {
 }) : "기록 없음";
 const duration = (seconds) => seconds === null || seconds === undefined ? "" : seconds < 60
   ? ` · ${seconds.toFixed(1)}초` : ` · ${Math.floor(seconds / 60)}분 ${(seconds % 60).toFixed(1)}초`;
-const idLabel = (user, index, preview, metaIdsIncluded) => user.metaUserId
-  ? `Meta ID ${user.metaUserId}`
-  : `${preview && !metaIdsIncluded ? "로컬 스냅샷에서 Meta ID 비공개" : "Meta ID 미수집"} · 목록 ${index + 1}`;
-let metaUserId = query.get("metaUserId") ?? "";
+let participantId = query.get("participantId") ?? "";
 let usersPage = Number(query.get("page")) || 1;
 let selectedId = Number(query.get("user")) || null;
 let historyPage = Number(query.get("historyPage")) || 1;
@@ -29,7 +26,7 @@ function showError(message) {
 
 function updateUrl() {
   const next = new URLSearchParams();
-  if (metaUserId) next.set("metaUserId", metaUserId);
+  if (participantId) next.set("participantId", participantId);
   if (usersPage > 1) next.set("page", String(usersPage));
   if (selectedId) next.set("user", String(selectedId));
   if (historyPage > 1) next.set("historyPage", String(historyPage));
@@ -37,13 +34,13 @@ function updateUrl() {
 }
 
 function renderList() {
-  const { users, total, page, pageSize, preview, metaIdsIncluded } = usersResult;
+  const { users, total, page, pageSize, preview } = usersResult;
   $("userCount").textContent = `${total}명 · 최근 플레이 순`;
   $("userList").innerHTML = users.length ? users.map((user, index) =>
     `<button type="button" data-user="${user.participantId}" aria-current="${user.participantId === selectedId}">
-      <b>${escapeHtml(idLabel(user, (page - 1) * pageSize + index, preview, metaIdsIncluded))}</b>
+      <b>사용자 ID ${escapeHtml(user.participantId)}</b>
       <small>플레이 ${user.playCount}회 · 최근 ${time(user.lastPlayAtUtc)}</small>
-    </button>`).join("") : `<p class="empty-row">${metaUserId ? "검색한 ID의 사용자가 없습니다." : "조회된 사용자가 없습니다."}</p>`;
+    </button>`).join("") : `<p class="empty-row">${participantId ? "검색한 사용자 ID가 없습니다." : "조회된 사용자가 없습니다."}</p>`;
   $("userList").querySelectorAll("[data-user]").forEach((button) => button.addEventListener("click", () => {
     selectedId = Number(button.dataset.user);
     historyPage = 1;
@@ -54,10 +51,8 @@ function renderList() {
   $("usersPrev").disabled = page <= 1;
   $("usersNext").disabled = !usersResult.moreAvailable;
   $("sourceStatus").textContent = preview
-    ? metaIdsIncluded
-      ? "운영 DB 읽기 전용 Meta ID 연결 · 로컬 플레이 스냅샷 · 새 플레이 자동 반영 전"
-      : "운영 데이터에서 만든 익명화 로컬 스냅샷 · Meta ID 값 미포함 · 새 플레이 자동 반영 전"
-    : "관리자 전용 운영 조회 · Meta 앱 범위 사용자 ID 기준";
+    ? "운영 DB 실데이터 로컬 스냅샷 · 내부 사용자 ID 기준 · 새 플레이 자동 반영 전"
+    : "관리자 전용 운영 조회 · 내부 사용자 ID 기준";
 }
 
 function clearHistory() {
@@ -73,9 +68,10 @@ function clearHistory() {
 function renderHistory() {
   const user = userResult;
   const preview = usersResult?.preview === true;
-  $("userIdentity").textContent = user.metaUserId
+  const metaIdentity = user.metaUserId
     ? `Meta 앱 범위 사용자 ID · ${user.metaUserId}`
-    : preview && !usersResult?.metaIdsIncluded ? "이 로컬 스냅샷에서는 Meta ID 값을 제거했습니다." : "이 사용자의 Meta ID는 기록되지 않았습니다.";
+    : preview && !usersResult?.metaIdsIncluded ? "이 로컬 스냅샷에서는 Meta ID 값을 제거했습니다." : "Meta ID가 기록되지 않았습니다.";
+  $("userIdentity").textContent = `사용자 ID ${user.participantId} · ${metaIdentity}`;
   $("userFacts").innerHTML = `<span>플레이 <b>${user.playCount}회</b></span><span>첫 플레이 <b>${time(user.firstPlayAtUtc)}</b></span><span>최근 플레이 <b>${time(user.lastPlayAtUtc)}</b></span>`;
   $("historyRows").innerHTML = user.sessions.length ? user.sessions.map((session) => {
     const runs = session.runs ?? [];
@@ -120,7 +116,7 @@ async function loadUsers(keepSelected = false) {
   showError(null);
   try {
     const params = new URLSearchParams({ page: String(usersPage) });
-    if (metaUserId) params.set("metaUserId", metaUserId);
+    if (participantId) params.set("participantId", participantId);
     const result = await readData(`/api/training-telemetry/dashboard-users?${params}`);
     if (request !== requestNumber) return;
     usersResult = result;
@@ -137,19 +133,21 @@ async function loadUsers(keepSelected = false) {
   }
 }
 
-$("metaIdSearch").value = metaUserId;
+$("userIdSearch").value = participantId;
 $("searchForm").addEventListener("submit", (event) => {
   event.preventDefault();
-  const value = $("metaIdSearch").value.trim();
-  if (!/^[0-9]{0,64}$/.test(value)) { showError("Meta 앱 범위 사용자 ID는 숫자만 입력해 주세요."); return; }
-  metaUserId = value;
+  const value = $("userIdSearch").value.trim();
+  if (value && (!/^[0-9]{1,16}$/.test(value) || !Number.isSafeInteger(Number(value)) || Number(value) < 1)) {
+    showError("사용자 ID는 1 이상의 숫자로 입력해 주세요."); return;
+  }
+  participantId = value;
   usersPage = 1;
   selectedId = null;
   loadUsers();
 });
 $("clearSearch").addEventListener("click", () => {
-  $("metaIdSearch").value = "";
-  metaUserId = "";
+  $("userIdSearch").value = "";
+  participantId = "";
   usersPage = 1;
   selectedId = null;
   loadUsers();
@@ -158,7 +156,8 @@ $("usersPrev").addEventListener("click", () => { usersPage -= 1; selectedId = nu
 $("usersNext").addEventListener("click", () => { usersPage += 1; selectedId = null; loadUsers(); });
 $("historyPrev").addEventListener("click", () => { historyPage -= 1; loadUser(); });
 $("historyNext").addEventListener("click", () => { historyPage += 1; loadUser(); });
-if (!/^[0-9]{0,64}$/.test(metaUserId) || !Number.isSafeInteger(usersPage) || usersPage < 1
+if ((participantId && (!/^[0-9]{1,16}$/.test(participantId) || !Number.isSafeInteger(Number(participantId)) || Number(participantId) < 1))
+  || !Number.isSafeInteger(usersPage) || usersPage < 1
   || (selectedId !== null && (!Number.isSafeInteger(selectedId) || selectedId < 1))
   || !Number.isSafeInteger(historyPage) || historyPage < 1) {
   showError("조회 주소의 사용자 ID 또는 페이지 번호가 올바르지 않습니다.");
