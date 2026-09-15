@@ -1,9 +1,29 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { test } from "node:test";
+import { runInNewContext } from "node:vm";
 
 import { createApp } from "../src/app.js";
 import { createTrainingTelemetryRepository } from "../src/modules/training-telemetry/training-telemetry-repository.js";
+
+test("첫 화면의 모드 막대는 세 모드의 공통 최댓값에 비례한다", async () => {
+  const script = await readFile(new URL("../public/dashboard/overview.js", import.meta.url), "utf8");
+  const modeRows = { innerHTML: "" };
+  const context = {
+    document: { getElementById: () => modeRows },
+    modeRows,
+  };
+  const setup = script.slice(0, script.indexOf("function render(data)"));
+  const modes = [
+    { mode: "Education", started: 12, completed: 1 },
+    { mode: "Training", started: 6, completed: 2 },
+    { mode: "Test", started: 1, completed: 1 },
+  ];
+  runInNewContext(`${setup}\ndrawModes(${JSON.stringify(modes)});`, context);
+  const widths = [...modeRows.innerHTML.matchAll(/<rect class="(?:started|completed)" width="([\d.]+)"/g)]
+    .map((match) => Number(match[1]));
+  assert.deepEqual(widths.map((width) => Number(width.toFixed(2))), [100, 8.33, 50, 16.67, 8.33, 8.33]);
+});
 
 test("관리자 프록시는 VR 대시보드 조회 API만 전달한다", async () => {
   const config = await readFile(new URL("../ops/nginx/tycheworks-admin.conf", import.meta.url), "utf8");
