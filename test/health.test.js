@@ -67,14 +67,14 @@ test("GET /dashboard/ serves the PPE dashboard", async () => {
   const body = await response.text();
 
   assert.equal(response.status, 200);
-  assert.match(body, /<title>TYCHE VR 안전교육 운영 대시보드<\/title>/);
+  assert.match(body, /<title>화학물질 안전훈련 VR 현황<\/title>/);
   assert.match(body, /데이터 활용 기준/);
   assert.match(body, /세션 종료 직후 · 교육 운영/);
   assert.match(body, /주간·월간 · 직원 역량 관리/);
   assert.match(body, /공식 직원 평가·수료 판정/);
   assert.match(body, /추가 계약 전에는 인사평가 근거로 사용하지 않음/);
-  assert.match(body, /서비스 개선/);
-  assert.match(body, /회원사·직원/);
+  assert.match(body, /병목 분석/);
+  assert.match(body, /유저 데이터/);
   assert.match(body, /직원 상세/);
   assert.match(body, /콘텐츠 품질/);
   assert.match(body, /이탈 분석/);
