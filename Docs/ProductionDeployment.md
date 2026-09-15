@@ -1064,3 +1064,31 @@ Google Search Console 소유권 확인 TXT는 Vultr DNS의 `tycheworks.com` 루�
   상세페이지 `200`, TLS 검증 성공을 확인했다.
 - 실제 Meta User Proof와 Quest Release 세션 적재는 아직 확인하지 않았다. code 6 생성 전에 테스트 사용자
   한 명으로 인증·세션·이벤트·완료·중복 재전송과 DB 원본을 대조한다.
+
+## 2026-09-15 화학물질 안전교육 VR 대시보드 운영 배포
+
+- 운영 런타임 기준은
+  `production/vr-dashboard-20260915@a76f99fd6f42e5563fff3167bd0b372a3e908813`이다.
+- 기존 운영 기준 `main@aad625a84e6d066c622c0ddde3bc9d84a794e9de`에서 대시보드 관련 커밋만
+  선별했다. 운영 작업 트리에 있던 `public/site/**`의 별빛 스도쿠 미커밋 변경은 배포 경로와 겹치지
+  않음을 확인하고 그대로 보존했다.
+- `https://admin.tycheworks.com/chemical-safety-training-vr/` 아래에 핵심 현황, 병목 분석, 사용자
+  목록과 플레이 상세 화면을 배포했다. 화면 명칭은 `화학물질 안전교육 VR 대시보드`로 통일했다.
+- 사용자 목록과 검색은 숫자 `participantId`를 사용자 ID로 사용한다. Meta 앱 범위 ID는 목록 응답에
+  포함하지 않고 선택한 사용자의 상세 조회에서만 표시한다.
+- 운영 DB를 읽기 전용으로 조회해 사용자 3명(내부 ID 3, 2, 1), 최신 앱 버전 `1.0.0`의 플레이
+  세션 8건을 확인했다. 이는 목업이 아니라 운영 텔레메트리 DB 조회 결과다.
+- Nginx에 `/api/training-telemetry/dashboard-` 관리자 API 프록시를 추가하고 설정 검사 후 reload했다.
+  Express 변경 반영을 위해 PM2의 `tyche-safety-training-server`를 재시작했으며 새 PID에서 `online`,
+  내부 health HTTP `200`을 확인했다. 미인증 대시보드 API는 HTTP `401`, 대시보드 경로는 로그인으로
+  HTTP `302` 이동한다.
+- 깨끗한 배포 브랜치에서 자동 테스트 112개를 모두 통과했고 운영 서버에서 VR 관련 집중 테스트
+  14개를 모두 통과했다. 운영 전체 테스트는 기존 별빛 스도쿠 미커밋 화면과 테스트 기대값이 다른
+  5건 때문에 107/112 통과했으며, 이 5건은 VR 배포 파일과 무관하다.
+- `npm audit --audit-level=high`는 기존 PM2 7 계열이 의존하는 `js-yaml` 경고 2건을 보고했다.
+  제시된 자동 수정은 PM2 5.3.1로의 주요 버전 변경이므로 이번 대시보드 배포에서 실행하지 않았다.
+- 운영 관리자 로그인 화면까지 실제 브라우저로 확인했다. 로그인 후 세 화면의 렌더링과 사용자 ID
+  검색은 관리자 세션이 없어 남은 수동 검증으로 구분한다.
+- DB 마이그레이션, 운영 DB·사용자 데이터, 환경 변수와 Unity 클라이언트는 변경하지 않았다. 기존
+  대시보드와 Nginx 설정은 서버 저장소 밖
+  `/home/linuxuser/.config/tycheworks/static-backups/vr-dashboard-before-20260915-1105`에 백업했다.
