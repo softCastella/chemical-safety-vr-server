@@ -216,10 +216,15 @@ html[lang="en"] .splash-content h1{font-size:clamp(40px,4.6vw,64px);line-height:
 @keyframes cta-orbit-travel{to{offset-distance:112%}}
 @keyframes cta-orbit-depth{0%,12%{opacity:1}28%,72%{opacity:0}88%,100%{opacity:1}}
 .sudoku-number-art{position:absolute;inset:0;z-index:2;overflow:hidden;pointer-events:none}
-.sudoku-number-tile{position:absolute;height:auto;object-fit:contain;filter:drop-shadow(0 10px 16px rgba(0,0,0,.3)) drop-shadow(0 0 10px rgba(255,215,112,.18))}
-.sudoku-number-three{left:53.5vw;top:24vh;width:clamp(86px,7.35vw,141px);transform:rotate(-13deg)}
-.sudoku-number-one{left:65vw;top:8vh;width:clamp(68px,5.2vw,100px);transform:rotate(11deg)}
-.sudoku-number-seven{left:60.5vw;top:42vh;width:clamp(116px,9.6vw,184px);transform:rotate(12deg)}
+.sudoku-number-tile{position:absolute;height:auto;opacity:0;will-change:opacity,transform;animation:sudoku-number-enter 1.2s cubic-bezier(.18,.72,.28,1) var(--number-delay) both}
+.sudoku-number-tile img{display:block;width:100%;height:auto;will-change:transform;filter:drop-shadow(0 10px 16px rgba(0,0,0,.3)) drop-shadow(0 0 10px rgba(255,215,112,.18));animation:sudoku-number-float 3.1s ease-in-out calc(var(--number-delay) + 1.2s) infinite both}
+.sudoku-number-seven img{animation-duration:3.6s}
+.sudoku-number-three{left:53.5vw;top:24vh;width:clamp(86px,7.35vw,141px);transform:rotate(-13deg);--number-rotation:-13deg;--number-delay:1.35s}
+.sudoku-number-one{left:65vw;top:8vh;width:clamp(68px,5.2vw,100px);transform:rotate(11deg);--number-rotation:11deg;--number-delay:.25s}
+.sudoku-number-seven{left:60.5vw;top:42vh;width:clamp(116px,9.6vw,184px);transform:rotate(12deg);--number-rotation:12deg;--number-delay:2.45s}
+@keyframes sudoku-number-enter{0%{opacity:0;transform:translateY(12px) rotate(var(--number-rotation)) scale(.96)}25%{opacity:.22;transform:translateY(7px) rotate(var(--number-rotation)) scale(.98)}60%{opacity:.78;transform:translateY(2px) rotate(var(--number-rotation)) scale(1)}82%{opacity:1;transform:translateY(.4px) rotate(var(--number-rotation)) scale(1)}100%{opacity:1;transform:translateY(0) rotate(var(--number-rotation)) scale(1)}}
+@keyframes sudoku-number-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 @media(max-width:900px) and (min-width:681px){.sudoku-number-three{left:52.5vw;top:25vh}.sudoku-number-one{left:66vw;top:10vh}.sudoku-number-seven{left:61vw;top:43vh}}
 @media(max-width:680px){.sudoku-number-art{display:none}}
 @media(prefers-reduced-motion:reduce){.play-scroll-button,.cta-star-art,.cta-sparkles,.cta-twinkle,.cta-orbit-dot::before,.cta-burst-particle{animation:none}}
+@media(prefers-reduced-motion:reduce){.sudoku-number-tile{opacity:1;animation:none;transform:none}.sudoku-number-tile img{animation:none;transform:rotate(var(--number-rotation))}}

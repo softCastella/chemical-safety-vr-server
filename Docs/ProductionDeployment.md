@@ -1117,3 +1117,8 @@ Google Search Console 소유권 확인 TXT는 Vultr DNS의 `tycheworks.com` 루�
   `/home/linuxuser/.config/tycheworks/static-backups/vr-dashboard-before-20260915-1105`에 백업했다.
 - 공용 대시보드 문서는 클라이언트 기준본 `main@1e8e8a5`에 동기화했다. 클라이언트 런타임·씬·XR
   설정은 변경하지 않았다.
+## 홈페이지 저장소 분리 검토 및 별빛 스도쿠 랜딩 CSS 반영 상태
+
+현재 `public/site`에는 공개 브랜드·프로젝트 랜딩과 서버·관리자 정적 화면이 함께 있다. Express API·DB·텔레메트리와 홈페이지 변경의 배포 경계를 분리하기 위해 홈페이지 전용 GitHub 저장소를 별도로 두는 방향을 검토한다. 즉시 파일을 이동하지 않고 사이트별 공개 URL, Nginx root, 서버 API 의존성, 공용 자산과 `/play/` 같은 Origin 계약을 먼저 목록화한다.
+
+랜딩 원본 `public/site/starlight-sudoku-landing/landing.css`에는 `1 → 3 → 7` 순서의 지연 등장과 등장 후 부유를 위한 `sudoku-number-enter`, `sudoku-number-float` 애니메이션이 반영되어 있다. 이는 스크린샷 경로의 작업 트리에 반영 중이며 운영 배포와는 별개다. 운영 공개 CSS에는 새 애니메이션이 포함되지 않았으므로, 운영 반영 시 CSS 배포와 `landing.css` 버전 갱신 후 공개 응답 및 실제 브라우저 화면을 별도로 확인한다. 운영 배포·Nginx reload는 명시적인 배포 요청 후 수행한다.
