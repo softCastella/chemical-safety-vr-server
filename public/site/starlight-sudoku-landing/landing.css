@@ -167,7 +167,7 @@ button{font:inherit}
 html[lang="en"] .splash-content h1{font-size:clamp(40px,4.6vw,64px);line-height:.98}
 .play-scroll-button{--cta-glow-core-idle:5px;--cta-glow-core-pulse:8px;--cta-glow-idle:14px;--cta-glow-pulse:22px;--cta-glow-wide-idle:30px;--cta-glow-wide-pulse:42px;isolation:isolate;z-index:1;overflow:visible;width:254.4px;min-width:254.4px;aspect-ratio:1;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none;filter:none;transition:transform .18s ease}
 .play-scroll-button::before,.play-scroll-button::after{content:none}
-.cta-star-art{position:absolute;z-index:1;left:50%;top:50%;width:294px;max-width:none;height:294px;object-fit:contain;pointer-events:none;transform:translate(-50%,-50%);filter:brightness(1.02) drop-shadow(0 0 var(--cta-glow-core-idle) rgba(255,250,218,.96)) drop-shadow(0 0 var(--cta-glow-idle) rgba(255,216,106,.78)) drop-shadow(0 0 var(--cta-glow-wide-idle) rgba(255,157,30,.42));transition:filter .24s ease;will-change:filter}
+.cta-star-art{position:absolute;z-index:1;left:50%;top:50%;width:294px;max-width:none;height:294px;object-fit:contain;pointer-events:none;transform:translate(-50%,-50%);filter:brightness(1.02) drop-shadow(0 0 var(--cta-glow-core-idle) rgba(255,250,218,.96)) drop-shadow(0 0 var(--cta-glow-idle) rgba(255,216,106,.78)) drop-shadow(0 0 var(--cta-glow-wide-idle) rgba(255,157,30,.42));transition:filter .24s ease;will-change:transform,filter}
 .cta-accessible-label{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
 .cta-sparkles{position:absolute;z-index:2;inset:-28px;pointer-events:none;font-style:normal}
 .cta-twinkle{--twinkle-dx:0px;--twinkle-dy:-8px;position:absolute!important;display:block!important;width:auto!important;height:auto!important;padding:0!important;color:#fff;font-style:normal!important;line-height:1!important;opacity:.38;text-shadow:0 0 4px rgba(255,255,255,1),0 0 10px rgba(255,255,255,.78),0 0 18px rgba(220,235,255,.38);pointer-events:none;transform:scale(.72)}
@@ -209,6 +209,14 @@ html[lang="en"] .splash-content h1{font-size:clamp(40px,4.6vw,64px);line-height:
 .play-scroll-button.is-bursting,.play-scroll-button.is-bursting:active{transform:translateX(-50%) scale(1.025);transition:none}
 @media(max-width:680px){.play-scroll-button{top:auto;width:254.4px!important;min-width:254.4px}.play-scroll-button:hover{transform:scale(1.025)}.play-scroll-button:active{transform:translateY(1px) scale(.97)}.play-scroll-button.is-bursting,.play-scroll-button.is-bursting:active{transform:scale(1.025)}}
 @media(prefers-reduced-motion:no-preference){.cta-twinkle{animation:cta-twinkle-idle 3.2s var(--twinkle-delay,0s) ease-in-out infinite!important}.cta-twinkle:nth-child(2n){--twinkle-delay:-1.35s}.cta-twinkle:nth-child(3n){--twinkle-delay:-2.1s}.play-scroll-button:hover .cta-twinkle{animation:cta-twinkle-out 1.45s var(--twinkle-delay,0s) ease-in-out infinite!important}.cta-orbit-front,.cta-orbit-dot{animation:none}.cta-orbit-dot::before{animation:cta-orbit-travel 8s linear infinite}}
+@media(prefers-reduced-motion:no-preference){.cta-star-art{animation:cta-star-intro .35s ease-out 3.35s both,cta-star-breathe 1.5s ease-in-out 3.7s infinite}}
+@keyframes cta-star-intro{0%{transform:translate(-50%,-50%) scale(1.08)}100%{transform:translate(-50%,-50%) scale(1)}}
+@keyframes cta-star-breathe{0%{transform:translate(-50%,-50%) scale(1)}70%{transform:translate(-50%,-50%) scale(1.046)}82%{transform:translate(-50%,-50%) scale(1.032)}100%{transform:translate(-50%,-50%) scale(1)}}
+@media(min-width:681px) and (prefers-reduced-motion:no-preference){.hero-actions::after{animation:cta-star-shadow-breathe 1.5s ease-in-out infinite}}
+@keyframes cta-star-shadow-breathe{0%{transform:translateX(-50%) scaleX(.26)}70%{transform:translateX(-50%) scaleX(.58)}82%{transform:translateX(-50%) scaleX(.54)}100%{transform:translateX(-50%) scaleX(.26)}}
+@media(min-width:681px) and (prefers-reduced-motion:no-preference){.play-scroll-button{opacity:0;animation:cta-button-enter .35s ease-out 3.35s both}.hero-actions::after{opacity:0;animation:cta-button-enter .35s ease-out 3.35s both,cta-star-shadow-breathe 1.5s ease-in-out 3.7s infinite}}
+@media(max-width:680px) and (prefers-reduced-motion:no-preference){.cta-star-art{animation-delay:0s}}
+@keyframes cta-button-enter{from{opacity:0}to{opacity:1}}
 @keyframes cta-twinkle-idle{0%,100%{opacity:.18;transform:translate(0,0) scale(.58)}48%{opacity:.56;transform:translate(0,-2px) scale(1.02)}}
 @keyframes cta-twinkle-out{0%,100%{opacity:.38;transform:translate(0,0) scale(.62)}21%{opacity:1;transform:translate(var(--twinkle-dx),var(--twinkle-dy)) scale(1.68)}43%{opacity:.46;transform:translate(0,0) scale(.76)}66%{opacity:.94;transform:translate(var(--twinkle-dx),var(--twinkle-dy)) scale(1.42)}}
 @keyframes cta-sparkles-dissolve{0%{opacity:1;filter:brightness(1)}34%{opacity:.86;filter:brightness(1.8)}100%{opacity:0;filter:brightness(.9)}}
@@ -216,10 +224,15 @@ html[lang="en"] .splash-content h1{font-size:clamp(40px,4.6vw,64px);line-height:
 @keyframes cta-orbit-travel{to{offset-distance:112%}}
 @keyframes cta-orbit-depth{0%,12%{opacity:1}28%,72%{opacity:0}88%,100%{opacity:1}}
 .sudoku-number-art{position:absolute;inset:0;z-index:2;overflow:hidden;pointer-events:none}
-.sudoku-number-tile{position:absolute;height:auto;object-fit:contain;filter:drop-shadow(0 10px 16px rgba(0,0,0,.3)) drop-shadow(0 0 10px rgba(255,215,112,.18))}
-.sudoku-number-three{left:53.5vw;top:24vh;width:clamp(86px,7.35vw,141px);transform:rotate(-13deg)}
-.sudoku-number-one{left:65vw;top:8vh;width:clamp(68px,5.2vw,100px);transform:rotate(11deg)}
-.sudoku-number-seven{left:60.5vw;top:42vh;width:clamp(116px,9.6vw,184px);transform:rotate(12deg)}
+.sudoku-number-tile{position:absolute;height:auto;opacity:0;will-change:opacity,transform;animation:sudoku-number-enter .6s cubic-bezier(.18,.72,.28,1) var(--number-delay) both}
+.sudoku-number-tile img{display:block;width:100%;height:auto;will-change:transform;filter:drop-shadow(0 10px 16px rgba(0,0,0,.3)) drop-shadow(0 0 10px rgba(255,215,112,.18));animation:sudoku-number-float 3.1s ease-in-out calc(var(--number-delay) + .6s) infinite both}
+.sudoku-number-seven img{animation-duration:3.6s}
+.sudoku-number-three{left:53.5vw;top:24vh;width:clamp(86px,7.35vw,141px);transform:rotate(-13deg);--number-rotation:-13deg;--number-delay:2.02s}
+.sudoku-number-one{left:65vw;top:8vh;width:clamp(68px,5.2vw,100px);transform:rotate(11deg);--number-rotation:11deg;--number-delay:1.47s}
+.sudoku-number-seven{left:60.5vw;top:42vh;width:clamp(116px,9.6vw,184px);transform:rotate(12deg);--number-rotation:12deg;--number-delay:2.57s}
+@keyframes sudoku-number-enter{0%{opacity:0;transform:translateY(12px) rotate(var(--number-rotation)) scale(.96)}25%{opacity:.22;transform:translateY(7px) rotate(var(--number-rotation)) scale(.98)}60%{opacity:.78;transform:translateY(2px) rotate(var(--number-rotation)) scale(1)}82%{opacity:1;transform:translateY(.4px) rotate(var(--number-rotation)) scale(1)}100%{opacity:1;transform:translateY(0) rotate(var(--number-rotation)) scale(1)}}
+@keyframes sudoku-number-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 @media(max-width:900px) and (min-width:681px){.sudoku-number-three{left:52.5vw;top:25vh}.sudoku-number-one{left:66vw;top:10vh}.sudoku-number-seven{left:61vw;top:43vh}}
 @media(max-width:680px){.sudoku-number-art{display:none}}
 @media(prefers-reduced-motion:reduce){.play-scroll-button,.cta-star-art,.cta-sparkles,.cta-twinkle,.cta-orbit-dot::before,.cta-burst-particle{animation:none}}
+@media(prefers-reduced-motion:reduce){.sudoku-number-tile{opacity:1;animation:none;transform:none}.sudoku-number-tile img{animation:none;transform:rotate(var(--number-rotation))}}
