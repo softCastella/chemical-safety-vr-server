@@ -176,10 +176,11 @@ test("같은 Origin의 /play/ 산출물은 랜딩 식별자와 UTM을 이어받�
   assert.match(landingLaunch, /const playUrl = "\/play\/"/);
   assert.match(landingLaunch, /url\.searchParams\.set\("lang"/);
   assert.match(landingLaunch, /decorateUrl/);
-  assert.match(landingIndex, /href="\/play\/\?lang=ko" data-play-launch/);
-  assert.match(landingLaunch, /event\.preventDefault\(\)/);
-  assert.match(landingLaunch, /launchTimer = window\.setTimeout\([\s\S]*420\)/);
-  assert.match(landingLaunch, /window\.location\.assign\(localizedPlayUrl\(\)\)/);
+  assert.match(landingIndex, /target="_blank" rel="noopener noreferrer" data-play-launch/);
+  assert.match(landingLaunch, /window\.open\(localizedPlayUrl\(\), "_blank", playWindowFeatures\(\)\)/);
+  assert.match(landingLaunch, /const width = 390;[\s\S]*const height = 844;/);
+  assert.match(landingLaunch, /if \(popup\) \{[\s\S]*event\.preventDefault\(\)/);
+  assert.doesNotMatch(landingLaunch, /window\.location\.assign/);
   assert.match(playIndex, /<base href="\/play\/">/);
   assert.match(playBootstrap, /"useLocalCanvasKit":true/);
   assert.match(playAnalytics, /starlight_anonymous_user_id_v1/);

@@ -162,7 +162,7 @@ test("별빛 스도쿠 랜딩은 모바일 크기 웹 체험판을 연결한다"
   assert.match(css, /Keep the project route crisp[\s\S]*\.project-label\{color:#fff;text-shadow:none\}/);
   assert.match(css, /\.project-label:hover\{color:var\(--gold\)/);
   assert.match(css, /\.project-label:focus-visible\{[^}]*outline:/);
-  assert.match(html, /class="play-scroll-button" href="\/play\/\?lang=ko" data-play-launch/);
+  assert.match(html, /class="play-scroll-button" href="\/play\/\?lang=ko" target="_blank" rel="noopener noreferrer" data-play-launch/);
   assert.doesNotMatch(html, /id="play-demo"|data-start-game|landing-game\.js/);
   assert.match(html, /landing\.css\?v=20260908-107/);
   assert.match(html, /landing-i18n\.js\?v=20260908-37/);
@@ -170,7 +170,7 @@ test("별빛 스도쿠 랜딩은 모바일 크기 웹 체험판을 연결한다"
   assert.doesNotMatch(html, /analytics-consent\.js/);
   assert.match(html, /analytics-config\.js\?v=20260912-1/);
   assert.match(html, /analytics\.js\?v=20260912-1/);
-  assert.match(html, /landing-launch\.js\?v=20260917-47/);
+  assert.match(html, /landing-launch\.js\?v=20260911-46/);
   assert.match(html, /data-i18n="title">퍼즐을 풀어<br>별빛을 모으고,<br><strong>멈춰버린 밤에<br>아침을 불러오세요\.<\/strong>/);
   assert.match(script, /title: "퍼즐을 풀어<br>별빛을 모으고,<br><strong>멈춰버린 밤에<br>아침을 불러오세요\.<\/strong>"/);
   for (const localizedTitle of [
@@ -203,10 +203,11 @@ test("별빛 스도쿠 랜딩은 모바일 크기 웹 체험판을 연결한다"
   assert.match(script, /ja: "Starlight%20Sdoku%20landing%20CTA_JP\.png"/);
   assert.match(script, /en: "Starlight%20Sdoku%20landing%20CTA_EN\.png"/);
   assert.match(html, /Starlight%20Sdoku%20landing%20CTA_KR\.png/);
-  assert.match(html, /href="\/play\/\?lang=ko" data-play-launch/);
-  assert.match(launchScript, /event\.preventDefault\(\)/);
-  assert.match(launchScript, /launchTimer = window\.setTimeout\([\s\S]*420\)/);
-  assert.match(launchScript, /window\.location\.assign\(localizedPlayUrl\(\)\)/);
+  assert.match(html, /target="_blank" rel="noopener noreferrer" data-play-launch/);
+  assert.match(launchScript, /window\.open\(localizedPlayUrl\(\), "_blank", playWindowFeatures\(\)\)/);
+  assert.match(launchScript, /const width = 390;[\s\S]*const height = 844;/);
+  assert.match(launchScript, /popup=yes,width=\$\{width\},height=\$\{height\}/);
+  assert.doesNotMatch(launchScript, /window\.location\.assign/);
   assert.match(launchScript, /function createStarField\(container, count, seed\)/);
   assert.match(launchScript, /state \* 1664525 \+ 1013904223/);
   assert.match(launchScript, /lowerSky = random\(\) < 0\.64/);
@@ -293,7 +294,7 @@ test("별빛 스도쿠 랜딩은 모바일 크기 웹 체험판을 연결한다"
   assert.match(css, /@keyframes cta-carbonation\{[^}]*var\(--burst-start-x\)[\s\S]*100%\{opacity:0;transform:translate\(calc\(-50% \+ var\(--burst-start-x\)\),calc\(-50% \+ var\(--burst-start-y\)\)\)\}/);
   assert.doesNotMatch(css.match(/@keyframes cta-carbonation\{[^\n]+/)[0], /scale\(/);
   assert.match(launchScript, /playLink\.addEventListener\("pointerdown", createCtaBurst\)/);
-  assert.match(launchScript, /launchTimer|\}, 420\);/);
+  assert.doesNotMatch(launchScript, /launchTimer|\}, 420\);/);
   assert.match(css, /@keyframes cta-orbit-travel\{to\{offset-distance:112%\}\}/);
   assert.doesNotMatch(css, /cta-star-flip|cta-star-softlight|cta-star-halo/);
   assert.match(html, /<div class="sudoku-number-art" aria-hidden="true">[\s\S]*sudoku_number_3\.png[\s\S]*sudoku_number_1\.png[\s\S]*sudoku_number_7\.png[\s\S]*<\/div>/);

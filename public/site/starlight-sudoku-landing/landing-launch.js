@@ -168,7 +168,6 @@
   const burstLayer = playLink.querySelector(".cta-burst-layer");
   const twinkles = [...playLink.querySelectorAll(".cta-twinkle")];
   let lastBurstAt = 0;
-  let launchTimer = 0;
 
   function createCtaBurst() {
     if (!burstLayer || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -208,8 +207,12 @@
   playLink.addEventListener("pointerdown", createCtaBurst);
 
   playLink.addEventListener("click", (event) => {
-    event.preventDefault();
-    if (launchTimer) return;
+    const popup = window.open(localizedPlayUrl(), "_blank", playWindowFeatures());
+    if (popup) {
+      event.preventDefault();
+      popup.opener = null;
+      popup.focus();
+    }
     window.starlightAnalytics?.trackJson(JSON.stringify({
       event_name: "landing_cta_click",
       screen_id: "landing",
@@ -218,9 +221,5 @@
       is_interactive: true,
     }));
     createCtaBurst();
-    launchTimer = window.setTimeout(() => {
-      launchTimer = 0;
-      window.location.assign(localizedPlayUrl());
-    }, 420);
   });
 })();
