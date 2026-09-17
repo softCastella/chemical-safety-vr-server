@@ -167,6 +167,40 @@ test('화학물질 안전훈련 VR 상세페이지 푸터는 공개 개인정보
   assert.match(html, /rel="icon" type="image\/png" href="\.\.\/\.\.\/assets\/Immersa\/Chemical%20Safety%20Training%20VR\/safety_vr_banner_square\.png"/);
 });
 
+test('화학물질 안전훈련 VR 입점 상태와 Meta Horizon Store 링크를 안내한다', async () => {
+  const marketingPages = [
+    'index.html',
+    'brand/index.html',
+    'loop/index.html',
+    'immersa/index.html',
+    'immersa/chemical-safety-training/index.html',
+    'immersa/chemical-safety-training-promo/index.html',
+    'chemical-safety-vr-landing/index.html',
+    'chemical-safety-vr-landing/light/index.html',
+    'chemical-safety-vr-landing/campaign/index.html',
+  ];
+
+  for (const path of marketingPages) {
+    const html = await readFile(new URL(path, siteRoot), 'utf8');
+    assert.match(html, /Meta Horizon[\s\S]{0,80}입점중/i, path);
+    assert.doesNotMatch(
+      html,
+      /Meta Horizon[\s\S]{0,80}(?:입점 예정|입점 준비 중|Coming soon)/i,
+      path,
+    );
+  }
+
+  const detail = await readFile(
+    new URL('immersa/chemical-safety-training/index.html', siteRoot),
+    'utf8',
+  );
+  assert.match(
+    detail,
+    /<a class="meta-horizon-banner has-caption" href="https:\/\/www\.meta\.com\/experiences\/app\/1279114391950885\/" target="_blank" rel="noopener noreferrer" aria-label="화학물질 안전교육 VR Meta Horizon Store 페이지 열기">/,
+  );
+  assert.doesNotMatch(detail, /meta-horizon-banner has-caption" href="#"/);
+});
+
 test('화학물질 안전훈련 VR 상세페이지는 세 학습 모드의 실제 차이를 안내한다', async () => {
   const html = await readFile(
     new URL('immersa/chemical-safety-training/index.html', siteRoot),
