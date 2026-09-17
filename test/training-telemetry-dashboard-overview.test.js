@@ -202,7 +202,7 @@ test("VR 첫 화면의 운영 집계와 정적 자산은 관리자 세션으로 
     assert.equal((await fetch(`${url}/chemical-safety-training-vr/users.html`)).status, 401);
     const page = await fetch(`${url}/chemical-safety-training-vr/`, { headers });
     assert.equal(page.status, 200);
-    assert.match(await page.text(), /사람이 들어오고, 다시 오고/);
+    assert.match(await page.text(), /훈련 개요 · 유입 현황/);
     assert.equal((await fetch(`${url}/chemical-safety-training-vr/overview.js`, { headers })).status, 200);
     assert.equal((await fetch(`${url}/chemical-safety-training-vr/session.html`, { headers })).status, 200);
     assert.equal((await fetch(`${url}/chemical-safety-training-vr/session.js`, { headers })).status, 200);
