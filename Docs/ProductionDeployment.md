@@ -29,6 +29,7 @@
 | `https://spark.tycheworks.com/starlight-sudoku/privacy/` | `public/site/spark/starlight-sudoku/privacy/index.html` |
 | `https://starlight-sudoku.tycheworks.com/` | `public/site/starlight-sudoku-landing/index.html` |
 | `https://loop.tycheworks.com/` | `public/site/loop/index.html` |
+| `https://loop.tycheworks.com/memoring/` | `public/site/loop/memoring/index.html` |
 
 사이트 내부 링크는 위 정식 HTTPS URL을 사용한다. `#contact`와 `#featured-releases`처럼 `#`이 붙은 값은 API가 아니라 같은 HTML 문서 안의 요소로 이동하는 앵커다.
 
@@ -1122,3 +1123,20 @@ Google Search Console 소유권 확인 TXT는 Vultr DNS의 `tycheworks.com` 루�
 현재 `public/site`에는 공개 브랜드·프로젝트 랜딩과 서버·관리자 정적 화면이 함께 있다. Express API·DB·텔레메트리와 홈페이지 변경의 배포 경계를 분리하기 위해 홈페이지 전용 GitHub 저장소를 별도로 두는 방향을 검토한다. 즉시 파일을 이동하지 않고 사이트별 공개 URL, Nginx root, 서버 API 의존성, 공용 자산과 `/play/` 같은 Origin 계약을 먼저 목록화한다.
 
 랜딩 원본 `public/site/starlight-sudoku-landing/landing.css`에는 `1 → 3 → 7` 순서의 지연 등장과 등장 후 부유를 위한 `sudoku-number-enter`, `sudoku-number-float` 애니메이션이 반영되어 있다. 이는 스크린샷 경로의 작업 트리에 반영 중이며 운영 배포와는 별개다. 운영 공개 CSS에는 새 애니메이션이 포함되지 않았으므로, 운영 반영 시 CSS 배포와 `landing.css` 버전 갱신 후 공개 응답 및 실제 브라우저 화면을 별도로 확인한다. 운영 배포·Nginx reload는 명시적인 배포 요청 후 수행한다.
+
+## 2026-09-18 LOOP 홈과 메모링 상세 페이지 운영 공개
+
+이 절은 **`public/site/loop` 정적 파일**을 운영 Nginx에 반영한 기록이다. 메모링 Flutter 앱, 관리자 8081, 카탈로그 8090, Express API, DB, PM2, Nginx 설정은 이번 배포에서 변경하지 않았다.
+
+### 적용 변경
+
+- `https://loop.tycheworks.com/` 준비중 페이지를 LOOP 라인 홈으로 교체했다. 히어로와 작품 카드는 메모링 로고·텍스트 소개이며, 앱 데모 스크린샷은 홈에 넣지 않았다.
+- `https://loop.tycheworks.com/memoring/` 상세를 추가했다. 소개는 체크리스트(자정 초기화) 다음 스킨 시스템 순이다. 히어로·스킨·설정 구간에 스킨 적용, 내 스킨, 설정 실화면을 원본 비율로 두었고 가로로 늘리지 않았다.
+- 사이트맵은 `/`와 `/memoring/`만 포함한다. 파비콘은 홈이 IMMERSA 공용 SVG, 상세가 `Logo_Memoring.png`다.
+
+### 운영 반영과 확인
+
+- GitHub `main@da743d7` (`LOOP 홈과 메모링 상세 페이지를 공개한다.`)를 올렸다. 운영 작업 트리는 `production/vr-dashboard-20260915`이므로 `origin/main`을 그 브랜치에 병합했다. 병합 커밋은 `7a07f0e`다.
+- Nginx reload와 PM2 재시작은 하지 않았다. 정적 파일만 체크아웃에 들어갔다.
+- 로컬 `node --test test/loop-site.test.js test/site-seo-security.test.js test/site-carousel.test.js` 22개가 통과했다.
+- 배포 후 공개 URL `https://loop.tycheworks.com/`과 `https://loop.tycheworks.com/memoring/`이 HTTP 본문으로 홈·상세 문구를 반환하는 것을 확인했다. 실제 모바일 브라우저 레이아웃은 별도 확인이다.
