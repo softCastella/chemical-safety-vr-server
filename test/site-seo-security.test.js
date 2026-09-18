@@ -16,6 +16,7 @@ const canonicalPages = new Map([
   ["spark/starlight-sudoku/privacy/index.html", "https://spark.tycheworks.com/starlight-sudoku/privacy/"],
   ["starlight-sudoku-landing/index.html", "https://starlight-sudoku.tycheworks.com/"],
   ["loop/index.html", "https://loop.tycheworks.com/"],
+  ["loop/memoring/index.html", "https://loop.tycheworks.com/memoring/"],
   ["chemical-safety-vr-landing/index.html", "https://chemical-safety-vr.tycheworks.com/"],
   ["chemical-safety-vr-landing/light/index.html", "https://chemical-safety-vr.tycheworks.com/"],
   ["chemical-safety-vr-landing/campaign/index.html", "https://chemical-safety-vr.tycheworks.com/"],
@@ -39,7 +40,7 @@ test("호스트별 사이트맵에는 색인 가능한 정식 URL만 포함한�
     ["immersa/sitemap.xml", ["https://immersa.tycheworks.com/", "https://immersa.tycheworks.com/chemical-safety-training"]],
     ["spark/sitemap.xml", ["https://spark.tycheworks.com/", "https://spark.tycheworks.com/starlight-sudoku/"]],
     ["starlight-sudoku-landing/sitemap.xml", ["https://starlight-sudoku.tycheworks.com/"]],
-    ["loop/sitemap.xml", ["https://loop.tycheworks.com/"]],
+    ["loop/sitemap.xml", ["https://loop.tycheworks.com/", "https://loop.tycheworks.com/memoring/"]],
     ["chemical-safety-vr-landing/sitemap.xml", ["https://chemical-safety-vr.tycheworks.com/"]],
   ]);
 
@@ -168,6 +169,7 @@ test("색인 대상 페이지는 파싱 가능한 구조화 데이터를 제공�
     "spark/starlight-sudoku/index.html",
     "starlight-sudoku-landing/index.html",
     "loop/index.html",
+    "loop/memoring/index.html",
     "chemical-safety-vr-landing/index.html",
   ]) {
     const html = await readFile(new URL(path, siteRoot), "utf8");

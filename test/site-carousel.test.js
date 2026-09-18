@@ -31,6 +31,7 @@ test('모든 사이트 페이지는 공용 또는 프로젝트 전용 파비콘�
     siteRoot,
   );
   const starlightPlayFaviconUrl = new URL('starlight-sudoku-landing/play/favicon.png', siteRoot);
+  const memoringFaviconUrl = new URL('assets/Loop/Logo_Memoring.png', siteRoot);
   const htmlFiles = await findHtmlFiles(siteRoot);
   const faviconSvg = await readFile(immersaFaviconUrl, 'utf8');
 
@@ -40,12 +41,13 @@ test('모든 사이트 페이지는 공용 또는 프로젝트 전용 파비콘�
     access(vrFaviconUrl),
     access(starlightFaviconUrl),
     access(starlightPlayFaviconUrl),
+    access(memoringFaviconUrl),
   ]);
   assert.match(faviconSvg, /<clipPath id="round-crop">/);
   assert.match(faviconSvg, /<circle cx="627" cy="627" r="627"\/>/);
   assert.match(faviconSvg, /clip-path="url\(#round-crop\)"/);
   assert.match(faviconSvg, /href="data:image\/png;base64,/);
-  assert.equal(htmlFiles.length, 23);
+  assert.equal(htmlFiles.length, 24);
 
   for (const htmlFile of htmlFiles) {
     const html = await readFile(htmlFile, 'utf8');
@@ -64,6 +66,7 @@ test('모든 사이트 페이지는 공용 또는 프로젝트 전용 파비콘�
         vrFaviconUrl.href,
         starlightFaviconUrl.href,
         starlightPlayFaviconUrl.href,
+        memoringFaviconUrl.href,
       ].includes(faviconUrl.href),
       `${htmlFile.pathname} favicon asset`,
     );
@@ -75,6 +78,7 @@ test('모든 사이트 페이지는 공용 또는 프로젝트 전용 파비콘�
     ['chemical-safety-vr-landing/index.html', vrFaviconUrl],
     ['spark/starlight-sudoku/index.html', starlightFaviconUrl],
     ['starlight-sudoku-landing/index.html', starlightFaviconUrl],
+    ['loop/memoring/index.html', memoringFaviconUrl],
   ];
   for (const [relativePath, expectedFavicon] of projectFavicons) {
     const pageUrl = new URL(relativePath, siteRoot);
@@ -338,14 +342,14 @@ test('브랜드 페이지 패밀리의 상단 내비게이션은 모바일에서
     readFile(new URL('styles.css', siteRoot), 'utf8'),
     readFile(new URL('immersa/immersa.css', siteRoot), 'utf8'),
     readFile(new URL('spark/spark.css', siteRoot), 'utf8'),
-    readFile(new URL('line-coming.css', siteRoot), 'utf8'),
+    readFile(new URL('loop/loop.css', siteRoot), 'utf8'),
   ]);
 
   for (const [name, css, selector] of [
     ['TYCHE', siteCss, '.nav'],
     ['IMMERSA', immersaCss, '.vr-nav'],
     ['SPARK', sparkCss, '.spark-nav'],
-    ['LOOP', loopCss, '.line-nav'],
+    ['LOOP', loopCss, '.loop-nav'],
   ]) {
     const escapedSelector = selector.replace('.', '\\.');
     const rule = css.match(new RegExp(`${escapedSelector}\\{([^}]+)\\}`));
@@ -360,8 +364,9 @@ test('브랜드 페이지 패밀리의 상단 내비게이션은 모바일에서
 
   assert.doesNotMatch(siteCss, /\.nav a:nth-child\([^)]*\)[^{]*\{display:none\}/);
   assert.doesNotMatch(immersaCss, /\.vr-nav a:nth-child\([^)]*\)[^{]*\{display:none\}/);
-  assert.doesNotMatch(loopCss, /\.line-nav a:nth-child\([^)]*\)[^{]*\{display:none\}/);
+  assert.doesNotMatch(loopCss, /\.loop-nav a:nth-child\([^)]*\)[^{]*\{display:none\}/);
   assert.match(sparkCss, /\.spark-nav a\{display:block!important\}/);
+  assert.match(loopCss, /\.loop-nav a\{display:block!important\}/);
 
   for (const css of [siteCss, immersaCss, sparkCss, loopCss]) {
     assert.match(css, /flex:1 0 100%/);

@@ -1,0 +1,6 @@
+.memoring-detail{background-color:var(--cream)}
+.memoring-detail .detail-hero,.memoring-detail .detail-final{background:transparent}
+.memoring-detail .detail-header{background:rgba(247,243,238,.96)}
+.memoring-detail .overview-grid>div,.memoring-detail .skin-grid article,.memoring-detail .play-grid article,.memoring-detail .feature-showcase{background:#fffdf8}
+.memoring-detail .demo-screen figure,.memoring-detail .showcase-phone,.memoring-detail .title-poster{background:#f7f3ee}
+.memoring-detail .detail-section[id]{scroll-margin-top:140px}
