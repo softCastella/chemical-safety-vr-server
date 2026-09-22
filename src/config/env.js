@@ -54,6 +54,7 @@ const defaultUnityTelemetryDirectory = process.env.USERPROFILE
 export const env = Object.freeze({
   nodeEnv,
   port: readInteger("PORT", 3000, 1, 65535),
+  websitePublicRoot: process.env.TYCHE_WEBSITE_PUBLIC_ROOT ?? "",
   enableUnauthenticatedUserCrud: readBoolean(
     "ENABLE_UNAUTHENTICATED_USER_CRUD",
     nodeEnv !== "production",

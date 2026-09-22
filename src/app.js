@@ -1,4 +1,5 @@
 import express from "express";
+import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -33,20 +34,26 @@ import { createStarlightAnalyticsRouter } from "./modules/starlight-analytics/st
 import { createStarlightReleasePushRepository } from "./modules/starlight-release-push/starlight-release-push-repository.js";
 import { createStarlightReleasePushRouter } from "./modules/starlight-release-push/starlight-release-push-routes.js";
 
-const publicRoot = fileURLToPath(new URL("../public/", import.meta.url));
-const dashboardRoot = path.join(publicRoot, "dashboard");
-const siteRoot = path.join(publicRoot, "site");
-const chemicalSafetyTrainingRoot = path.join(
-  siteRoot,
-  "immersa",
-  "chemical-safety-training",
-);
-const serverStatusRoot = path.join(publicRoot, "server-status");
-const telemetryIngestTestRoot = path.join(publicRoot, "telemetry-ingest-test");
-const starlightAnalyticsRoot = path.join(publicRoot, "starlight-analytics");
+const bundledPublicRoot = fileURLToPath(new URL("../public/", import.meta.url));
 const serverDashboardPath = "/server";
 const starlightDashboardPath = "/starlight-sudoku";
 const chemicalSafetyVrDashboardPath = "/chemical-safety-training-vr";
+
+function resolveWebsitePublicRoot(configuredRoot) {
+  if (!configuredRoot) return bundledPublicRoot;
+  if (!path.isAbsolute(configuredRoot)) {
+    throw new Error("TYCHE_WEBSITE_PUBLIC_ROOT must be an absolute path.");
+  }
+
+  const requiredDirectories = ["site", "dashboard", "starlight-analytics", "server-status"];
+  for (const directory of requiredDirectories) {
+    const requiredPath = path.join(configuredRoot, directory);
+    if (!existsSync(requiredPath)) {
+      throw new Error(`TYCHE_WEBSITE_PUBLIC_ROOT is missing required directory: ${requiredPath}`);
+    }
+  }
+  return configuredRoot;
+}
 
 const redirectToTrailingSlash = (target) => (request, response, next) => {
   if (request.path.endsWith("/")) return next();
@@ -84,8 +91,20 @@ export function createApp({
   enableStarlightReleasePush = env.enableStarlightReleasePush,
   starlightReleasePushRateLimitPerHour = env.starlightReleasePush.rateLimitPerHour,
   kakaoJavaScriptKey = env.kakaoJavaScriptKey,
+  websitePublicRoot = env.websitePublicRoot,
 } = {}) {
   const app = express();
+  const resolvedWebsitePublicRoot = resolveWebsitePublicRoot(websitePublicRoot);
+  const dashboardRoot = path.join(resolvedWebsitePublicRoot, "dashboard");
+  const siteRoot = path.join(resolvedWebsitePublicRoot, "site");
+  const chemicalSafetyTrainingRoot = path.join(
+    siteRoot,
+    "immersa",
+    "chemical-safety-training",
+  );
+  const serverStatusRoot = path.join(resolvedWebsitePublicRoot, "server-status");
+  const telemetryIngestTestRoot = path.join(bundledPublicRoot, "telemetry-ingest-test");
+  const starlightAnalyticsRoot = path.join(resolvedWebsitePublicRoot, "starlight-analytics");
   const resolvedUserRepository =
     userRepository ?? createUserRepository(databasePool);
 
